@@ -1,0 +1,547 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "email": "student@example.com",
+      "password": "password123",
+      "name": "Nguyễn Văn A",
+      "phone": "0123456789",
+      "role": "student",
+      "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150",
+      "points": 1250,
+      "level": "Intermediate",
+      "streak": 7,
+      "createdAt": "2024-01-15T00:00:00Z"
+    },
+    {
+      "id": "2",
+      "email": "teacher@example.com",
+      "password": "password123",
+      "name": "Ms. Sarah Johnson",
+      "phone": "0987654321",
+      "role": "teacher",
+      "avatar": "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150",
+      "bio": "Giáo viên bản ngữ với 5 năm kinh nghiệm giảng dạy tiếng Anh",
+      "createdAt": "2024-01-10T00:00:00Z"
+    },
+    {
+      "id": "3",
+      "email": "admin@example.com",
+      "password": "password123",
+      "name": "Admin System",
+      "phone": "0369852147",
+      "role": "admin",
+      "avatar": null,
+      "createdAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "1759697280769",
+      "firstName": "Thang",
+      "lastName": "Le",
+      "name": "Thang Le",
+      "email": "thangdev02@gmail.com",
+      "phone": "0949450800",
+      "password": "123123aA",
+      "role": "student",
+      "points": 0,
+      "streak": 0,
+      "level": "Beginner",
+      "avatar": null,
+      "createdAt": "2025-10-05T20:48:00.769Z"
+    }
+  ],
+  "courses": [
+    {
+      "id": "1",
+      "title": "Tiếng Anh Giao Tiếp Cơ Bảnn",
+      "description": "Khóa học dành cho người mới bắt đầu, tập trung vào giao tiếp hàng ngày",
+      "longDescription": "Khóa học này sẽ giúp bạn xây dựng nền tảng tiếng Anh vững chắc thông qua các bài học thực tế, video hướng dẫn chi tiết và bài tập thực hành.",
+      "level": "beginner",
+      "category": "communication",
+      "duration": "30 giờ",
+      "price": 799000,
+      "originalPrice": 1200000,
+      "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
+      "teacherId": 2,
+      "students": 1250,
+      "rating": 4.8,
+      "totalLessons": 25,
+      "isActive": true,
+      "createdAt": "2024-01-20T00:00:00Z"
+    },
+    {
+      "id": "2",
+      "title": "Luyện Thi IELTS Chuyên Sâu",
+      "description": "Chiến lược và kỹ năng để đạt điểm cao trong kỳ thi IELTS",
+      "longDescription": "Khóa học cung cấp đầy đủ kiến thức và kỹ năng cần thiết cho cả 4 phần thi IELTS.",
+      "level": "advanced",
+      "category": "exam",
+      "duration": "60 giờ",
+      "price": 1299000,
+      "originalPrice": 2000000,
+      "image": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800",
+      "teacherId": 2,
+      "students": 890,
+      "rating": 4.9,
+      "totalLessons": 40,
+      "isActive": true,
+      "createdAt": "2024-01-18T00:00:00Z"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "1",
+      "courseId": "1",
+      "title": "Chương 1: Làm quen với tiếng Anh",
+      "order": "1",
+      "description": "Nhập môn tiếng Anh cơ bản"
+    },
+    {
+      "id": "2",
+      "courseId": "1",
+      "title": "Chương 2: Giao tiếp hàng ngày",
+      "order": "2",
+      "description": "Các tình huống giao tiếp thông dụng"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "1",
+      "chapterId": "1",
+      "title": "Bảng chữ cái và phát âm cơ bản",
+      "content": "Nội dung bài học về bảng chữ cái...",
+      "videoUrl": "https://example.com/video1.mp4",
+      "duration": "15 phút",
+      "order": "1",
+      "isFree": true,
+      "type": "video"
+    },
+    {
+      "id": "2",
+      "chapterId": "1",
+      "title": "Chào hỏi và giới thiệu bản thân",
+      "content": "Nội dung bài học về chào hỏi...",
+      "videoUrl": "https://example.com/video2.mp4",
+      "duration": "20 phút",
+      "order": "2",
+      "isFree": false,
+      "type": "video"
+    }
+  ],
+  "enrollments": [
+    {
+      "id": "1",
+      "userId": "1",
+      "courseId": "1",
+      "progress": 25,
+      "completedLessons": [
+        1
+      ],
+      "enrolledAt": "2024-01-25T00:00:00Z",
+      "status": "active"
+    },
+    {
+      "id": "1668",
+      "courseId": "1"
+    },
+    {
+      "id": "cd70",
+      "courseId": "1"
+    },
+    {
+      "id": "576b",
+      "courseId": "1"
+    },
+    {
+      "id": "7ef6",
+      "courseId": "1",
+      "progress": 0,
+      "completedLessons": [],
+      "enrolledAt": "2025-10-05T20:54:52.469Z",
+      "status": "active"
+    },
+    {
+      "id": "b635",
+      "userId": "1759697280769",
+      "courseId": "1",
+      "progress": 0,
+      "completedLessons": [],
+      "enrolledAt": "2025-10-05T20:56:58.238Z",
+      "status": "active"
+    },
+    {
+      "id": "a691",
+      "userId": "1759697280769",
+      "courseId": "2",
+      "progress": 0,
+      "completedLessons": [],
+      "enrolledAt": "2025-10-05T21:00:27.904Z",
+      "status": "active"
+    },
+    {
+      "id": "c1f8",
+      "userId": "1",
+      "courseId": "2",
+      "progress": 0,
+      "completedLessons": [],
+      "enrolledAt": "2025-10-05T21:18:14.515Z",
+      "status": "active"
+    }
+  ],
+  "cart": [
+    {
+      "id": "1",
+      "userId": "1",
+      "courseId": "1",
+      "addedAt": "2024-01-25T10:00:00Z"
+    }
+  ],
+  "orders": [
+    {
+      "id": "1",
+      "userId": "1",
+      "courses": [
+        1
+      ],
+      "totalAmount": 799000,
+      "status": "completed",
+      "paymentMethod": "credit_card",
+      "createdAt": "2024-01-25T10:30:00Z"
+    }
+  ],
+  "exams": [
+    {
+      "id": "1",
+      "title": "Bài kiểm tra giữa kỳ - Tiếng Anh Giao Tiếp",
+      "description": "Kiểm tra kiến thức từ bài 1-10",
+      "type": "multiple_choice",
+      "duration": 60,
+      "totalQuestions": 20,
+      "totalPoints": 100,
+      "passingScore": 70,
+      "isActive": true,
+      "createdBy": 2,
+      "createdAt": "2024-01-20T00:00:00Z",
+      "updatedAt": "2024-01-20T00:00:00Z"
+    },
+    {
+      "id": "2",
+      "title": "Bài thi viết - IELTS Writing Task 2",
+      "description": "Bài thi viết theo chủ đề xã hội",
+      "type": "essay",
+      "duration": 40,
+      "totalQuestions": 1,
+      "totalPoints": 100,
+      "passingScore": 60,
+      "isActive": true,
+      "createdBy": 2,
+      "createdAt": "2024-01-21T00:00:00Z",
+      "updatedAt": "2024-01-21T00:00:00Z"
+    },
+    {
+      "id": "4bc9",
+      "title": "bai test",
+      "description": "test",
+      "type": "multiple_choice",
+      "duration": 10,
+      "passingScore": 100,
+      "totalQuestions": 1,
+      "totalPoints": 1,
+      "createdBy": "2",
+      "isActive": true,
+      "createdAt": "2025-10-05T21:13:04.625Z",
+      "updatedAt": "2025-10-05T21:13:04.625Z"
+    }
+  ],
+  "questions": [
+    {
+      "id": "1",
+      "examId": "1",
+      "type": "multiple_choice",
+      "question": "Chọn từ có cách phát âm khác với các từ còn lại:",
+      "options": [
+        "cat",
+        "hat",
+        "late",
+        "bat"
+      ],
+      "correctAnswer": 2,
+      "points": 5,
+      "order": "1"
+    },
+    {
+      "id": "2",
+      "examId": 1,
+      "type": "multiple_choice",
+      "question": "Câu nào sau đây là đúng ngữ pháp?",
+      "options": [
+        "She don't like apples",
+        "She doesn't likes apples",
+        "She doesn't like apples",
+        "She don't likes apples"
+      ],
+      "correctAnswer": 2,
+      "points": 5,
+      "order": "2"
+    }
+  ],
+  "examResults": [
+    {
+      "id": "1",
+      "examId": "1",
+      "userId": "1",
+      "classId": "1",
+      "score": 85,
+      "totalPoints": 100,
+      "timeSpent": 45,
+      "answers": {
+        "1": 2,
+        "2": 2
+      },
+      "submittedAt": "2024-01-26T15:30:00Z",
+      "status": "completed"
+    },
+    {
+      "id": "5087",
+      "examId": "2",
+      "userId": "1759697280769",
+      "classId": "1",
+      "score": 0,
+      "totalPoints": 100,
+      "timeSpent": 8,
+      "answers": {
+        "0": "<p>Ádasdasdasdasdáda</p>"
+      },
+      "submittedAt": "2025-10-05T21:51:58.649Z",
+      "status": "completed"
+    }
+  ],
+  "forumClasses": [
+    {
+      "id": "1",
+      "name": "Lớp Giao Tiếp Cơ Bản - K1",
+      "teacherId": 2,
+      "description": "Diễn đàn cho lớp Giao Tiếp Cơ Bản khóa 1",
+      "createdAt": "2024-01-15T00:00:00Z",
+      "isActive": true
+    },
+    {
+      "id": "6faf",
+      "name": "test",
+      "description": "123",
+      "teacherId": 2
+    },
+    {
+      "id": "3b2a",
+      "name": "test",
+      "description": "asd",
+      "teacherId": "1",
+      "isActive": true,
+      "createdAt": "2025-10-05T20:36:51.336Z"
+    },
+    {
+      "id": "e5d0",
+      "name": "Lop moi",
+      "description": "lop moi",
+      "teacherId": "2",
+      "isActive": true,
+      "createdAt": "2025-10-05T20:48:47.581Z"
+    }
+  ],
+  "forumCourses": [
+    {
+      "id": "1",
+      "classId": "1",
+      "courseId": "1",
+      "addedAt": "2024-01-20T00:00:00Z",
+      "addedBy": 2
+    },
+    {
+      "id": "2",
+      "classId": "1",
+      "courseId": "2",
+      "addedAt": "2024-01-20T00:00:00Z",
+      "addedBy": 2
+    },
+    {
+      "id": "84e1",
+      "classId": "3b2a",
+      "courseId": "1",
+      "addedBy": "1",
+      "addedAt": "2025-10-05T20:43:52.347Z"
+    },
+    {
+      "id": "60f2",
+      "classId": "e5d0",
+      "courseId": "1",
+      "addedBy": "2",
+      "addedAt": "2025-10-05T20:51:06.320Z"
+    },
+    {
+      "id": "9595",
+      "classId": "e5d0",
+      "courseId": "2",
+      "addedBy": "2",
+      "addedAt": "2025-10-05T22:03:58.088Z"
+    }
+  ],
+  "forumMembers": [
+    {
+      "id": "1",
+      "classId": "1",
+      "userId": "1",
+      "joinedAt": "2024-01-20T00:00:00Z",
+      "role": "student"
+    },
+    {
+      "id": "7c52",
+      "classId": "6faf",
+      "userId": 1,
+      "role": "student",
+      "joinedAt": "2025-10-05T20:10:17.958Z"
+    },
+    {
+      "id": "e3cf",
+      "classId": "3b2a",
+      "userId": "1",
+      "role": "student",
+      "joinedAt": "2025-10-05T20:37:01.495Z"
+    },
+    {
+      "id": "a552",
+      "classId": "e5d0",
+      "userId": 1759697280769,
+      "role": "student",
+      "joinedAt": "2025-10-05T20:48:53.748Z"
+    },
+    {
+      "id": "2f35",
+      "classId": "1",
+      "userId": "1759697280769",
+      "role": "student",
+      "joinedAt": "2025-10-05T20:59:56.936Z"
+    }
+  ],
+  "forumPosts": [
+    {
+      "id": "1",
+      "classId": "1",
+      "userId": "2",
+      "title": "Chào mừng các em đến với lớp học!",
+      "content": "Chào các em, chúng ta sẽ cùng nhau học tập thật tốt nhé!",
+      "isPinned": true,
+      "createdAt": "2024-01-20T09:00:00Z",
+      "updatedAt": "2024-01-20T09:00:00Z"
+    }
+  ],
+  "achievements": [
+    {
+      "id": "1",
+      "name": "Học viên chăm chỉ",
+      "description": "Hoàn thành 5 khóa học",
+      "icon": "🏆",
+      "points": 500,
+      "type": "course_completion"
+    },
+    {
+      "id": "2",
+      "name": "Chuyên cần",
+      "description": "Duy trì streak 30 ngày",
+      "icon": "🔥",
+      "points": 300,
+      "type": "streak"
+    }
+  ],
+  "userAchievements": [
+    {
+      "id": "1",
+      "userId": "1",
+      "achievementId": "1",
+      "earnedAt": "2024-01-25T00:00:00Z"
+    }
+  ],
+  "examQuestions": [
+    {
+      "id": "1",
+      "examId": "1",
+      "type": "multiple_choice",
+      "question": "Chọn từ có cách phát âm khác với các từ còn lại:",
+      "options": [
+        "cat",
+        "hat",
+        "late",
+        "bat"
+      ],
+      "correctAnswer": 2,
+      "points": 5,
+      "order": 1
+    },
+    {
+      "id": "2",
+      "examId": "1",
+      "type": "multiple_choice",
+      "question": "Câu nào sau đây là đúng ngữ pháp?",
+      "options": [
+        "She don't like apples",
+        "She doesn't likes apples",
+        "She doesn't like apples",
+        "She don't likes apples"
+      ],
+      "correctAnswer": 2,
+      "points": 5,
+      "order": 2
+    },
+    {
+      "id": "3",
+      "examId": "2",
+      "type": "essay",
+      "question": "Viết một bài luận khoảng 250 từ về chủ đề: 'Advantages and disadvantages of social media'",
+      "points": 100,
+      "order": 1
+    },
+    {
+      "id": "8f4d",
+      "examId": "4bc9",
+      "type": "multiple_choice",
+      "question": "A hay B hay C hay D",
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "correctAnswer": 0,
+      "points": 1,
+      "order": 1
+    }
+  ],
+  "classExams": [
+    {
+      "id": "1",
+      "classId": "1",
+      "examId": "1",
+      "assignedBy": 2,
+      "assignedAt": "2024-01-25T00:00:00Z",
+      "dueDate": "2024-02-01T23:59:59Z",
+      "isActive": true
+    },
+    {
+      "id": "2",
+      "classId": "1",
+      "examId": "2",
+      "assignedBy": 2,
+      "assignedAt": "2024-01-25T00:00:00Z",
+      "dueDate": "2024-02-05T23:59:59Z",
+      "isActive": true
+    },
+    {
+      "id": "dea0",
+      "classId": "e5d0",
+      "examId": "4bc9",
+      "assignedBy": "2",
+      "assignedAt": "2025-10-05T21:13:30.599Z",
+      "dueDate": "2025-10-05T17:00:00.000Z",
+      "isActive": true
+    }
+  ]
+}
