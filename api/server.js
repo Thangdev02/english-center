@@ -11,4 +11,6 @@ server.use(middlewares);
 server.use(jsonServer.bodyParser);
 server.use("/api", router);
 
-export default server;
+export default function handler(req, res) {
+  server(req, res);
+}
