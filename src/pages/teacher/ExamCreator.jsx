@@ -59,7 +59,6 @@ const ExamCreator = () => {
     try {
       setSaving(true);
       
-      // Tạo bài thi
       const examData = {
         ...values,
         totalQuestions: questions.length,
@@ -73,7 +72,6 @@ const ExamCreator = () => {
       const examResponse = await examApi.createExam(examData);
       const examId = examResponse.data.id;
 
-      // Tạo các câu hỏi
       await Promise.all(
         questions.map((question, index) => 
           examApi.createQuestion({
@@ -105,7 +103,6 @@ const ExamCreator = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center space-x-4">
               <Button 
@@ -122,7 +119,6 @@ const ExamCreator = () => {
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Exam Info */}
             <div className="lg:col-span-1">
               <Card title="Thông tin bài thi">
                 <Form
@@ -190,7 +186,6 @@ const ExamCreator = () => {
                 </Form>
               </Card>
 
-              {/* Quick Stats */}
               <Card className="mt-6" title="Thống kê">
                 <div className="space-y-2">
                   <div className="flex justify-between">
@@ -218,7 +213,6 @@ const ExamCreator = () => {
               </Card>
             </div>
 
-            {/* Questions */}
             <div className="lg:col-span-2">
               <Card 
                 title="Câu hỏi"
@@ -273,7 +267,6 @@ const ExamCreator = () => {
                             </div>
                           }
                         >
-                          {/* Question Text */}
                           <div className="mb-4">
                             <Input.TextArea
                               placeholder="Nhập câu hỏi..."
@@ -283,7 +276,6 @@ const ExamCreator = () => {
                             />
                           </div>
 
-                          {/* Options for multiple choice */}
                           {question.type === 'multiple_choice' && (
                             <div className="space-y-2">
                               {question.options.map((option, optIndex) => (
@@ -304,7 +296,6 @@ const ExamCreator = () => {
                             </div>
                           )}
 
-                          {/* Essay question */}
                           {question.type === 'essay' && (
                             <div className="bg-gray-50 p-4 rounded">
                               <p className="text-sm text-gray-600">

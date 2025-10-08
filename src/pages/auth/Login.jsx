@@ -9,7 +9,6 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { login, apiConnected } = useAuth();
   const navigate = useNavigate();
-  // XÓA DÒNG NÀY: const { message, notification, modal } = App.useApp();
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -35,7 +34,6 @@ const Login = () => {
         animate={{ opacity: 1, scale: 1 }}
         className="max-w-md w-full space-y-8 bg-white rounded-2xl shadow-xl p-8"
       >
-        {/* Connection Status */}
         {!apiConnected && (
           <Alert
             message="Mất kết nối server"
@@ -137,7 +135,6 @@ const Login = () => {
           </Link>
         </div>
 
-        {/* Demo Accounts */}
         <div className="mt-6 p-4 bg-gray-50 rounded-lg">
           <h4 className="font-semibold text-sm mb-2">Tài khoản demo:</h4>
           <div className="text-xs space-y-1">

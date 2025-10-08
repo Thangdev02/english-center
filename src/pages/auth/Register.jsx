@@ -15,7 +15,6 @@ const Register = () => {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      // Xử lý dữ liệu trước khi gửi
       const registerData = {
         firstName: values.firstName,
         lastName: values.lastName,
@@ -224,7 +223,6 @@ const Register = () => {
           </Link>
         </div>
 
-        {/* Terms and Conditions */}
         <div className="text-center text-xs text-gray-500">
           Bằng việc đăng ký, bạn đồng ý với <Link to="/terms" className="text-primary-600">Điều khoản sử dụng</Link> và <Link to="/privacy" className="text-primary-600">Chính sách bảo mật</Link> của chúng tôi.
         </div>

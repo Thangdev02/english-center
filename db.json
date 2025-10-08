@@ -48,6 +48,36 @@
       "level": "Beginner",
       "avatar": null,
       "createdAt": "2025-10-05T20:48:00.769Z"
+    },
+    {
+      "id": "1759741640791",
+      "firstName": "Cuong",
+      "lastName": "Anh",
+      "name": "Cuong Anh",
+      "email": "anhcuong@gmail.com",
+      "phone": "0949450801",
+      "password": "123123aA",
+      "role": "student",
+      "points": 0,
+      "streak": 0,
+      "level": "Beginner",
+      "avatar": null,
+      "createdAt": "2025-10-06T09:07:20.791Z"
+    },
+    {
+      "id": "1759767243492",
+      "firstName": "Anh",
+      "lastName": "Khoa",
+      "name": "Anh Khoa",
+      "email": "anhkhoa@gmail.com",
+      "phone": "0949450802",
+      "password": "123123Aa",
+      "role": "student",
+      "points": 0,
+      "streak": 0,
+      "level": "Beginner",
+      "avatar": null,
+      "createdAt": "2025-10-06T16:14:03.492Z"
     }
   ],
   "courses": [
@@ -126,6 +156,17 @@
       "order": "2",
       "isFree": false,
       "type": "video"
+    },
+    {
+      "id": "60e1",
+      "chapterId": "86de",
+      "title": "Lớp học mới ",
+      "content": "Lớp học mới ",
+      "videoUrl": "https://youtu.be/wSxEXD1V_uk?list=RDwSxEXD1V_uk",
+      "duration": "10",
+      "order": 1,
+      "isFree": true,
+      "type": "video"
     }
   ],
   "enrollments": [
@@ -185,6 +226,24 @@
       "progress": 0,
       "completedLessons": [],
       "enrolledAt": "2025-10-05T21:18:14.515Z",
+      "status": "active"
+    },
+    {
+      "id": "7566",
+      "userId": "1759741640791",
+      "courseId": "1",
+      "progress": 0,
+      "completedLessons": [],
+      "enrolledAt": "2025-10-06T09:12:40.558Z",
+      "status": "active"
+    },
+    {
+      "id": "47b3",
+      "userId": "1759767243492",
+      "courseId": "1",
+      "progress": 0,
+      "completedLessons": [],
+      "enrolledAt": "2025-10-06T16:18:59.254Z",
       "status": "active"
     }
   ],
@@ -251,6 +310,34 @@
       "isActive": true,
       "createdAt": "2025-10-05T21:13:04.625Z",
       "updatedAt": "2025-10-05T21:13:04.625Z"
+    },
+    {
+      "id": "76b1",
+      "title": "bài học đầu đời",
+      "description": "bài học đầu đời",
+      "type": "multiple_choice",
+      "duration": 10,
+      "passingScore": 100,
+      "totalQuestions": 1,
+      "totalPoints": 1,
+      "createdBy": "2",
+      "isActive": true,
+      "createdAt": "2025-10-06T09:11:56.393Z",
+      "updatedAt": "2025-10-06T09:11:56.393Z"
+    },
+    {
+      "id": "78b1",
+      "title": "Bài thi 2025",
+      "description": "Bài thi 2025",
+      "type": "multiple_choice",
+      "duration": 30,
+      "passingScore": 100,
+      "totalQuestions": 1,
+      "totalPoints": 1,
+      "createdBy": "2",
+      "isActive": true,
+      "createdAt": "2025-10-06T16:21:57.365Z",
+      "updatedAt": "2025-10-06T16:21:57.365Z"
     }
   ],
   "questions": [
@@ -314,6 +401,34 @@
       },
       "submittedAt": "2025-10-05T21:51:58.649Z",
       "status": "completed"
+    },
+    {
+      "id": "66f1",
+      "examId": "76b1",
+      "userId": "1759741640791",
+      "classId": "1",
+      "score": 0,
+      "totalPoints": 1,
+      "timeSpent": 4,
+      "answers": {
+        "0": 0
+      },
+      "submittedAt": "2025-10-06T09:12:53.003Z",
+      "status": "completed"
+    },
+    {
+      "id": "088b",
+      "examId": "78b1",
+      "userId": "1759767243492",
+      "classId": "1",
+      "score": 1,
+      "totalPoints": 1,
+      "timeSpent": 6,
+      "answers": {
+        "0": 0
+      },
+      "submittedAt": "2025-10-06T16:22:48.745Z",
+      "status": "completed"
     }
   ],
   "forumClasses": [
@@ -346,6 +461,22 @@
       "teacherId": "2",
       "isActive": true,
       "createdAt": "2025-10-05T20:48:47.581Z"
+    },
+    {
+      "id": "bbff",
+      "name": "lớp học làm người",
+      "description": "lớp học làm người",
+      "teacherId": "2",
+      "isActive": true,
+      "createdAt": "2025-10-06T09:10:08.417Z"
+    },
+    {
+      "id": "f915",
+      "name": "Khoa 2025",
+      "description": "Khoa 2025",
+      "teacherId": "2",
+      "isActive": true,
+      "createdAt": "2025-10-06T16:17:35.771Z"
     }
   ],
   "forumCourses": [
@@ -383,6 +514,20 @@
       "courseId": "2",
       "addedBy": "2",
       "addedAt": "2025-10-05T22:03:58.088Z"
+    },
+    {
+      "id": "6a86",
+      "classId": "bbff",
+      "courseId": "1",
+      "addedBy": "2",
+      "addedAt": "2025-10-06T09:10:16.675Z"
+    },
+    {
+      "id": "d70a",
+      "classId": "f915",
+      "courseId": "1",
+      "addedBy": "2",
+      "addedAt": "2025-10-06T16:18:08.627Z"
     }
   ],
   "forumMembers": [
@@ -410,7 +555,7 @@
     {
       "id": "a552",
       "classId": "e5d0",
-      "userId": 1759697280769,
+      "userId": "1759697280769",
       "role": "student",
       "joinedAt": "2025-10-05T20:48:53.748Z"
     },
@@ -420,6 +565,27 @@
       "userId": "1759697280769",
       "role": "student",
       "joinedAt": "2025-10-05T20:59:56.936Z"
+    },
+    {
+      "id": "f36d",
+      "classId": "bbff",
+      "userId": "1759741640791",
+      "role": "student",
+      "joinedAt": "2025-10-06T09:10:28.934Z"
+    },
+    {
+      "id": "bbe5",
+      "classId": "bbff",
+      "userId": "1759697280769",
+      "role": "student",
+      "joinedAt": "2025-10-06T09:10:58.488Z"
+    },
+    {
+      "id": "c4c3",
+      "classId": "f915",
+      "userId": "1759767243492",
+      "role": "student",
+      "joinedAt": "2025-10-06T16:17:55.549Z"
     }
   ],
   "forumPosts": [
@@ -513,6 +679,36 @@
       "correctAnswer": 0,
       "points": 1,
       "order": 1
+    },
+    {
+      "id": "3f50",
+      "examId": "76b1",
+      "type": "multiple_choice",
+      "question": "Cường có đẹp zai k",
+      "options": [
+        "Đéo",
+        "Có",
+        "Không ",
+        "Khồng"
+      ],
+      "correctAnswer": 1,
+      "points": 1,
+      "order": 1
+    },
+    {
+      "id": "6f10",
+      "examId": "78b1",
+      "type": "multiple_choice",
+      "question": "Bài thi 2025",
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "correctAnswer": 0,
+      "points": 1,
+      "order": 1
     }
   ],
   "classExams": [
@@ -541,6 +737,24 @@
       "assignedBy": "2",
       "assignedAt": "2025-10-05T21:13:30.599Z",
       "dueDate": "2025-10-05T17:00:00.000Z",
+      "isActive": true
+    },
+    {
+      "id": "cd32",
+      "classId": "bbff",
+      "examId": "76b1",
+      "assignedBy": "2",
+      "assignedAt": "2025-10-06T09:12:13.980Z",
+      "dueDate": "2025-10-06T09:12:12.800Z",
+      "isActive": true
+    },
+    {
+      "id": "131a",
+      "classId": "f915",
+      "examId": "78b1",
+      "assignedBy": "2",
+      "assignedAt": "2025-10-06T16:22:18.879Z",
+      "dueDate": "2025-10-06T16:22:17.700Z",
       "isActive": true
     }
   ]

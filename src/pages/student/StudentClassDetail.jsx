@@ -80,38 +80,33 @@ const StudentClassDetail = () => {
 
         try {
             setEnrolling(true);
-            console.log('🔄 Starting learning process for course:', courseId, 'user:', user.id);
+            console.log(' Starting learning process for course:', courseId, 'user:', user.id);
 
-            // Kiểm tra xem học sinh đã đăng ký khóa học chưa
             const enrollmentsResponse = await courseApi.getMyEnrollments(user.id);
-            console.log('📋 Existing enrollments:', enrollmentsResponse.data);
+            console.log('Existing enrollments:', enrollmentsResponse.data);
 
             const existingEnrollment = enrollmentsResponse.data.find(
                 e => e.courseId === courseId && e.userId === user.id
             );
 
             if (existingEnrollment) {
-                // Đã đăng ký, chuyển đến trang học
-                console.log('✅ Already enrolled, redirecting to learning page with enrollment:', existingEnrollment.id);
+                console.log(' Already enrolled, redirecting to learning page with enrollment:', existingEnrollment.id);
                 navigate(`/learning/${existingEnrollment.id}`);
                 return;
             }
 
-            console.log('🔄 Enrolling in course:', courseId);
+            console.log(' Enrolling in course:', courseId);
 
-            // Tự động đăng ký khóa học với user ID thực tế
             const enrollResponse = await courseApi.enrollCourse(courseId, user.id);
-            console.log('✅ Enrollment response:', enrollResponse);
+            console.log(' Enrollment response:', enrollResponse);
 
             if (enrollResponse.data && enrollResponse.data.id) {
                 message.success('Đã tự động đăng ký khóa học!');
 
-                // Chuyển hướng ngay lập tức đến trang học với enrollment ID mới
-                console.log('🎯 Redirecting to learning page with new enrollment:', enrollResponse.data.id);
+                console.log(' Redirecting to learning page with new enrollment:', enrollResponse.data.id);
                 navigate(`/learning/${enrollResponse.data.id}`);
             } else {
-                // Nếu không có ID ngay lập tức, thử tìm lại
-                console.log('🔄 Enrollment created but no ID, searching for it...');
+                console.log('Enrollment created but no ID, searching for it...');
 
                 setTimeout(async () => {
                     try {
@@ -121,21 +116,21 @@ const StudentClassDetail = () => {
                         );
 
                         if (newEnrollment) {
-                            console.log('✅ Found new enrollment:', newEnrollment.id);
+                            console.log(' Found new enrollment:', newEnrollment.id);
                             navigate(`/learning/${newEnrollment.id}`);
                         } else {
-                            console.error('❌ No enrollment found after enrollment');
+                            console.error(' No enrollment found after enrollment');
                             message.error('Không thể tìm thấy thông tin đăng ký');
                         }
                     } catch (searchError) {
-                        console.error('❌ Error searching for enrollment:', searchError);
+                        console.error(' Error searching for enrollment:', searchError);
                         message.error('Lỗi khi tìm thông tin đăng ký');
                     }
                 }, 1000);
             }
 
         } catch (error) {
-            console.error('❌ Error enrolling course:', error);
+            console.error(' Error enrolling course:', error);
             message.error('Không thể bắt đầu học: ' + (error.message || 'Lỗi không xác định'));
         } finally {
             setEnrolling(false);
@@ -171,7 +166,6 @@ const StudentClassDetail = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Header */}
             <div className="bg-white shadow-sm">
                 <div className="container mx-auto px-4 py-4">
                     <Link
@@ -200,7 +194,6 @@ const StudentClassDetail = () => {
 
             <div className="container mx-auto px-4 py-8">
                 <div className="grid lg:grid-cols-4 gap-8">
-                    {/* Main Content */}
                     <div className="lg:col-span-3">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -386,7 +379,6 @@ const StudentClassDetail = () => {
                         </motion.div>
                     </div>
 
-                    {/* Sidebar */}
                     <div className="lg:col-span-1">
                         <motion.div
                             initial={{ opacity: 0, x: 20 }}
@@ -394,7 +386,6 @@ const StudentClassDetail = () => {
                             transition={{ delay: 0.2 }}
                             className="space-y-6"
                         >
-                            {/* Teacher Info */}
                             <Card title="Giáo viên">
                                 <div className="flex items-center space-x-3">
                                     <img
@@ -413,7 +404,6 @@ const StudentClassDetail = () => {
                                 </div>
                             </Card>
 
-                            {/* Class Stats */}
                             <Card title="Thống kê lớp">
                                 <div className="space-y-3">
                                     <div className="flex justify-between">

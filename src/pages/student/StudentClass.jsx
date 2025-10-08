@@ -26,7 +26,6 @@ const StudentClasses = () => {
   const fetchMyClasses = async () => {
     try {
       setLoading(true);
-      // Sử dụng service mới để lấy lớp học với đầy đủ thông tin
       const classesWithDetails = await forumService.getMyClassesWithDetails(user.id);
       console.log('✅ My classes with details:', classesWithDetails);
       setMyClasses(classesWithDetails);
@@ -76,8 +75,6 @@ const StudentClasses = () => {
     });
   };
 
-  // ... rest of the component remains the same
-  // Phần JSX giữ nguyên như code trước
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -86,7 +83,6 @@ const StudentClasses = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
               Lớp Học Của Tôi
@@ -134,7 +130,6 @@ const StudentClasses = () => {
                             ]}
                           >
                             <div className="space-y-4">
-                              {/* Class Header */}
                               <div>
                                 <h3 className="font-bold text-lg text-gray-900 mb-2">
                                   {classItem.name}
@@ -144,7 +139,6 @@ const StudentClasses = () => {
                                 </p>
                               </div>
 
-                              {/* Teacher Info */}
                               <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                                 <img 
                                   src={classItem.teacher?.avatar} 
@@ -161,7 +155,6 @@ const StudentClasses = () => {
                                 </div>
                               </div>
 
-                              {/* Stats */}
                               <div className="flex justify-between text-sm text-gray-600">
                                 <div className="flex items-center">
                                   <Users className="w-4 h-4 mr-1" />
@@ -173,13 +166,11 @@ const StudentClasses = () => {
                                 </div>
                               </div>
 
-                              {/* Join Date */}
                               <div className="flex items-center text-xs text-gray-500">
                                 <Calendar className="w-3 h-3 mr-1" />
                                 <span>Tham gia: {formatDate(classItem.joinedAt)}</span>
                               </div>
 
-                              {/* Status */}
                               <Tag color={classItem.isActive ? 'green' : 'red'}>
                                 {classItem.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}
                               </Tag>

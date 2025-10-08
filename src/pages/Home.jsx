@@ -132,7 +132,6 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Enhanced Hero Section */}
       <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900">
           <div className="absolute inset-0 bg-black/20"></div>
@@ -217,7 +216,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
       <section ref={statsRef} className="py-20 bg-gradient-to-b from-gray-50 to-white">
         <div className="container mx-auto px-4">
           <motion.div
@@ -242,7 +240,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Enhanced Features Section */}
       <section ref={featuresRef} className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <motion.div
@@ -299,7 +296,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Enhanced Popular Courses */}
       <section ref={coursesRef} className="py-20 bg-gradient-to-b from-gray-50 to-white">
         <div className="container mx-auto px-4">
           <motion.div
@@ -443,7 +439,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section ref={ctaRef} className="py-20 bg-gradient-to-r from-primary-600 to-primary-800">
         <div className="container mx-auto px-4">
           <motion.div

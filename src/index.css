@@ -129,7 +129,6 @@ html {
   line-height: 1.7;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -147,7 +146,6 @@ html {
   background: #a8a8a8;
 }
 
-/* Ant Design customizations */
 .ant-card {
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
@@ -166,7 +164,6 @@ html {
   border-color: #0284c7;
 }
 
-/* Loading states */
 .skeleton {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200% 100%;

@@ -19,15 +19,12 @@ const CourseDetail = () => {
       try {
         setLoading(true);
         
-        // Fetch course details
         const courseResponse = await courseApi.getCourse(id);
         const courseData = courseResponse.data;
         
-        // Fetch chapters
         const chaptersResponse = await courseApi.getChapters(id);
         const chapters = chaptersResponse.data;
 
-        // Fetch lessons for each chapter
         const chaptersWithLessons = await Promise.all(
           chapters.map(async (chapter) => {
             const lessonsResponse = await courseApi.getLessons(chapter.id);
@@ -38,7 +35,6 @@ const CourseDetail = () => {
           })
         );
 
-        // Fetch related courses (same category)
         const allCoursesResponse = await courseApi.getAllCourses();
         const related = allCoursesResponse.data
           .filter(c => c.id !== parseInt(id) && c.category === courseData.category)
@@ -72,7 +68,6 @@ const CourseDetail = () => {
 
   const handleEnroll = async () => {
     try {
-      // TODO: Integrate with enrollment API
       message.success('Đăng ký khóa học thành công!');
       setEnrollModal(false);
     } catch (error) {
@@ -118,7 +113,6 @@ const CourseDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <Link to="/courses" className="inline-flex items-center text-primary-600 hover:text-primary-700 mb-4">
@@ -130,7 +124,6 @@ const CourseDetail = () => {
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Content */}
           <div className="lg:col-span-2">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -187,7 +180,6 @@ const CourseDetail = () => {
                 </div>
               </Card>
 
-              {/* Tabs */}
               <Card>
                 <Tabs defaultActiveKey="overview">
                   <TabPane tab="Tổng quan" key="overview">
@@ -276,7 +268,6 @@ const CourseDetail = () => {
             </motion.div>
           </div>
 
-          {/* Sidebar */}
           <div className="lg:col-span-1">
             <motion.div
               initial={{ opacity: 0, x: 20 }}
@@ -284,7 +275,6 @@ const CourseDetail = () => {
               transition={{ delay: 0.2 }}
               className="sticky top-8"
             >
-              {/* Enrollment Card */}
               <Card className="shadow-lg border-0">
                 <div className="text-center mb-6">
                   <div className="text-3xl font-bold text-primary-600 mb-2">
@@ -343,7 +333,6 @@ const CourseDetail = () => {
           </div>
         </div>
 
-        {/* Related Courses */}
         {relatedCourses.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -398,7 +387,6 @@ const CourseDetail = () => {
         )}
       </div>
 
-      {/* Enrollment Modal */}
       <Modal
         title="Đăng ký khóa học"
         open={enrollModal}

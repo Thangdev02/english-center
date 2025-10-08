@@ -7,7 +7,6 @@ const Footer = () => {
     <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-12">
         <div className="grid md:grid-cols-4 gap-8">
-          {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <BookOpen className="h-8 w-8 text-primary-400" />
@@ -24,7 +23,6 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Quick Links */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Liên kết nhanh</h3>
             <ul className="space-y-2 text-gray-400">
@@ -35,7 +33,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Support */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Hỗ trợ</h3>
             <ul className="space-y-2 text-gray-400">
@@ -46,7 +43,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Contact */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Liên hệ</h3>
             <div className="space-y-3 text-gray-400">

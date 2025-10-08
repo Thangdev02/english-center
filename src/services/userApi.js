@@ -1,8 +1,6 @@
 import api from './api';
 
-// Helper function để tạo token đơn giản
 const createSimpleToken = (user) => {
-  // Sử dụng JSON stringify và base64 encode an toàn
   const tokenData = {
     id: user.id,
     email: user.email,

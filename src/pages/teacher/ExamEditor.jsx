@@ -45,7 +45,6 @@ const ExamEditor = () => {
     }
   };
 
-  // Các hàm addQuestion, updateQuestion, updateOption, removeQuestion giống như trong ExamCreator
 
   const handleSubmit = async (values) => {
     if (questions.length === 0) {
@@ -56,7 +55,6 @@ const ExamEditor = () => {
     try {
       setSaving(true);
       
-      // Cập nhật bài thi
       const examData = {
         ...values,
         totalQuestions: questions.length,
@@ -66,13 +64,11 @@ const ExamEditor = () => {
 
       await examApi.updateExam(id, examData);
 
-      // Xóa các câu hỏi cũ và tạo mới
       const currentQuestions = await examApi.getExamQuestions(id);
       await Promise.all(
         currentQuestions.data.map(q => examApi.deleteQuestion(q.id))
       );
 
-      // Tạo các câu hỏi mới
       await Promise.all(
         questions.map((question, index) => 
           examApi.createQuestion({
@@ -130,8 +126,6 @@ const ExamEditor = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          {/* Header và form tương tự như ExamCreator */}
-          {/* Chỉ thay đổi text và hàm xử lý */}
           
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center space-x-4">
@@ -148,8 +142,6 @@ const ExamEditor = () => {
             </div>
           </div>
 
-          {/* Form và questions list tương tự ExamCreator */}
-          {/* ... */}
           
         </motion.div>
       </div>

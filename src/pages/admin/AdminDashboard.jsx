@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Card, Table, Tag, Progress, Statistic, Row, Col, Button } from 'antd';
 import { Users, BookOpen, DollarSign, TrendingUp, Eye, Edit, Delete } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const AdminDashboard = () => {
   const stats = [
@@ -108,7 +109,6 @@ const AdminDashboard = () => {
         >
           <h1 className="text-3xl font-bold text-gray-900 mb-8">Dashboard Quản Trị</h1>
 
-          {/* Stats */}
           <Row gutter={[16, 16]} className="mb-8">
             {stats.map((stat, index) => (
               <Col xs={24} sm={12} lg={6} key={index}>
@@ -137,7 +137,6 @@ const AdminDashboard = () => {
           </Row>
 
           <div className="grid lg:grid-cols-2 gap-8">
-            {/* Recent Courses */}
             <Card title="Khóa học gần đây" extra={<Button type="link">Xem tất cả</Button>}>
               <Table
                 columns={columns}
@@ -148,12 +147,13 @@ const AdminDashboard = () => {
               />
             </Card>
 
-            {/* Quick Actions */}
             <Card title="Thao tác nhanh">
               <div className="grid grid-cols-2 gap-4">
+                <Link to="/admin/addCourses">
                 <Button type="primary" size="large" block>
                   Thêm khóa học
                 </Button>
+                </Link>
                 <Button size="large" block>
                   Quản lý người dùng
                 </Button>

@@ -24,10 +24,6 @@ const ExamTaking = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  console.log('🚀 ExamTaking COMPONENT MOUNTED');
-  console.log('🎯 Exam ID from params:', id);
-  console.log('👤 Current user:', user);
-  console.log('📍 Current URL:', window.location.href);
 
   // React Quill modules configuration
   const quillModules = {
@@ -48,13 +44,7 @@ const ExamTaking = () => {
     'link'
   ];
 
-  // Reset state khi examId thay đổi
   useEffect(() => {
-    console.log('🔄 useEffect triggered with examId:', id);
-    console.log('🚀 ExamTaking COMPONENT MOUNTED');
-  console.log('🎯 Exam ID from params:', id);
-  console.log('👤 Current user:', user);
-  console.log('📍 Current URL:', window.location.href);
     fetchExamData();
   }, [id]);
 
@@ -68,38 +58,20 @@ const ExamTaking = () => {
 
     try {
       setLoading(true);
-      console.log('📥 Starting fetchExamData for:', id);
       
-      // Test API trực tiếp trước
-      console.log('🔍 Testing direct API calls...');
       
-      // Gọi API exam trực tiếp
-      const examDirect = await fetch(`http://localhost:3001/exams/${id}`).then(r => r.json());
-      console.log('📊 Direct exam API result:', examDirect);
-      
-      // Gọi API questions trực tiếp
-      const questionsDirect = await fetch(`http://localhost:3001/examQuestions?examId=${id}`).then(r => r.json());
-      console.log('❓ Direct questions API result:', questionsDirect);
-      
-      // Sau đó dùng service
       const examData = await examService.getExamWithDetails(id);
-      console.log('✅ ExamService result:', examData);
       
       if (!examData) {
         console.error('❌ Exam data is null/undefined');
         throw new Error('Không nhận được dữ liệu bài thi');
       }
       
-      console.log('📋 Questions from examData:', examData.questions);
-      console.log('🔢 Number of questions:', examData.questions ? examData.questions.length : 0);
       
       if (!examData.questions || examData.questions.length === 0) {
-        console.error('❌ No questions found in exam data');
-        console.error('📊 Full exam data:', examData);
         throw new Error('Bài thi không có câu hỏi');
       }
       
-      // Log chi tiết từng câu hỏi
       examData.questions.forEach((question, index) => {
         console.log(`--- Câu hỏi ${index + 1} ---`);
         console.log('ID:', question.id);
@@ -109,13 +81,11 @@ const ExamTaking = () => {
         console.log('Correct Answer:', question.correctAnswer);
         console.log('Points:', question.points);
         console.log('Order:', question.order);
-        console.log('-------------------');
       });
       
       setExam(examData);
       setTimeLeft(examData.duration * 60);
       
-      // Khởi tạo answers object
       const initialAnswers = {};
       examData.questions.forEach((q, index) => {
         if (q.type === 'multiple_choice') {
@@ -137,7 +107,6 @@ const ExamTaking = () => {
     }
   };
 
-  // Timer effect
   useEffect(() => {
     if (!exam || timeLeft <= 0) return;
 
@@ -185,13 +154,11 @@ const ExamTaking = () => {
     try {
       setSubmitting(true);
       
-      // Tính điểm cho câu hỏi trắc nghiệm
       let score = 0;
       exam.questions.forEach((question, index) => {
         if (question.type === 'multiple_choice' && answers[index] === question.correctAnswer) {
           score += question.points;
         }
-        // Essay questions sẽ được chấm sau bởi giáo viên
       });
 
       const resultData = {
@@ -206,12 +173,12 @@ const ExamTaking = () => {
         status: 'completed'
       };
 
-      console.log('📤 Submitting exam result:', resultData);
+      console.log(' Submitting exam result:', resultData);
       await examApi.submitExam(resultData);
       message.success('Nộp bài thành công!');
       navigate('/student/classes');
     } catch (error) {
-      console.error('❌ Error submitting exam:', error);
+      console.error(' Error submitting exam:', error);
       message.error('Nộp bài thất bại!');
     } finally {
       setSubmitting(false);
@@ -278,7 +245,6 @@ const ExamTaking = () => {
           animate={{ opacity: 1, y: 0 }}
           key={id}
         >
-          {/* Header */}
           <Card className="mb-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
@@ -317,7 +283,6 @@ const ExamTaking = () => {
           </Card>
 
           <div className="grid lg:grid-cols-4 gap-8">
-            {/* Question Navigation */}
             <div className="lg:col-span-1">
               <Card title="Danh sách câu hỏi">
                 <div className="grid grid-cols-5 gap-2">
@@ -346,7 +311,6 @@ const ExamTaking = () => {
               </Card>
             </div>
 
-            {/* Question Content */}
             <div className="lg:col-span-3">
               <Card
                 title={`Câu ${currentQuestion + 1} (${currentQ.points} điểm) - ${currentQ.type === 'multiple_choice' ? 'Trắc nghiệm' : 'Tự luận'}`}
@@ -375,7 +339,6 @@ const ExamTaking = () => {
                   )}
                 </div>
 
-                {/* Multiple Choice */}
                 {currentQ.type === 'multiple_choice' && (
                   <Radio.Group 
                     value={answers[currentQuestion]} 
@@ -396,7 +359,6 @@ const ExamTaking = () => {
                   </Radio.Group>
                 )}
 
-                {/* Essay Question với React Quill */}
                 {currentQ.type === 'essay' && (
                   <div className="border rounded">
                     <ReactQuill
@@ -410,7 +372,6 @@ const ExamTaking = () => {
                   </div>
                 )}
 
-                {/* Navigation Buttons */}
                 <div className="flex justify-between mt-8">
                   <Button 
                     icon={<ArrowLeft size={16} />}
@@ -447,7 +408,6 @@ const ExamTaking = () => {
         </motion.div>
       </div>
 
-      {/* Submit Confirmation Modal */}
       <Modal
         title="Xác nhận nộp bài"
         open={showConfirm}

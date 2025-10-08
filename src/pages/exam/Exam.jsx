@@ -8,10 +8,9 @@ const Exam = () => {
   const { courseId } = useParams();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [timeLeft, setTimeLeft] = useState(3600); // 60 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(3600);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
 
-  // Mock exam data
   const exam = {
     title: "Bài kiểm tra giữa kỳ - Tiếng Anh Giao Tiếp",
     duration: 60,
@@ -106,7 +105,6 @@ const Exam = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Exam Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -135,7 +133,6 @@ const Exam = () => {
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-4 gap-8">
-          {/* Questions Navigation */}
           <div className="lg:col-span-1">
             <Card title="Danh sách câu hỏi" className="sticky top-8">
               <div className="grid grid-cols-5 gap-2 mb-4">
@@ -172,7 +169,6 @@ const Exam = () => {
             </Card>
           </div>
 
-          {/* Question Content */}
           <div className="lg:col-span-3">
             <motion.div
               key={currentQuestion}
@@ -180,7 +176,6 @@ const Exam = () => {
               animate={{ opacity: 1, x: 0 }}
             >
               <Card>
-                {/* Question Header */}
                 <div className="flex items-center justify-between mb-6 pb-4 border-b">
                   <div>
                     <h2 className="text-xl font-semibold">
@@ -193,7 +188,6 @@ const Exam = () => {
                   </Button>
                 </div>
 
-                {/* Reading Passage */}
                 {currentQ.passage && (
                   <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                     <h3 className="font-semibold mb-2">Đọc đoạn văn sau:</h3>
@@ -203,13 +197,11 @@ const Exam = () => {
                   </div>
                 )}
 
-                {/* Question */}
                 <div className="mb-6">
                   <h3 className="text-lg font-medium mb-4">
                     {currentQ.question}
                   </h3>
 
-                  {/* Options */}
                   <div className="space-y-3">
                     {currentQ.options.map((option, index) => (
                       <div
@@ -233,7 +225,6 @@ const Exam = () => {
                   </div>
                 </div>
 
-                {/* Navigation Buttons */}
                 <div className="flex justify-between pt-4 border-t">
                   <Button
                     onClick={handlePrevious}
@@ -267,7 +258,6 @@ const Exam = () => {
         </div>
       </div>
 
-      {/* Submit Modal */}
       <Modal
         title="Xác nhận nộp bài"
         open={showSubmitModal}

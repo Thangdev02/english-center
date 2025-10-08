@@ -25,7 +25,7 @@ import ExamManager from './pages/teacher/ExamManager';
 import ExamEditor from './pages/teacher/ExamEditor';
 import ExamCreator from './pages/teacher/ExamCreator';
 import ExamTaking from './pages/ExamTaking';
-// Xóa dòng này: import './App.css';
+import AddCourse from './pages/admin/AddCourse';
 
 function App() {
   return (
@@ -55,6 +55,7 @@ function App() {
                 {/* <Route path="/exam/:courseId" element={<Exam />} /> */}
                 <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/addCourses" element={<AddCourse />} />
                 <Route path="/teacher" element={<TeacherDashboard />} />
                 <Route path="/teacher/schedule" element={<TeacherSchedule />} />
                 <Route path="/teacher/forum" element={<ForumManager />} />
@@ -63,6 +64,7 @@ function App() {
                 <Route path="/teacher/exams/:id/edit" element={<ExamEditor />} />
                 <Route path="/exam/:id" element={<ExamTaking />} />
                 <Route path="/test-tailwind" element={<TestTailwind />} />
+                
               </Routes>
             </main>
             <Footer />

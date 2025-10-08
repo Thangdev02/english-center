@@ -19,11 +19,9 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const initializeApp = async () => {
-      // Test API connection
       const connected = await testApiConnection();
       setApiConnected(connected);
 
-      // Load user from localStorage
       const savedUser = localStorage.getItem('user');
       if (savedUser) {
         setUser(JSON.parse(savedUser));

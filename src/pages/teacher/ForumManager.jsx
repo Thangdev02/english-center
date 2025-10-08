@@ -43,7 +43,7 @@ const ForumManager = () => {
         response.data.map(async (classItem) => {
           try {
             const membersResponse = await forumApi.getClassMembers(classItem.id);
-            const coursesCount = 0; // You might want to fetch this from API
+            const coursesCount = 0; 
             return {
               ...classItem,
               memberCount: membersResponse.data.length,
@@ -101,9 +101,8 @@ const ForumManager = () => {
         return;
       }
 
-      console.log('🔍 Searching for user with email:', values.email);
+      console.log(' Searching for user with email:', values.email);
 
-      // First, find user by email
       const usersResponse = await userApi.getAllUsers();
       const targetUser = usersResponse.data.find(u => 
         u.email.toLowerCase() === values.email.toLowerCase() && u.role === 'student'
@@ -114,9 +113,8 @@ const ForumManager = () => {
         return;
       }
 
-      console.log('✅ Found user:', targetUser.name);
+      console.log(' Found user:', targetUser.name);
 
-      // Check if user is already in class
       const membersResponse = await forumApi.getClassMembers(selectedClass.id);
       const existingMember = membersResponse.data.find(m => m.userId === targetUser.id);
       
@@ -125,7 +123,6 @@ const ForumManager = () => {
         return;
       }
 
-      // Add member to class
       await forumApi.addMember(selectedClass.id, values.email);
       message.success(`Đã thêm học viên ${targetUser.name} vào lớp!`);
       setAddMemberModalVisible(false);
@@ -137,7 +134,6 @@ const ForumManager = () => {
     }
   };
 
-  // Trong ForumManager component, sửa các hàm sau:
 
 const handleAddCourse = async (values) => {
     try {
@@ -153,13 +149,11 @@ const handleAddCourse = async (values) => {
         return;
       }
   
-      // Thêm khóa học vào lớp
       await forumApi.addCourseToClass(selectedClass.id, values.courseId, user.id);
       message.success(`Đã thêm khóa học "${selectedCourse.title}" vào lớp "${selectedClass.name}"!`);
       setAddCourseModalVisible(false);
       courseForm.resetFields();
       
-      // Refresh class details
       fetchClassDetails(selectedClass.id);
     } catch (error) {
       console.error('Error adding course:', error);
@@ -167,7 +161,6 @@ const handleAddCourse = async (values) => {
     }
   };
   
-  // Sửa hàm getClassCourses
   const getClassCourses = () => {
     if (!selectedClass || !selectedClass.courses) return [];
     return selectedClass.courses.map(item => item.course).filter(Boolean);
@@ -178,7 +171,7 @@ const handleAddCourse = async (values) => {
       setClassLoading(true);
       const classDetails = await forumService.getClassWithDetails(classId);
       setSelectedClass(classDetails);
-      console.log('📊 Class details:', classDetails);
+      console.log(' Class details:', classDetails);
     } catch (error) {
       console.error('Error fetching class details:', error);
       message.error('Không thể tải chi tiết lớp học');
@@ -269,7 +262,7 @@ const handleAddCourse = async (values) => {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="container mx-auto px-4 text-center">
-          <div className="text-6xl mb-4">🔒</div>
+          <div className="text-6xl mb-4">block icon</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Vui lòng đăng nhập</h1>
           <p className="text-gray-600">Bạn cần đăng nhập để truy cập trang này</p>
         </div>
@@ -335,7 +328,6 @@ const handleAddCourse = async (values) => {
                   ),
                   children: selectedClass ? (
                     <div className="grid lg:grid-cols-3 gap-8">
-                      {/* Class Info */}
                       <div className="lg:col-span-2">
                         <div className="mb-6">
                           <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -350,7 +342,6 @@ const handleAddCourse = async (values) => {
                           </div>
                         </div>
 
-                        {/* Members Section */}
                         <Card 
                           title={
                             <div className="flex items-center justify-between">
@@ -408,7 +399,6 @@ const handleAddCourse = async (values) => {
                           )}
                         </Card>
 
-                        {/* Courses Section */}
                         <Card 
                           title={
                             <div className="flex items-center justify-between">
@@ -479,7 +469,6 @@ const handleAddCourse = async (values) => {
                         </Card>
                       </div>
 
-                      {/* Quick Actions */}
                       <div className="lg:col-span-1">
                         <Card title="Thao tác nhanh">
                           <div className="space-y-4">
@@ -507,7 +496,6 @@ const handleAddCourse = async (values) => {
                           </div>
                         </Card>
 
-                        {/* Class Stats */}
                         <Card className="mt-6" title="Thống kê lớp">
                           <div className="space-y-3">
                             <div className="flex justify-between">
@@ -552,7 +540,6 @@ const handleAddCourse = async (values) => {
         </motion.div>
       </div>
 
-      {/* Create Class Modal */}
       <Modal
         title="Tạo Lớp Học Mới"
         open={modalVisible}
@@ -604,7 +591,6 @@ const handleAddCourse = async (values) => {
         </Form>
       </Modal>
 
-      {/* Add Member Modal */}
       <Modal
         title="Thêm Học Viên Vào Lớp"
         open={addMemberModalVisible}
@@ -637,9 +623,9 @@ const handleAddCourse = async (values) => {
 
           <div className="bg-blue-50 p-3 rounded-lg mb-4">
             <p className="text-sm text-blue-700">
-              💡 Lưu ý: Học viên phải đã có tài khoản trong hệ thống với email này.
+               Lưu ý: Học viên phải đã có tài khoản trong hệ thống với email này.
               <br />
-              📧 Email demo: student@example.com hoặc student2@example.com
+              Email demo: student@example.com hoặc student2@example.com
             </p>
           </div>
 
@@ -659,7 +645,6 @@ const handleAddCourse = async (values) => {
         </Form>
       </Modal>
 
-      {/* Add Course Modal */}
       <Modal
         title="Thêm Khóa Học Vào Lớp"
         open={addCourseModalVisible}

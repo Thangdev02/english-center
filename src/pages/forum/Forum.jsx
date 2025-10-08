@@ -69,7 +69,6 @@ const Forum = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -84,7 +83,6 @@ const Forum = () => {
             </Button>
           </div>
 
-          {/* Search */}
           <Card className="mb-6">
             <AntSearch
               placeholder="Tìm kiếm trong diễn đàn..."
@@ -93,7 +91,6 @@ const Forum = () => {
             />
           </Card>
 
-          {/* Create Post */}
           <Card className="mb-6" title="Tạo bài viết mới">
             <TextArea
               value={newPost}
@@ -118,7 +115,6 @@ const Forum = () => {
             </div>
           </Card>
 
-          {/* Posts List */}
           <Card>
             <List
               itemLayout="vertical"
@@ -174,7 +170,6 @@ const Forum = () => {
                       {post.content}
                     </div>
 
-                    {/* Comments Section */}
                     <div className="mt-4 pt-4 border-t">
                       <div className="flex space-x-3">
                         <Avatar size="small" src={post.user.avatar} />

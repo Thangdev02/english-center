@@ -16,7 +16,6 @@ const TeacherSchedule = () => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    // Mock data - in real app, this would come from API
     const mockClasses = [
       {
         id: 1,
@@ -153,7 +152,6 @@ const TeacherSchedule = () => {
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Calendar */}
             <div className="lg:col-span-2">
               <Card>
                 <Calendar
@@ -177,7 +175,6 @@ const TeacherSchedule = () => {
               </Card>
             </div>
 
-            {/* Today's Classes */}
             <div className="lg:col-span-1">
               <Card title={`Lịch dạy - ${selectedDate.format('DD/MM/YYYY')}`}>
                 {todayClasses.length > 0 ? (
@@ -218,7 +215,6 @@ const TeacherSchedule = () => {
                 )}
               </Card>
 
-              {/* Quick Stats */}
               <Card className="mt-6" title="Thống kê tháng">
                 <div className="space-y-3">
                   <div className="flex justify-between">
@@ -244,7 +240,6 @@ const TeacherSchedule = () => {
         </motion.div>
       </div>
 
-      {/* Add Class Modal */}
       <Modal
         title="Thêm Lịch Dạy Mới"
         open={modalVisible}

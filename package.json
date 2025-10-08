@@ -4,12 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm run tailwind:watch\" \"npm run server\" \"vite\"",
-    "server": "json-server --watch db.json --port 3001 --host localhost",
+    "dev": "concurrently \"npm run tailwind:watch\" \"vite\" \"npm run server\"",
+    "server": "json-server --watch db.json --port 3001",
     "build": "npm run tailwind:build && vite build",
     "preview": "vite preview",
     "tailwind:watch": "tailwindcss -i ./src/input.css -o ./src/output.css --watch",
-    "tailwind:build": "tailwindcss -i ./src/input.css -o ./src/output.css --minify"
+    "tailwind:build": "tailwindcss -i ./src/input.css -o ./src/output.css --minify",
+    "serve": "node api/server.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",

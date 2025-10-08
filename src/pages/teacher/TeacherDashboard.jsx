@@ -20,15 +20,12 @@ const TeacherDashboard = () => {
       try {
         setLoading(true);
         
-        // Fetch teacher's courses
         const coursesResponse = await courseApi.getTeacherCourses(user.id);
         const courses = coursesResponse.data;
         
-        // Fetch forum classes
         const classesResponse = await forumApi.getClasses(user.id);
         const forumClasses = classesResponse.data;
 
-        // Calculate stats
         const totalStudents = courses.reduce((sum, course) => sum + course.students, 0);
         const totalCourses = courses.length;
         const totalClasses = forumClasses.length;
@@ -37,10 +34,10 @@ const TeacherDashboard = () => {
           students: totalStudents,
           courses: totalCourses,
           classes: totalClasses,
-          messages: 12 // Mock data
+          messages: 12 
         });
 
-        // Mock recent students (in real app, this would come from API)
+        
         setRecentStudents([
           {
             name: 'Nguyễn Văn A',
@@ -56,25 +53,23 @@ const TeacherDashboard = () => {
           }
         ]);
 
-        // Mock upcoming classes
         setUpcomingClasses([
           {
             id: 1,
             title: 'Lớp Giao Tiếp - Buổi 15',
-            time: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 hours from now
+            time: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
             students: 20,
             type: 'online'
           },
           {
             id: 2,
             title: 'Lớp IELTS - Writing',
-            time: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // tomorrow
+            time: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
             students: 15,
             type: 'offline'
           }
         ]);
 
-        // Mock forum activity
         setForumActivity([
           {
             id: 1,
@@ -204,7 +199,6 @@ const TeacherDashboard = () => {
             </div>
           </div>
 
-          {/* Stats */}
           <Row gutter={[16, 16]} className="mb-8">
             {statsData.map((stat, index) => (
               <Col xs={24} sm={12} lg={6} key={index}>
@@ -233,7 +227,6 @@ const TeacherDashboard = () => {
           </Row>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Recent Students */}
             <div className="lg:col-span-2">
               <Card 
                 title="Học viên gần đây" 
@@ -269,7 +262,6 @@ const TeacherDashboard = () => {
                 </Table>
               </Card>
 
-              {/* Quick Actions */}
               <Card className="mt-6" title="Thao tác nhanh">
                 <div className="grid grid-cols-2 gap-4">
                   <Link to="/teacher/schedule">
@@ -296,7 +288,6 @@ const TeacherDashboard = () => {
               </Card>
             </div>
 
-            {/* Upcoming Classes */}
             <div className="lg:col-span-1">
               <Card 
                 title="Lịch dạy sắp tới"
@@ -330,7 +321,6 @@ const TeacherDashboard = () => {
                 />
               </Card>
 
-              {/* Forum Activity */}
               <Card className="mt-6" title="Hoạt động diễn đàn">
                 <div className="space-y-4">
                   {forumActivity.map((activity) => (

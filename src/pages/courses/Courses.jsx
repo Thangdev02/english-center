@@ -94,7 +94,6 @@ const Courses = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -108,7 +107,6 @@ const Courses = () => {
           </p>
         </motion.div>
 
-        {/* Filters */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -168,7 +166,6 @@ const Courses = () => {
           </div>
         </motion.div>
 
-        {/* Courses Grid */}
         <AnimatePresence>
           <motion.div 
             layout

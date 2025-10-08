@@ -25,7 +25,7 @@ export const checkoutService = {
     const totalAmount = cartItems.reduce((total, item) => total + item.course.price, 0);
     
     const order = {
-      userId: 1, // Mock user ID
+      userId: 1, 
       courses: cartItems.map(item => item.courseId),
       totalAmount,
       status: 'completed',
@@ -33,13 +33,10 @@ export const checkoutService = {
       createdAt: new Date().toISOString()
     };
     
-    // Create order
     const orderResponse = await cartApi.createOrder(order);
     
-    // Clear cart
     await cartApi.clearCart(1);
     
-    // Create enrollments
     const enrollmentPromises = cartItems.map(item =>
       courseApi.enrollCourse(item.courseId)
     );

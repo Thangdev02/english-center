@@ -42,21 +42,14 @@ export const examApi = {
 export const examService = {
     getExamWithDetails: async (examId) => {
         try {
-          console.log('🔄 Starting getExamWithDetails for:', examId);
           
           const [examResponse, questionsResponse] = await Promise.all([
             examApi.getExam(examId),
             examApi.getExamQuestions(examId)
           ]);
           
-          console.log('📊 Exam response status:', examResponse.status);
-          console.log('📊 Exam response data:', examResponse.data);
-          console.log('❓ Questions response status:', questionsResponse.status);
-          console.log('❓ Questions response data:', questionsResponse.data);
-          console.log('❓ Questions response data length:', questionsResponse.data ? questionsResponse.data.length : 0);
           
           if (!examResponse.data) {
-            console.error('❌ Exam not found in response');
             throw new Error('Exam not found');
           }
           
@@ -65,15 +58,10 @@ export const examService = {
             questions: questionsResponse.data || []
           };
           
-          console.log('✅ Final result questions:', result.questions);
-          console.log('✅ Final result questions length:', result.questions.length);
           
           return result;
           
         } catch (error) {
-          console.error('❌ Error in getExamWithDetails:', error);
-          console.error('Error response:', error.response);
-          console.error('Error response data:', error.response?.data);
           throw error;
         }
       },

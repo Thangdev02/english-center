@@ -1,0 +1,12 @@
+// api/server.js
+import jsonServer from "json-server";
+
+const server = jsonServer.create();
+const router = jsonServer.router("db.json");
+const middlewares = jsonServer.defaults();
+
+server.use(middlewares);
+server.use(jsonServer.bodyParser);
+server.use("/api", router);
+
+export default server;

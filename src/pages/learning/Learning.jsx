@@ -10,8 +10,7 @@ const Learning = () => {
   const { courseId } = useParams();
   const [currentLesson, setCurrentLesson] = useState(1);
   const [completedLessons, setCompletedLessons] = useState([1]);
-
-  // Mock data
+// trang  bai hoc
   const course = {
     id: 1,
     title: "Tiếng Anh Giao Tiếp Cơ Bản",
@@ -48,7 +47,6 @@ const Learning = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Layout className="min-h-screen">
-        {/* Sidebar */}
         <Sider
           width={350}
           className="bg-white shadow-lg"
@@ -105,7 +103,6 @@ const Learning = () => {
           </div>
         </Sider>
 
-        {/* Main Content */}
         <Layout>
           <Content className="p-6">
             <motion.div
@@ -113,7 +110,6 @@ const Learning = () => {
               animate={{ opacity: 1, y: 0 }}
               className="max-w-4xl mx-auto"
             >
-              {/* Lesson Header */}
               <Card className="mb-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -138,7 +134,6 @@ const Learning = () => {
                 </div>
               </Card>
 
-              {/* Lesson Content */}
               <Card>
                 <Tabs defaultActiveKey="content">
                   <Tabs.TabPane 
@@ -235,7 +230,6 @@ const Learning = () => {
                 </Tabs>
               </Card>
 
-              {/* Navigation */}
               <div className="flex justify-between mt-6">
                 <Button size="large">
                   Bài trước

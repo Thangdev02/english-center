@@ -130,7 +130,6 @@ const Leaderboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          {/* Header */}
           <div className="text-center mb-12">
             <div className="flex items-center justify-center mb-4">
               <Trophy className="w-12 h-12 text-yellow-500 mr-4" />
@@ -142,7 +141,6 @@ const Leaderboard = () => {
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Top Performers */}
             <div className="lg:col-span-2">
               <Card 
                 title={
@@ -172,7 +170,6 @@ const Leaderboard = () => {
                 />
               </Card>
 
-              {/* Current User Stats */}
               <Card className="mt-6" title="Thống kê của bạn">
                 <div className="grid grid-cols-4 gap-4 text-center">
                   <div className="p-4 bg-blue-50 rounded-lg">
@@ -195,7 +192,6 @@ const Leaderboard = () => {
               </Card>
             </div>
 
-            {/* Achievements */}
             <div className="lg:col-span-1">
               <Card 
                 title={
@@ -251,7 +247,6 @@ const Leaderboard = () => {
                   ))}
                 </div>
 
-                {/* Progress to next level */}
                 <div className="mt-6 p-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg text-white">
                   <div className="text-sm mb-2">Tiến trình đến cấp độ tiếp theo</div>
                   <Progress 
@@ -271,7 +266,6 @@ const Leaderboard = () => {
             </div>
           </div>
 
-          {/* Weekly Challenges */}
           <Card className="mt-8" title="Thử thách tuần">
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center p-6 border rounded-lg">

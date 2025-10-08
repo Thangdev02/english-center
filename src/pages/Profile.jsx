@@ -39,7 +39,6 @@ const Profile = () => {
           className="max-w-4xl mx-auto"
         >
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Profile Sidebar */}
             <div className="lg:col-span-1">
               <Card className="text-center">
                 <div className="relative inline-block mb-4">
@@ -81,7 +80,6 @@ const Profile = () => {
                 </div>
               </Card>
 
-              {/* Quick Stats */}
               <Card className="mt-6" title="Thống kê học tập">
                 <div className="space-y-4">
                   <div>
@@ -112,7 +110,6 @@ const Profile = () => {
               </Card>
             </div>
 
-            {/* Main Content */}
             <div className="lg:col-span-2">
               <Card>
                 <Tabs defaultActiveKey="profile">
