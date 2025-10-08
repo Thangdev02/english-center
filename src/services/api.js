@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3001';
+const API_BASE_URL = 'https://english-center-19t2.vercel.app/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
