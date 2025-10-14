@@ -1,8 +1,20 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Card, Button, Progress, Radio, Checkbox, Space, Modal, Timeline } from 'antd';
-import { Clock, AlertCircle, CheckCircle, Flag } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  Card,
+  Button,
+  Progress,
+  Radio,
+  Space,
+  Modal,
+  message,
+  Spin,
+} from "antd";
+import { Clock, AlertCircle, Flag } from "lucide-react";
+import ReactQuill from "react-quill";
+import axios from "axios";
+import "react-quill/dist/quill.snow.css";
 
 const Exam = () => {
   const { courseId } = useParams();
@@ -10,56 +22,61 @@ const Exam = () => {
   const [answers, setAnswers] = useState({});
   const [timeLeft, setTimeLeft] = useState(3600);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [essay, setEssay] = useState("");
+  const [evaluating, setEvaluating] = useState(false);
+  const [evaluation, setEvaluation] = useState(null);
 
   const exam = {
     title: "Bài kiểm tra giữa kỳ - Tiếng Anh Giao Tiếp",
     duration: 60,
-    totalQuestions: 20,
+    totalQuestions: 4,
     questions: [
       {
         id: 1,
-        type: 'multiple_choice',
+        type: "multiple_choice",
         question: "Chọn từ có cách phát âm khác với các từ còn lại:",
-        options: [
-          "A. cat",
-          "B. hat",
-          "C. late",
-          "D. bat"
-        ],
-        points: 1
+        options: ["A. cat", "B. hat", "C. late", "D. bat"],
+        points: 1,
       },
       {
         id: 2,
-        type: 'multiple_choice',
+        type: "multiple_choice",
         question: "Câu nào sau đây là đúng ngữ pháp?",
         options: [
           "A. She don't like apples",
           "B. She doesn't likes apples",
           "C. She doesn't like apples",
-          "D. She don't likes apples"
+          "D. She don't likes apples",
         ],
-        points: 1
+        points: 1,
       },
       {
         id: 3,
-        type: 'reading',
-        passage: "The quick brown fox jumps over the lazy dog. This sentence contains every letter in the English alphabet. It is often used for typing practice and testing typewriters and computer keyboards.",
+        type: "reading",
+        passage:
+          "The quick brown fox jumps over the lazy dog. This sentence contains every letter in the English alphabet. It is often used for typing practice and testing typewriters and computer keyboards.",
         question: "What is the main purpose of this sentence?",
         options: [
           "A. To tell a story about animals",
           "B. To practice typing and test keyboards",
           "C. To teach the alphabet to children",
-          "D. To demonstrate grammar rules"
+          "D. To demonstrate grammar rules",
         ],
-        points: 2
-      }
-    ]
+        points: 2,
+      },
+      {
+        id: 4,
+        type: "essay",
+        question: "Write an essay about the impact of technology on communication (about 250–300 words).",
+        points: 5,
+      },
+    ],
   };
 
   const handleAnswer = (questionId, answer) => {
-    setAnswers(prev => ({
+    setAnswers((prev) => ({
       ...prev,
-      [questionId]: answer
+      [questionId]: answer,
     }));
   };
 
@@ -80,10 +97,10 @@ const Exam = () => {
     return (answered / exam.totalQuestions) * 100;
   };
 
-  // Timer effect
-  React.useEffect(() => {
+  // ⏰ Timer
+  useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft(prev => {
+      setTimeLeft((prev) => {
         if (prev <= 0) {
           clearInterval(timer);
           return 0;
@@ -91,26 +108,55 @@ const Exam = () => {
         return prev - 1;
       });
     }, 1000);
-
     return () => clearInterval(timer);
   }, []);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${minutes.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
+  };
+
+  // 🚀 Gửi bài viết lên API Python
+  const handleEssaySubmit = async () => {
+    if (!essay.trim()) {
+      message.warning("Please write your essay before submitting!");
+      return;
+    }
+
+    setEvaluating(true);
+    setEvaluation(null);
+
+    try {
+      const response = await axios.post("http://127.0.0.1:8000/api/evaluate", {
+        essay: essay,
+      });
+
+      setEvaluation(response.data);
+      message.success("Essay evaluated successfully!");
+    } catch (error) {
+      console.error(error);
+      message.error("Error evaluating essay. Please try again!");
+    } finally {
+      setEvaluating(false);
+    }
   };
 
   const currentQ = exam.questions[currentQuestion];
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">{exam.title}</h1>
-              <p className="text-gray-600">Tổng số câu: {exam.totalQuestions}</p>
+              <p className="text-gray-600">
+                Tổng số câu: {exam.totalQuestions}
+              </p>
             </div>
             <div className="flex items-center space-x-6">
               <div className="text-center">
@@ -131,19 +177,26 @@ const Exam = () => {
         </div>
       </div>
 
+      {/* Content */}
       <div className="container mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-4 gap-8">
+          {/* Sidebar */}
           <div className="lg:col-span-1">
             <Card title="Danh sách câu hỏi" className="sticky top-8">
               <div className="grid grid-cols-5 gap-2 mb-4">
                 {exam.questions.map((_, index) => (
                   <Button
                     key={index}
-                    type={currentQuestion === index ? "primary" : 
-                          answers[index] ? "default" : "dashed"}
+                    type={
+                      currentQuestion === index
+                        ? "primary"
+                        : answers[index + 1]
+                        ? "default"
+                        : "dashed"
+                    }
                     size="small"
                     className={`w-8 h-8 p-0 ${
-                      currentQuestion === index ? 'bg-primary-600 border-primary-600' : ''
+                      currentQuestion === index ? "bg-blue-600" : ""
                     }`}
                     onClick={() => setCurrentQuestion(index)}
                   >
@@ -152,23 +205,10 @@ const Exam = () => {
                 ))}
               </div>
               <Progress percent={calculateProgress()} />
-              <div className="mt-4 space-y-2 text-sm">
-                <div className="flex items-center">
-                  <div className="w-3 h-3 bg-blue-600 rounded mr-2"></div>
-                  <span>Đang làm</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-3 h-3 bg-green-600 rounded mr-2"></div>
-                  <span>Đã trả lời</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-3 h-3 bg-gray-300 rounded mr-2"></div>
-                  <span>Chưa làm</span>
-                </div>
-              </div>
             </Card>
           </div>
 
+          {/* Question Section */}
           <div className="lg:col-span-3">
             <motion.div
               key={currentQuestion}
@@ -176,78 +216,89 @@ const Exam = () => {
               animate={{ opacity: 1, x: 0 }}
             >
               <Card>
-                <div className="flex items-center justify-between mb-6 pb-4 border-b">
-                  <div>
-                    <h2 className="text-xl font-semibold">
-                      Câu {currentQuestion + 1}
-                    </h2>
-                    <p className="text-gray-600">Điểm: {currentQ.points}</p>
-                  </div>
-                  <Button icon={<Flag />} type="text">
-                    Đánh dấu
-                  </Button>
-                </div>
+                <h2 className="text-xl font-semibold mb-4">
+                  Câu {currentQuestion + 1}
+                </h2>
 
-                {currentQ.passage && (
-                  <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <h3 className="font-semibold mb-2">Đọc đoạn văn sau:</h3>
-                    <p className="text-gray-700 leading-relaxed">
-                      {currentQ.passage}
-                    </p>
-                  </div>
-                )}
-
-                <div className="mb-6">
-                  <h3 className="text-lg font-medium mb-4">
-                    {currentQ.question}
-                  </h3>
-
-                  <div className="space-y-3">
-                    {currentQ.options.map((option, index) => (
+                {currentQ.type !== "essay" ? (
+                  <>
+                    {currentQ.passage && (
+                      <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+                        <p>{currentQ.passage}</p>
+                      </div>
+                    )}
+                    <p className="font-medium mb-4">{currentQ.question}</p>
+                    {currentQ.options.map((opt, i) => (
                       <div
-                        key={index}
-                        className={`p-3 border rounded-lg cursor-pointer transition-all ${
-                          answers[currentQ.id] === option
-                            ? 'border-primary-500 bg-primary-50'
-                            : 'border-gray-300 hover:border-primary-300'
+                        key={i}
+                        className={`p-3 border rounded-lg mb-2 cursor-pointer ${
+                          answers[currentQ.id] === opt
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-300"
                         }`}
-                        onClick={() => handleAnswer(currentQ.id, option)}
+                        onClick={() => handleAnswer(currentQ.id, opt)}
                       >
-                        <Space>
-                          <Radio 
-                            checked={answers[currentQ.id] === option}
-                            onChange={() => handleAnswer(currentQ.id, option)}
-                          />
-                          <span>{option}</span>
-                        </Space>
+                        <Radio
+                          checked={answers[currentQ.id] === opt}
+                          onChange={() => handleAnswer(currentQ.id, opt)}
+                        >
+                          {opt}
+                        </Radio>
                       </div>
                     ))}
-                  </div>
-                </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-medium mb-3">{currentQ.question}</p>
+                    <ReactQuill
+                      theme="snow"
+                      value={essay}
+                      onChange={setEssay}
+                      placeholder="Write your essay here..."
+                    />
+                    <Button
+                      type="primary"
+                      className="mt-4"
+                      onClick={handleEssaySubmit}
+                      disabled={evaluating}
+                    >
+                      {evaluating ? <Spin /> : "Nộp bài viết để chấm điểm"}
+                    </Button>
 
-                <div className="flex justify-between pt-4 border-t">
+                    {evaluation && (
+                      <Card className="mt-6 bg-gray-50 border-blue-100">
+                        <h3 className="text-lg font-semibold text-blue-600 mb-2">
+                          Kết quả chấm bài viết:
+                        </h3>
+                        <p>
+                          <strong>Score:</strong> {evaluation.score}
+                        </p>
+                        <p>
+                          <strong>Feedback:</strong> {evaluation.feedback}
+                        </p>
+                        <p>
+                          <strong>Grammar:</strong> {evaluation.grammar}
+                        </p>
+                        <p>
+                          <strong>Vocabulary:</strong> {evaluation.vocabulary}
+                        </p>
+                        <p>
+                          <strong>Coherence:</strong> {evaluation.coherence}
+                        </p>
+                      </Card>
+                    )}
+                  </>
+                )}
+
+                <div className="flex justify-between pt-6 border-t mt-4">
                   <Button
                     onClick={handlePrevious}
                     disabled={currentQuestion === 0}
-                    size="large"
                   >
                     Câu trước
                   </Button>
-                  
-                  {currentQuestion === exam.questions.length - 1 ? (
-                    <Button 
-                      type="primary" 
-                      size="large"
-                      onClick={() => setShowSubmitModal(true)}
-                    >
-                      Nộp bài
-                    </Button>
-                  ) : (
-                    <Button 
-                      type="primary" 
-                      size="large"
-                      onClick={handleNext}
-                    >
+                  {currentQuestion < exam.questions.length - 1 && (
+                    <Button type="primary" onClick={handleNext}>
                       Câu tiếp theo
                     </Button>
                   )}
@@ -257,41 +308,6 @@ const Exam = () => {
           </div>
         </div>
       </div>
-
-      <Modal
-        title="Xác nhận nộp bài"
-        open={showSubmitModal}
-        onCancel={() => setShowSubmitModal(false)}
-        footer={[
-          <Button key="back" onClick={() => setShowSubmitModal(false)}>
-            Tiếp tục làm bài
-          </Button>,
-          <Button key="submit" type="primary" danger>
-            Xác nhận nộp bài
-          </Button>,
-        ]}
-      >
-        <div className="text-center py-4">
-          <AlertCircle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Bạn có chắc chắn muốn nộp bài?</h3>
-          <p className="text-gray-600">
-            Bạn đã trả lời {Object.keys(answers).length} trong tổng số {exam.totalQuestions} câu hỏi.
-            Thời gian còn lại: {formatTime(timeLeft)}
-          </p>
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <div className="font-semibold">Câu đã trả lời:</div>
-                <div className="text-green-600">{Object.keys(answers).length}</div>
-              </div>
-              <div>
-                <div className="font-semibold">Câu chưa trả lời:</div>
-                <div className="text-red-600">{exam.totalQuestions - Object.keys(answers).length}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 };

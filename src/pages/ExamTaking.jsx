@@ -1,15 +1,22 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Card, Button, Radio, Input, Space, Progress, Modal, message, Typography, Alert, Spin } from 'antd';
-import { Clock, ArrowLeft, ArrowRight, Flag, Send } from 'lucide-react';
-import { examApi, examService } from '../services/examApi';
-import { useAuth } from '../context/AuthContext';
-import { Statistic } from 'antd';
-
-// Import React Quill
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import React, { useState, useEffect, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  Card,
+  Button,
+  Radio,
+  Space,
+  Modal,
+  message,
+  Typography,
+  Alert,
+  Spin,
+} from "antd";
+import { ArrowLeft, ArrowRight, Send } from "lucide-react";
+import { examApi, examService } from "../services/examApi";
+import { useAuth } from "../context/AuthContext";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const { Title, Text } = Typography;
 
@@ -17,6 +24,7 @@ const ExamTaking = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+
   const [exam, setExam] = useState(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
@@ -24,259 +32,247 @@ const ExamTaking = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [aiResult, setAiResult] = useState(null);
 
-  // React Quill modules configuration
+  // 🔹 Cấu hình Quill
   const quillModules = {
     toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'indent': '-1'}, { 'indent': '+1' }],
-      ['link'],
-      ['clean']
+      [{ header: [1, 2, false] }],
+      ["bold", "italic", "underline"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      ["link"],
+      ["clean"],
     ],
   };
 
-  const quillFormats = [
-    'header',
-    'bold', 'italic', 'underline', 'strike',
-    'list', 'bullet', 'indent',
-    'link'
-  ];
-
-  useEffect(() => {
-    fetchExamData();
-  }, [id]);
-
-  const fetchExamData = async () => {
-    if (!id) {
-      console.error('❌ No exam ID provided');
-      message.error('Không tìm thấy bài thi');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      
-      
-      const examData = await examService.getExamWithDetails(id);
-      
-      if (!examData) {
-        console.error('❌ Exam data is null/undefined');
-        throw new Error('Không nhận được dữ liệu bài thi');
-      }
-      
-      
-      if (!examData.questions || examData.questions.length === 0) {
-        throw new Error('Bài thi không có câu hỏi');
-      }
-      
-      examData.questions.forEach((question, index) => {
-        console.log(`--- Câu hỏi ${index + 1} ---`);
-        console.log('ID:', question.id);
-        console.log('Type:', question.type);
-        console.log('Question:', question.question);
-        console.log('Options:', question.options);
-        console.log('Correct Answer:', question.correctAnswer);
-        console.log('Points:', question.points);
-        console.log('Order:', question.order);
-      });
-      
-      setExam(examData);
-      setTimeLeft(examData.duration * 60);
-      
-      const initialAnswers = {};
-      examData.questions.forEach((q, index) => {
-        if (q.type === 'multiple_choice') {
-          initialAnswers[index] = null;
-        } else {
-          initialAnswers[index] = '';
-        }
-      });
-      setAnswers(initialAnswers);
-      
-      console.log('🎯 Initial answers created:', initialAnswers);
-    } catch (error) {
-      console.error('❌ Error in fetchExamData:', error);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-      message.error(`Không thể tải bài thi: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
+  // 🔹 Strip HTML tags để gửi sang Gemini
+  const stripHtml = (html) => {
+    const tmp = document.createElement("div");
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || "";
   };
 
+  // 🔹 Tải đề thi
+  useEffect(() => {
+    const fetchExam = async () => {
+      try {
+        setLoading(true);
+        const data = await examService.getExamWithDetails(id);
+        if (!data?.questions?.length) throw new Error("Không tìm thấy câu hỏi.");
+
+        setExam(data);
+        setTimeLeft(data.duration * 60);
+
+        const init = {};
+        data.questions.forEach((q, i) => {
+          init[i] = q.type === "multiple_choice" ? null : "";
+        });
+        setAnswers(init);
+      } catch (err) {
+        console.error("❌ Lỗi tải bài thi:", err);
+        message.error("Không thể tải bài thi.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchExam();
+  }, [id]);
+
+  // 🔹 Đếm ngược thời gian
   useEffect(() => {
     if (!exam || timeLeft <= 0) return;
-
     const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
+      setTimeLeft((t) => {
+        if (t <= 1) {
           clearInterval(timer);
           setShowConfirm(true);
           return 0;
         }
-        return prev - 1;
+        return t - 1;
       });
     }, 1000);
-
     return () => clearInterval(timer);
   }, [exam, timeLeft]);
 
-  const handleAnswerChange = useCallback((value) => {
-    setAnswers(prev => ({
-      ...prev,
-      [currentQuestion]: value
-    }));
-  }, [currentQuestion]);
+  // 🔹 Ghi câu trả lời
+  const handleAnswerChange = (v) =>
+    setAnswers((p) => ({ ...p, [currentQuestion]: v }));
 
-  const handleEssayChange = useCallback((value) => {
-    setAnswers(prev => ({
-      ...prev,
-      [currentQuestion]: value
-    }));
-  }, [currentQuestion]);
+  const handleEssayChange = (v) =>
+    setAnswers((p) => ({ ...p, [currentQuestion]: v }));
 
-  const nextQuestion = () => {
-    if (currentQuestion < exam.questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-    }
-  };
-
-  const prevQuestion = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1);
-    }
-  };
-
+  // 🔹 Nộp bài thi
   const handleSubmit = async () => {
     try {
       setSubmitting(true);
-      
-      let score = 0;
-      exam.questions.forEach((question, index) => {
-        if (question.type === 'multiple_choice' && answers[index] === question.correctAnswer) {
-          score += question.points;
+      let totalScore = 0;
+      let aiFeedback = null;
+
+      // ✅ Chấm điểm AI nếu có bài luận
+      for (const [index, q] of exam.questions.entries()) {
+        if (q.type === "multiple_choice" && answers[index] === q.correctAnswer)
+          totalScore += q.points;
+
+        if (q.type === "essay" && answers[index]) {
+          const res = await fetch("http://localhost:8000/api/evaluate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ essay: stripHtml(answers[index]) }),
+          });
+
+          const json = await res.json();
+          setAiResult(json);
+          aiFeedback = json;
         }
-      });
+      }
 
-      const resultData = {
-        examId: id,
-        userId: user.id,
-        classId: exam.classId || '1',
-        score: score,
-        totalPoints: exam.totalPoints,
-        timeSpent: exam.duration * 60 - timeLeft,
-        answers: answers,
-        submittedAt: new Date().toISOString(),
-        status: 'completed'
+      // ✅ Gửi bài thi về hệ thống chính
+      const safeString = (str) => {
+        if (!str) return "";
+        return String(str)
+          .replace(/\n/g, " ")
+          .replace(/\r/g, "")
+          .replace(/\t/g, " ")
+          .replace(/"/g, "'");
       };
+      
+      const cleanAi = aiFeedback
+        ? {
+            score: aiFeedback.score || 0,
+            feedback: safeString(aiFeedback.feedback),
+            grammar: safeString(aiFeedback.grammar),
+            vocabulary: safeString(aiFeedback.vocabulary),
+            coherence: safeString(aiFeedback.coherence),
+          }
+        : {};
+      
+      const cleanAnswers = Object.fromEntries(
+        Object.entries(answers).map(([k, v]) => [k, safeString(v)])
+      );
+      
+      const payload = {
+        examId: id,
+        userId: user?.id || "anonymous",
+        classId: exam.classId || "1",
+        score: aiFeedback?.score || totalScore || 0,
+        totalPoints: exam.totalPoints || 100,
+        timeSpent: exam.duration * 60 - timeLeft,
+        answers: cleanAnswers,
+        aiResult: cleanAi,
+        submittedAt: new Date().toISOString(),
+        status: "completed",
+      };
+      
 
-      console.log(' Submitting exam result:', resultData);
-      await examApi.submitExam(resultData);
-      message.success('Nộp bài thành công!');
-      navigate('/student/classes');
-    } catch (error) {
-      console.error(' Error submitting exam:', error);
-      message.error('Nộp bài thất bại!');
+      console.log("📤 Submitting result:", payload);
+      await examApi.submitExam(payload);
+
+      message.success("✅ Nộp bài thành công!");
+
+      // ✅ Hiển thị kết quả AI
+     // ✅ Show AI result with modern English layout
+Modal.success({
+  title: "✨ Essay Evaluation Result",
+  width: 650,
+  okText: "Return to Class",
+  content: (
+    <div style={{ maxHeight: 400, overflowY: "auto", padding: "8px" }}>
+      {aiFeedback ? (
+        <>
+          <Card  bordered={false} style={{ marginBottom: 16, background: "#f9fafb" }}>
+            <Title level={4} style={{ marginBottom: 8 }}>
+              Overall Score:{" "}
+              <span style={{ color: "#52c41a" }}>{aiFeedback.score} / 9</span>
+            </Title>
+            <p style={{ fontSize: 15 }}>
+              <Text type="secondary">
+                The following evaluation was generated automatically by AI.
+              </Text>
+            </p>
+          </Card>
+
+          <Card bordered style={{ marginBottom: 12 }}>
+            <Title level={5}>🧠 General Feedback</Title>
+            <Text>{aiFeedback.feedback}</Text>
+          </Card>
+
+          <Card bordered style={{ marginBottom: 12 }}>
+            <Title level={5}>✍️ Grammar</Title>
+            <Text>{aiFeedback.grammar}</Text>
+          </Card>
+
+          <Card bordered style={{ marginBottom: 12 }}>
+            <Title level={5}>📚 Vocabulary</Title>
+            <Text>{aiFeedback.vocabulary}</Text>
+          </Card>
+
+          <Card bordered style={{ marginBottom: 12 }}>
+            <Title level={5}>🔗 Coherence & Cohesion</Title>
+            <Text>{aiFeedback.coherence}</Text>
+          </Card>
+        </>
+      ) : (
+        <Alert
+          message="No Essay Found"
+          description="You did not submit any essay for AI evaluation."
+          type="info"
+          showIcon
+        />
+      )}
+    </div>
+  ),
+  onOk: () => navigate("/student/classes"),
+});
+
+    } catch (err) {
+      console.error("❌ Error submitting exam:", err);
+      message.error("Nộp bài thất bại!");
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Format time for display
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  const formatTime = (s) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
   };
 
-  if (loading) {
+  // 🔹 Loading
+  if (loading)
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="container mx-auto px-4">
-          <div className="text-center py-12">
-            <Spin size="large" />
-            <p className="mt-4 text-gray-600">Đang tải bài thi {id}...</p>
-          </div>
-        </div>
+      <div className="min-h-screen flex justify-center items-center">
+        <Spin size="large" />
       </div>
     );
-  }
 
-  if (!exam) {
+  if (!exam)
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="container mx-auto px-4 text-center">
-          <div className="text-6xl mb-4">😞</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Không thể tải bài thi</h1>
-          <p className="text-gray-600 mb-2">ID: {id}</p>
-          <p className="text-gray-500 mb-4">Có thể bài thi không tồn tại hoặc không có câu hỏi</p>
-          <Button type="primary" onClick={() => navigate('/student/classes')}>
-            Quay lại lớp học
-          </Button>
-        </div>
+      <div className="min-h-screen flex flex-col justify-center items-center">
+        <h1>Không thể tải bài thi</h1>
+        <Button onClick={() => navigate("/student/classes")}>Quay lại</Button>
       </div>
     );
-  }
 
-  const currentQ = exam.questions[currentQuestion];
-
-  if (!currentQ) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="container mx-auto px-4 text-center">
-          <div className="text-6xl mb-4">❓</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Câu hỏi không tồn tại</h1>
-          <Button type="primary" onClick={() => setCurrentQuestion(0)}>
-            Quay về câu đầu tiên
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  const q = exam.questions[currentQuestion];
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          key={id}
-        >
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <Card className="mb-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Button 
-                  icon={<ArrowLeft size={16} />}
-                  onClick={() => navigate(-1)}
-                >
-                  Quay lại
-                </Button>
-                <div>
-                  <Title level={3} className="mb-0">{exam.title}</Title>
-                  <Text type="secondary">{exam.description}</Text>
-                  <div className="text-sm text-gray-500 mt-1">
-                    ID: {id} | {exam.questions.length} câu hỏi | Loại: {exam.type}
-                  </div>
-                </div>
+            <div className="flex justify-between items-center">
+              <Button icon={<ArrowLeft size={16} />} onClick={() => navigate(-1)}>
+                Quay lại
+              </Button>
+              <div>
+                <Title level={3}>{exam.title}</Title>
+                <Text type="secondary">{exam.description}</Text>
               </div>
-              
               <div className="text-right">
-                <div className="flex items-center space-x-4">
-                  <div className="text-center">
-                    <div className="text-sm text-gray-600">Thời gian còn lại</div>
-                    <div className="text-2xl font-bold text-red-600">
-                      {formatTime(timeLeft)}
-                    </div>
-                  </div>
-                  <Progress
-                    type="circle"
-                    percent={Math.round(((currentQuestion + 1) / exam.questions.length) * 100)}
-                    width={60}
-                    format={() => `${currentQuestion + 1}/${exam.questions.length}`}
-                  />
+                <Text type="secondary">Thời gian còn lại</Text>
+                <div className="text-2xl font-bold text-red-600">
+                  {formatTime(timeLeft)}
                 </div>
               </div>
             </div>
@@ -286,117 +282,78 @@ const ExamTaking = () => {
             <div className="lg:col-span-1">
               <Card title="Danh sách câu hỏi">
                 <div className="grid grid-cols-5 gap-2">
-                  {exam.questions.map((question, index) => (
+                  {exam.questions.map((_, i) => (
                     <Button
-                      key={index}
-                      type={currentQuestion === index ? 'primary' : 
-                            answers[index] !== null && answers[index] !== '' ? 'default' : 'dashed'}
-                      onClick={() => setCurrentQuestion(index)}
-                      className="h-10"
-                      title={`Câu ${index + 1}: ${question.type === 'multiple_choice' ? 'Trắc nghiệm' : 'Tự luận'}`}
+                      key={i}
+                      type={
+                        currentQuestion === i
+                          ? "primary"
+                          : answers[i]
+                          ? "default"
+                          : "dashed"
+                      }
+                      onClick={() => setCurrentQuestion(i)}
                     >
-                      {index + 1}
+                      {i + 1}
                     </Button>
                   ))}
-                </div>
-                
-                <div className="mt-4 p-3 bg-blue-50 rounded">
-                  <div className="text-sm text-blue-700 space-y-1">
-                    <div>• Đã trả lời: <strong>{Object.values(answers).filter(a => a !== null && a !== '').length}</strong></div>
-                    <div>• Chưa trả lời: <strong>{exam.questions.length - Object.values(answers).filter(a => a !== null && a !== '').length}</strong></div>
-                    <div>• Trắc nghiệm: <strong>{exam.questions.filter(q => q.type === 'multiple_choice').length}</strong></div>
-                    <div>• Tự luận: <strong>{exam.questions.filter(q => q.type === 'essay').length}</strong></div>
-                  </div>
                 </div>
               </Card>
             </div>
 
             <div className="lg:col-span-3">
-              <Card
-                title={`Câu ${currentQuestion + 1} (${currentQ.points} điểm) - ${currentQ.type === 'multiple_choice' ? 'Trắc nghiệm' : 'Tự luận'}`}
-                extra={
-                  <Space>
-                    <Button 
-                      icon={<Flag size={16} />}
-                      type={answers[currentQuestion] !== null && answers[currentQuestion] !== '' ? 'primary' : 'default'}
-                    >
-                      {answers[currentQuestion] !== null && answers[currentQuestion] !== '' ? 'Đã trả lời' : 'Chưa trả lời'}
-                    </Button>
-                  </Space>
-                }
-              >
-                <div className="mb-6">
-                  <Text strong className="text-lg">{currentQ.question}</Text>
-                  {currentQ.type === 'multiple_choice' && (
-                    <div className="mt-2 text-sm text-gray-500">
-                      Chọn một đáp án đúng
-                    </div>
-                  )}
-                  {currentQ.type === 'essay' && (
-                    <div className="mt-2 text-sm text-gray-500">
-                      Viết bài luận của bạn bên dưới
-                    </div>
-                  )}
-                </div>
+              <Card title={`Câu ${currentQuestion + 1} (${q.points} điểm)`}>
+                <Text strong>{q.question}</Text>
 
-                {currentQ.type === 'multiple_choice' && (
-                  <Radio.Group 
-                    value={answers[currentQuestion]} 
+                {q.type === "multiple_choice" ? (
+                  <Radio.Group
+                    value={answers[currentQuestion]}
                     onChange={(e) => handleAnswerChange(e.target.value)}
-                    className="w-full"
+                    className="mt-4"
                   >
-                    <Space direction="vertical" className="w-full">
-                      {currentQ.options && currentQ.options.map((option, optIndex) => (
-                        <Radio 
-                          key={optIndex} 
-                          value={optIndex} 
-                          className="p-3 border rounded hover:bg-gray-50 transition-colors"
-                        >
-                          <span className="text-base">{option}</span>
+                    <Space direction="vertical">
+                      {q.options.map((opt, i) => (
+                        <Radio key={i} value={i}>
+                          {opt}
                         </Radio>
                       ))}
                     </Space>
                   </Radio.Group>
-                )}
-
-                {currentQ.type === 'essay' && (
-                  <div className="border rounded">
+                ) : (
+                  <div className="border rounded mt-4">
                     <ReactQuill
-                      value={answers[currentQuestion] || ''}
+                      value={answers[currentQuestion] || ""}
                       onChange={handleEssayChange}
                       modules={quillModules}
-                      formats={quillFormats}
                       placeholder="Nhập bài luận của bạn..."
-                      style={{ height: '300px', marginBottom: '50px' }}
+                      style={{ height: "300px", marginBottom: "50px" }}
                     />
                   </div>
                 )}
 
                 <div className="flex justify-between mt-8">
-                  <Button 
+                  <Button
                     icon={<ArrowLeft size={16} />}
-                    onClick={prevQuestion}
+                    onClick={() => setCurrentQuestion((p) => p - 1)}
                     disabled={currentQuestion === 0}
-                    size="large"
                   >
                     Câu trước
                   </Button>
-                  
+
                   {currentQuestion === exam.questions.length - 1 ? (
-                    <Button 
-                      type="primary" 
+                    <Button
+                      type="primary"
                       icon={<Send size={16} />}
                       onClick={() => setShowConfirm(true)}
-                      size="large"
+                      loading={submitting}
                     >
                       Nộp bài
                     </Button>
                   ) : (
-                    <Button 
-                      type="primary" 
+                    <Button
+                      type="primary"
                       icon={<ArrowRight size={16} />}
-                      onClick={nextQuestion}
-                      size="large"
+                      onClick={() => setCurrentQuestion((p) => p + 1)}
                     >
                       Câu tiếp
                     </Button>
@@ -416,31 +373,23 @@ const ExamTaking = () => {
           <Button key="cancel" onClick={() => setShowConfirm(false)}>
             Tiếp tục làm bài
           </Button>,
-          <Button 
-            key="submit" 
-            type="primary" 
+          <Button
+            key="submit"
+            type="primary"
             loading={submitting}
             onClick={handleSubmit}
             icon={<Send size={16} />}
           >
             Xác nhận nộp bài
-          </Button>
+          </Button>,
         ]}
       >
         <Alert
           message="Bạn có chắc chắn muốn nộp bài?"
-          description="Sau khi nộp bài, bạn sẽ không thể thay đổi câu trả lời."
+          description="Sau khi nộp, bạn sẽ không thể thay đổi câu trả lời."
           type="warning"
           showIcon
         />
-        <div className="mt-4">
-          <Text strong>Thống kê bài làm:</Text>
-          <div className="mt-2 space-y-2">
-            <div>• Số câu đã trả lời: <strong>{Object.values(answers).filter(a => a !== null && a !== '').length}/{exam.questions.length}</strong></div>
-            <div>• Thời gian làm bài: <strong>{Math.floor((exam.duration * 60 - timeLeft) / 60)} phút {((exam.duration * 60 - timeLeft) % 60)} giây</strong></div>
-            <div>• Bài thi: <strong>{exam.title}</strong></div>
-          </div>
-        </div>
       </Modal>
     </div>
   );
