@@ -1,9 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Card, Button, Tabs, Tag, List, Progress, Modal, Skeleton, message } from 'antd';
-import { PlayCircle, Users, Clock, BookOpen, CheckCircle, Star, ArrowLeft } from 'lucide-react';
-import { courseApi, courseService } from '../../services/courseApi';
+import React, { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { Card, Button, Tabs, Tag, Skeleton, message, Modal } from "antd";
+import {
+  PlayCircle,
+  Users,
+  Clock,
+  BookOpen,
+  CheckCircle,
+  Star,
+  ArrowLeft,
+} from "lucide-react";
+import { courseApi } from "../../services/courseApi";
 
 const { TabPane } = Tabs;
 
@@ -18,44 +25,92 @@ const CourseDetail = () => {
     const fetchCourseData = async () => {
       try {
         setLoading(true);
-        
-        const courseResponse = await courseApi.getCourse(id);
-        const courseData = courseResponse.data;
-        
-        const chaptersResponse = await courseApi.getChapters(id);
-        const chapters = chaptersResponse.data;
 
+        // Fetch course details
+        const courseResponse = await courseApi.getCourse(id);
+        const courseData = courseResponse?.data?.data;
+
+        // Fetch chapters with pagination
+        const chaptersResponse = await courseApi.getChapters({
+          courseId: id,
+          page: 1,
+          size: 100,
+          sortBy: "number",
+          isAsc: true,
+        });
+        const chapters = chaptersResponse.data?.data?.items || [];
+
+        // Fetch lessons for each chapter
         const chaptersWithLessons = await Promise.all(
           chapters.map(async (chapter) => {
-            const lessonsResponse = await courseApi.getLessons(chapter.id);
-            return {
-              ...chapter,
-              lessons: lessonsResponse.data
-            };
+            try {
+              const lessonsResponse = await courseApi.getLessons({
+                chapterId: chapter.id,
+                page: 1,
+                size: 100,
+              });
+              return {
+                ...chapter,
+                lessons: lessonsResponse.data?.data?.items || [],
+              };
+            } catch (error) {
+              console.error(
+                `Error fetching lessons for chapter ${chapter.id}:`,
+                error
+              );
+              return {
+                ...chapter,
+                lessons: [],
+              };
+            }
           })
         );
 
-        const allCoursesResponse = await courseApi.getAllCourses();
-        const related = allCoursesResponse.data
-          .filter(c => c.id !== parseInt(id) && c.category === courseData.category)
+        // Fetch related courses
+        const allCoursesResponse = await courseApi.getAllCourses({
+          page: 1,
+          size: 4,
+        });
+        const allCourses = allCoursesResponse.data?.data?.items || [];
+        const related = allCourses
+          .filter((c) => c.courseId !== id && c.level === courseData.level)
           .slice(0, 3);
 
         setCourse({
-          ...courseData,
+          id: courseData.id,
+          courseId: courseData.id,
+          title: courseData.name || courseData.name,
+          description: courseData.description || "Khóa học chất lượng cao",
+          image:
+            courseData.imageUrl ||
+            "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
+          level: courseData.level,
+          duration: courseData.duration,
+          isActive: courseData.isActive,
+          teacherId: courseData.teacherAccountId,
+          teacher: courseData.teacher
+            ? `${courseData.teacher.firstName} ${courseData.teacher.lastName}`
+            : "Chưa có giáo viên",
           chapters: chaptersWithLessons,
-          priceFormatted: new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(courseData.price),
-          originalPriceFormatted: courseData.originalPrice ? 
-            new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(courseData.originalPrice) : null
         });
 
-        setRelatedCourses(related.map(course => ({
-          ...course,
-          priceFormatted: new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(course.price)
-        })));
-
+        setRelatedCourses(
+          related.map((course) => ({
+            id: course.courseId,
+            courseId: course.courseId,
+            title: course.courseName || course.name,
+            description: course.description,
+            image:
+              course.imageUrl ||
+              "https://via.placeholder.com/400x300?text=Course+Image",
+            level: course.level,
+            rating: (4 + Math.random()).toFixed(1),
+            students: Math.floor(Math.random() * 2000) + 100,
+          }))
+        );
       } catch (error) {
-        console.error('Error fetching course details:', error);
-        message.error('Không thể tải thông tin khóa học');
+        console.error("Error fetching course details:", error);
+        message.error("Không thể tải thông tin khóa học");
       } finally {
         setLoading(false);
       }
@@ -68,15 +123,11 @@ const CourseDetail = () => {
 
   const handleEnroll = async () => {
     try {
-      message.success('Đăng ký khóa học thành công!');
+      message.success("Đăng ký khóa học thành công!");
       setEnrollModal(false);
-    } catch (error) {
-      message.error('Đăng ký thất bại!');
+    } catch {
+      message.error("Đăng ký thất bại!");
     }
-  };
-
-  const handleAddToCart = () => {
-    message.info('Tính năng thêm vào giỏ hàng sẽ được tích hợp sau');
   };
 
   if (loading) {
@@ -102,7 +153,9 @@ const CourseDetail = () => {
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="container mx-auto px-4 text-center">
           <div className="text-6xl mb-4">😞</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Khóa học không tồn tại</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Khóa học không tồn tại
+          </h1>
           <Link to="/courses">
             <Button type="primary">Quay lại danh sách khóa học</Button>
           </Link>
@@ -115,7 +168,10 @@ const CourseDetail = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4">
-          <Link to="/courses" className="inline-flex items-center text-primary-600 hover:text-primary-700 mb-4">
+          <Link
+            to="/courses"
+            className="inline-flex items-center text-primary-600 hover:text-primary-700 mb-4"
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Quay lại danh sách khóa học
           </Link>
@@ -125,22 +181,36 @@ const CourseDetail = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
+            <div>
               <Card className="mb-6">
                 <div className="flex flex-col md:flex-row gap-6">
-                  <img 
-                    src={course.image} 
+                  <img
+                    src={course.image}
                     alt={course.title}
                     className="w-full md:w-64 h-48 object-cover rounded-lg"
+                    onError={(e) => {
+                      e.target.src =
+                        "https://via.placeholder.com/400x300?text=Course+Image";
+                    }}
                   />
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-4">
                       <div>
-                        <Tag color="blue" className="mb-2 capitalize">
-                          {course.level}
+                        <Tag
+                          color={
+                            course.level === 0
+                              ? "green"
+                              : course.level === 1
+                              ? "blue"
+                              : "red"
+                          }
+                          className="mb-2"
+                        >
+                          {course.level === 0
+                            ? "Beginner"
+                            : course.level === 1
+                            ? "Intermediate"
+                            : "Advanced"}
                         </Tag>
                         <h1 className="text-3xl font-bold text-gray-900 mb-2">
                           {course.title}
@@ -153,15 +223,6 @@ const CourseDetail = () => {
 
                     <div className="flex items-center space-x-6 text-gray-600 mb-4">
                       <div className="flex items-center">
-                        <Star className="w-5 h-5 text-yellow-400 fill-current mr-1" />
-                        <span className="font-semibold">{course.rating}</span>
-                        <span className="ml-1">({course.students} đánh giá)</span>
-                      </div>
-                      <div className="flex items-center">
-                        <Users className="w-5 h-5 mr-1" />
-                        <span>{course.students} học viên</span>
-                      </div>
-                      <div className="flex items-center">
                         <Clock className="w-5 h-5 mr-1" />
                         <span>{course.duration}</span>
                       </div>
@@ -171,7 +232,7 @@ const CourseDetail = () => {
                       <div className="flex items-center">
                         <BookOpen className="w-5 h-5 text-gray-400 mr-2" />
                         <div>
-                          <div className="font-semibold">Giáo viên ID: {course.teacherId}</div>
+                          <div className="font-semibold">{course.teacher}</div>
                           <div className="text-sm text-gray-600">Giáo viên</div>
                         </div>
                       </div>
@@ -185,30 +246,33 @@ const CourseDetail = () => {
                   <TabPane tab="Tổng quan" key="overview">
                     <div className="space-y-6">
                       <div>
-                        <h3 className="text-xl font-semibold mb-3">Giới thiệu khóa học</h3>
+                        <h3 className="text-xl font-semibold mb-3">
+                          Giới thiệu khóa học
+                        </h3>
                         <p className="text-gray-700 leading-relaxed">
                           {course.longDescription || course.description}
                         </p>
                       </div>
 
                       <div>
-                        <h3 className="text-xl font-semibold mb-3">Thông tin khóa học</h3>
+                        <h3 className="text-xl font-semibold mb-3">
+                          Thông tin khóa học
+                        </h3>
                         <div className="grid md:grid-cols-2 gap-4">
                           <div className="flex items-center">
                             <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                            <span>Trình độ: {course.level}</span>
+                            <span>
+                              Trình độ:{" "}
+                              {course.level === 0
+                                ? "Beginner"
+                                : course.level === 1
+                                ? "Intermediate"
+                                : "Advanced"}
+                            </span>
                           </div>
                           <div className="flex items-center">
                             <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
                             <span>Thời lượng: {course.duration}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                            <span>Học viên: {course.students}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                            <span>Đánh giá: {course.rating}/5.0</span>
                           </div>
                         </div>
                       </div>
@@ -218,40 +282,60 @@ const CourseDetail = () => {
                   <TabPane tab="Nội dung khóa học" key="curriculum">
                     <div className="space-y-6">
                       {course.chapters && course.chapters.length > 0 ? (
-                        course.chapters.map((chapter, chapterIndex) => (
+                        course.chapters.map((chapter) => (
                           <div key={chapter.id} className="border rounded-lg">
                             <div className="bg-gray-50 px-6 py-4 border-b">
-                              <h4 className="font-semibold text-lg">{chapter.title}</h4>
-                              {chapter.description && (
-                                <p className="text-gray-600 text-sm mt-1">{chapter.description}</p>
-                              )}
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <h4 className="font-semibold text-lg">
+                                    Chương {chapter.number}: {chapter.name}
+                                  </h4>
+                                  {chapter.description && (
+                                    <p className="text-gray-600 text-sm mt-1">
+                                      {chapter.description}
+                                    </p>
+                                  )}
+                                </div>
+                                <Tag color="blue">
+                                  {chapter.lessons?.length || 0} bài học
+                                </Tag>
+                              </div>
                             </div>
                             <div className="divide-y">
-                              {chapter.lessons && chapter.lessons.map((lesson) => (
-                                <div key={lesson.id} className="px-6 py-4 flex items-center justify-between">
-                                  <div className="flex items-center">
-                                    <PlayCircle className="w-5 h-5 text-gray-400 mr-3" />
-                                    <span>{lesson.title}</span>
-                                    {lesson.isFree && (
-                                      <Tag color="green" className="ml-3">
-                                        Miễn phí
-                                      </Tag>
-                                    )}
+                              {chapter.lessons && chapter.lessons.length > 0 ? (
+                                chapter.lessons.map((lesson) => (
+                                  <div
+                                    key={lesson.id}
+                                    className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                                  >
+                                    <div className="flex items-center flex-1">
+                                      <PlayCircle className="w-5 h-5 text-primary-500 mr-3" />
+                                      <div>
+                                        <div className="font-medium">
+                                          {lesson.name}
+                                        </div>
+                                        {lesson.content && (
+                                          <div className="text-sm text-gray-500 mt-1 line-clamp-1">
+                                            {lesson.content}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center space-x-4">
+                                      {lesson.duration && (
+                                        <span className="text-gray-500 text-sm flex items-center">
+                                          <Clock className="w-4 h-4 mr-1" />
+                                          {lesson.duration}
+                                        </span>
+                                      )}
+                                    </div>
                                   </div>
-                                  <div className="flex items-center space-x-4">
-                                    <span className="text-gray-500 text-sm">{lesson.duration}</span>
-                                    {lesson.isFree ? (
-                                      <Button type="primary" size="small">
-                                        Học thử
-                                      </Button>
-                                    ) : (
-                                      <Button size="small" disabled>
-                                        Khóa
-                                      </Button>
-                                    )}
-                                  </div>
+                                ))
+                              ) : (
+                                <div className="px-6 py-4 text-center text-gray-500">
+                                  Chưa có bài học nào
                                 </div>
-                              ))}
+                              )}
                             </div>
                           </div>
                         ))
@@ -265,49 +349,29 @@ const CourseDetail = () => {
                   </TabPane>
                 </Tabs>
               </Card>
-            </motion.div>
+            </div>
           </div>
 
           <div className="lg:col-span-1">
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="sticky top-8"
-            >
+            <div className="sticky top-8">
               <Card className="shadow-lg border-0">
                 <div className="text-center mb-6">
-                  <div className="text-3xl font-bold text-primary-600 mb-2">
-                    {course.priceFormatted}
-                  </div>
-                  {course.originalPriceFormatted && (
-                    <div className="text-lg text-gray-500 line-through mb-2">
-                      {course.originalPriceFormatted}
-                    </div>
-                  )}
-                  {course.originalPrice && (
-                    <div className="text-green-600 font-semibold">
-                      Tiết kiệm {Math.round((1 - course.price / course.originalPrice) * 100)}%
-                    </div>
-                  )}
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                    Thông tin khóa học
+                  </h3>
                 </div>
 
                 <div className="space-y-4">
-                  <Button 
-                    type="primary" 
-                    size="large" 
-                    className="w-full h-12 text-lg font-semibold"
-                    onClick={() => setEnrollModal(true)}
-                  >
-                    Đăng ký ngay
-                  </Button>
-                  <Button 
-                    size="large" 
-                    className="w-full h-12"
-                    onClick={handleAddToCart}
-                  >
-                    Thêm vào giỏ hàng
-                  </Button>
+                  <Link to={`/learning/${course.id}`}>
+                    <Button
+                      type="primary"
+                      size="large"
+                      className="w-full h-12 text-lg font-semibold"
+                      // onClick={() => setEnrollModal(true)}
+                    >
+                      Bắt đầu học
+                    </Button>
+                  </Link>
                 </div>
 
                 <div className="mt-6 space-y-3 text-sm text-gray-600">
@@ -317,65 +381,70 @@ const CourseDetail = () => {
                   </div>
                   <div className="flex justify-between">
                     <span>Trình độ:</span>
-                    <span className="font-semibold capitalize">{course.level}</span>
+                    <span className="font-semibold">
+                      {course.level === 0
+                        ? "Beginner"
+                        : course.level === 1
+                        ? "Intermediate"
+                        : "Advanced"}
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Học viên:</span>
-                    <span className="font-semibold">{course.students}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Đánh giá:</span>
-                    <span className="font-semibold">{course.rating}/5.0</span>
+                    <span>Giáo viên:</span>
+                    <span className="font-semibold">{course.teacher}</span>
                   </div>
                 </div>
               </Card>
-            </motion.div>
+            </div>
           </div>
         </div>
 
         {relatedCourses.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="mt-12"
-          >
+          <div className="mt-12">
             <h2 className="text-2xl font-bold mb-6">Khóa học liên quan</h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {relatedCourses.map((relatedCourse) => (
                 <Card
                   key={relatedCourse.id}
                   cover={
-                    <img 
-                      alt={relatedCourse.title} 
-                      src={relatedCourse.image}
+                    <img
+                      alt={relatedCourse.name}
+                      src={
+                        relatedCourse.imageUrl ||
+                        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800"
+                      }
                       className="h-48 object-cover"
                     />
                   }
                   actions={[
                     <Link to={`/courses/${relatedCourse.id}`} key="view">
                       <Button type="primary">Xem chi tiết</Button>
-                    </Link>
+                    </Link>,
                   ]}
                 >
                   <Card.Meta
-                    title={relatedCourse.title}
+                    title={relatedCourse.name}
                     description={
                       <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <Tag color="blue" className="capitalize">
-                            {relatedCourse.level}
-                          </Tag>
-                          <div className="flex items-center">
-                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                            <span className="ml-1 text-sm">{relatedCourse.rating}</span>
-                          </div>
+                        <div className="text-sm text-gray-600 line-clamp-2 mb-2">
+                          {relatedCourse.description}
                         </div>
-                        <div className="flex justify-between items-center text-sm">
-                          <span>👥 {relatedCourse.students} học viên</span>
-                          <span className="font-semibold text-primary-600">
-                            {relatedCourse.priceFormatted}
-                          </span>
+                        <div className="flex justify-between items-center">
+                          <Tag
+                            color={
+                              relatedCourse.level === 0
+                                ? "green"
+                                : relatedCourse.level === 1
+                                ? "blue"
+                                : "red"
+                            }
+                          >
+                            {relatedCourse.level === 0
+                              ? "Beginner"
+                              : relatedCourse.level === 1
+                              ? "Intermediate"
+                              : "Advanced"}
+                          </Tag>
                         </div>
                       </div>
                     }
@@ -383,7 +452,7 @@ const CourseDetail = () => {
                 </Card>
               ))}
             </div>
-          </motion.div>
+          </div>
         )}
       </div>
 
@@ -398,14 +467,14 @@ const CourseDetail = () => {
           <BookOpen className="w-16 h-16 text-primary-600 mx-auto mb-4" />
           <h3 className="text-xl font-semibold mb-2">Xác nhận đăng ký</h3>
           <p className="text-gray-600 mb-6">
-            Bạn sắp đăng ký khóa học "{course.title}" với giá {course.priceFormatted}
+            Bạn sắp đăng ký khóa học "{course.title}"
           </p>
           <div className="flex space-x-4 justify-center">
             <Button size="large" onClick={() => setEnrollModal(false)}>
               Hủy
             </Button>
             <Button type="primary" size="large" onClick={handleEnroll}>
-              Xác nhận thanh toán
+              Xác nhận đăng ký
             </Button>
           </div>
         </div>

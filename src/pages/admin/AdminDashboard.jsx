@@ -1,103 +1,122 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Card, Table, Tag, Progress, Statistic, Row, Col, Button } from 'antd';
-import { Users, BookOpen, DollarSign, TrendingUp, Eye, Edit, Delete } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Card, Table, Tag, Progress, Statistic, Row, Col, Button } from "antd";
+import {
+  Users,
+  BookOpen,
+  DollarSign,
+  TrendingUp,
+  Eye,
+  Edit,
+  Delete,
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { courseApi } from "../../services/courseApi";
 
 const AdminDashboard = () => {
+  const [recentCourses, setRecentCourses] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const stats = [
     {
-      title: 'Tổng học viên',
+      title: "Tổng học viên",
       value: 1250,
       icon: <Users className="w-8 h-8 text-blue-500" />,
-      change: '+12%',
-      color: 'blue'
+      change: "+12%",
+      color: "blue",
     },
     {
-      title: 'Tổng khóa học',
+      title: "Tổng khóa học",
       value: 45,
       icon: <BookOpen className="w-8 h-8 text-green-500" />,
-      change: '+5%',
-      color: 'green'
+      change: "+5%",
+      color: "green",
     },
     {
-      title: 'Doanh thu',
-      value: '125M',
+      title: "Doanh thu",
+      value: "125M",
       icon: <DollarSign className="w-8 h-8 text-purple-500" />,
-      change: '+23%',
-      color: 'purple'
+      change: "+23%",
+      color: "purple",
     },
     {
-      title: 'Tỷ lệ hoàn thành',
-      value: '78%',
+      title: "Tỷ lệ hoàn thành",
+      value: "78%",
       icon: <TrendingUp className="w-8 h-8 text-orange-500" />,
-      change: '+8%',
-      color: 'orange'
-    }
+      change: "+8%",
+      color: "orange",
+    },
   ];
 
-  const recentCourses = [
-    {
-      id: 1,
-      name: 'Tiếng Anh Giao Tiếp',
-      students: 250,
-      revenue: '25,000,000₫',
-      status: 'active',
-      rating: 4.8
-    },
-    {
-      id: 2,
-      name: 'Luyện Thi IELTS',
-      students: 180,
-      revenue: '45,000,000₫',
-      status: 'active',
-      rating: 4.9
+  useEffect(() => {
+    fetchRecentCourses();
+  }, []);
+
+  const fetchRecentCourses = async () => {
+    try {
+      setLoading(true);
+      const response = await courseApi.getAllCourses({
+        page: 1,
+        size: 2,
+        sortBy: "createdDate",
+        isAsc: false,
+      });
+      setRecentCourses(response.data?.data?.items || []);
+    } catch (error) {
+      console.error("Error fetching recent courses:", error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const columns = [
     {
-      title: 'Tên khóa học',
-      dataIndex: 'name',
-      key: 'name'
+      title: "Tên khóa học",
+      dataIndex: "name",
+      key: "name",
+      render: (text) => <span className="font-medium">{text}</span>,
     },
     {
-      title: 'Học viên',
-      dataIndex: 'students',
-      key: 'students'
+      title: "Cấp độ",
+      dataIndex: "level",
+      key: "level",
+      render: (level) => {
+        const levelMap = {
+          0: { text: "Beginner", color: "green" },
+          1: { text: "Intermediate", color: "blue" },
+          2: { text: "Advanced", color: "orange" },
+        };
+        const levelInfo = levelMap[level] || { text: "Unknown", color: "gray" };
+        return <Tag color={levelInfo.color}>{levelInfo.text}</Tag>;
+      },
     },
     {
-      title: 'Doanh thu',
-      dataIndex: 'revenue',
-      key: 'revenue'
+      title: "Thời lượng",
+      dataIndex: "duration",
+      key: "duration",
+      render: (duration) => `${duration}`,
     },
     {
-      title: 'Đánh giá',
-      dataIndex: 'rating',
-      key: 'rating',
-      render: (rating) => <Tag color="gold">{rating}/5.0</Tag>
-    },
-    {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status) => (
-        <Tag color={status === 'active' ? 'green' : 'red'}>
-          {status === 'active' ? 'Đang hoạt động' : 'Ngừng hoạt động'}
+      title: "Trạng thái",
+      dataIndex: "isActive",
+      key: "isActive",
+      render: (isActive) => (
+        <Tag color={isActive ? "green" : "red"}>
+          {isActive ? "Đang hoạt động" : "Ngừng hoạt động"}
         </Tag>
-      )
+      ),
     },
     {
-      title: 'Thao tác',
-      key: 'actions',
-      render: () => (
+      title: "Thao tác",
+      key: "actions",
+      render: (_, record) => (
         <div className="flex space-x-2">
-          <Button type="link" icon={<Eye size={16} />} />
-          <Button type="link" icon={<Edit size={16} />} />
-          <Button type="link" danger icon={<Delete size={16} />} />
+          <Link to={`/admin/courses/${record.id}`}>
+            <Button type="link" icon={<Edit size={16} />} />
+          </Link>
         </div>
-      )
-    }
+      ),
+    },
   ];
 
   return (
@@ -107,7 +126,9 @@ const AdminDashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Dashboard Quản Trị</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">
+            Dashboard Quản Trị
+          </h1>
 
           <Row gutter={[16, 16]} className="mb-8">
             {stats.map((stat, index) => (
@@ -124,7 +145,13 @@ const AdminDashboard = () => {
                           {stat.value}
                         </div>
                         <div className="text-gray-600">{stat.title}</div>
-                        <div className={`text-sm ${stat.change.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
+                        <div
+                          className={`text-sm ${
+                            stat.change.startsWith("+")
+                              ? "text-green-500"
+                              : "text-red-500"
+                          }`}
+                        >
                           {stat.change} so với tháng trước
                         </div>
                       </div>
@@ -137,26 +164,36 @@ const AdminDashboard = () => {
           </Row>
 
           <div className="grid lg:grid-cols-2 gap-8">
-            <Card title="Khóa học gần đây" extra={<Button type="link">Xem tất cả</Button>}>
+            <Card
+              title="Khóa học gần đây"
+              extra={
+                <Link to="/admin/courses">
+                  <Button type="link">Xem tất cả</Button>
+                </Link>
+              }
+            >
               <Table
                 columns={columns}
                 dataSource={recentCourses}
                 pagination={false}
                 rowKey="id"
                 size="small"
+                loading={loading}
               />
             </Card>
 
             <Card title="Thao tác nhanh">
               <div className="grid grid-cols-2 gap-4">
-                <Link to="/admin/addCourses">
-                <Button type="primary" size="large" block>
-                  Thêm khóa học
-                </Button>
+                <Link to="/admin/courses/add">
+                  <Button type="primary" size="large" block>
+                    Thêm khóa học
+                  </Button>
                 </Link>
-                <Button size="large" block>
-                  Quản lý người dùng
-                </Button>
+                <Link to="/admin/users">
+                  <Button size="large" block>
+                    Quản lý người dùng
+                  </Button>
+                </Link>
                 <Button size="large" block>
                   Xem báo cáo
                 </Button>

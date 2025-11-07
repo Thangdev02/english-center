@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Form, Input, Button, Divider, Alert, message } from 'antd';
-import { Mail, Lock, Eye, EyeOff, Wifi, WifiOff } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Form, Input, Button, Divider, Alert, message } from "antd";
+import { Mail, Lock, Eye, EyeOff, Wifi, WifiOff } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
@@ -14,17 +14,23 @@ const Login = () => {
     setLoading(true);
     try {
       await login(values);
-      message.success('Đăng nhập thành công!');
-      navigate('/');
+      console.log("Login successful, navigating to home");
+      message.success("Đăng nhập thành công!");
+      navigate("/");
     } catch (error) {
-      message.error(error.message || 'Đăng nhập thất bại!');
+      console.log("Login failed:", error);
+      message.error(
+        error.response.data.data[0].errorMessage ||
+          error.response.data.data ||
+          "Đăng nhập thất bại!"
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoogleLogin = () => {
-    message.info('Tính năng đăng nhập Google sẽ được tích hợp sau');
+    message.info("Tính năng đăng nhập Google sẽ được tích hợp sau");
   };
 
   return (
@@ -45,7 +51,7 @@ const Login = () => {
         )}
 
         <div className="text-center">
-          <motion.h2 
+          <motion.h2
             initial={{ y: -20 }}
             animate={{ y: 0 }}
             className="text-3xl font-bold text-gray-900 mb-2"
@@ -62,20 +68,23 @@ const Login = () => {
           onFinish={onFinish}
           layout="vertical"
           className="space-y-6"
-          initialValues={{
-            email: 'student@example.com',
-            password: 'password123'
-          }}
+          // initialValues={{
+          //   email: 'student@example.com',
+          //   password: 'password123'
+          // }}
         >
           <Form.Item
             name="email"
-            label="Email"
+            label="Email hoặc tên đăng nhập"
             rules={[
-              { required: true, message: 'Vui lòng nhập email!' },
-              { type: 'email', message: 'Email không hợp lệ!' }
+              {
+                required: true,
+                message: "Vui lòng nhập email hoặc tên đăng nhập!",
+              },
+              // { type: 'email', message: 'Email không hợp lệ!' }
             ]}
           >
-            <Input 
+            <Input
               prefix={<Mail className="text-gray-400" size={18} />}
               placeholder="Nhập email của bạn"
               size="large"
@@ -85,32 +94,32 @@ const Login = () => {
           <Form.Item
             name="password"
             label="Mật khẩu"
-            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+            rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
           >
             <Input.Password
               prefix={<Lock className="text-gray-400" size={18} />}
               placeholder="Nhập mật khẩu"
               size="large"
-              iconRender={(visible) => 
+              iconRender={(visible) =>
                 visible ? <Eye size={18} /> : <EyeOff size={18} />
               }
             />
           </Form.Item>
 
           <Form.Item>
-            <Button 
-              type="primary" 
-              htmlType="submit" 
+            <Button
+              type="primary"
+              htmlType="submit"
               loading={loading}
               size="large"
               className="w-full h-12 text-lg font-semibold"
             >
-              {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+              {loading ? "Đang đăng nhập..." : "Đăng nhập"}
             </Button>
           </Form.Item>
         </Form>
 
-        <Divider>Hoặc</Divider>
+        {/* <Divider>Hoặc</Divider>
 
         <div className="space-y-4">
           <Button 
@@ -126,23 +135,26 @@ const Login = () => {
             </svg>
             Đăng nhập với Google
           </Button>
-        </div>
+        </div> */}
 
         <div className="text-center">
           <span className="text-gray-600">Chưa có tài khoản? </span>
-          <Link to="/register" className="text-primary-600 hover:text-primary-700 font-semibold">
+          <Link
+            to="/register"
+            className="text-primary-600 hover:text-primary-700 font-semibold"
+          >
             Đăng ký ngay
           </Link>
         </div>
 
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+        {/* <div className="mt-6 p-4 bg-gray-50 rounded-lg">
           <h4 className="font-semibold text-sm mb-2">Tài khoản demo:</h4>
           <div className="text-xs space-y-1">
             <div><strong>Học sinh:</strong> student@example.com / password123</div>
             <div><strong>Giáo viên:</strong> teacher@example.com / password123</div>
             <div><strong>Admin:</strong> admin@example.com / password123</div>
           </div>
-        </div>
+        </div> */}
       </motion.div>
     </div>
   );

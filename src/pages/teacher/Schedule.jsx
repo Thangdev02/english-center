@@ -1,71 +1,153 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Card, Calendar, List, Tag, Button, Modal, Form, Input, Select, TimePicker, message } from 'antd';
-import { Plus, Clock, Users, MapPin, Video, Building } from 'lucide-react';
-import dayjs from 'dayjs';
-import { useAuth } from '../../context/AuthContext';
+import {
+  Button,
+  Calendar,
+  Card,
+  Input,
+  List,
+  message,
+  Modal,
+  Select,
+  Spin,
+  Tag,
+} from "antd";
+import dayjs from "dayjs";
+import isBetween from "dayjs/plugin/isBetween";
+import { motion } from "framer-motion";
+import { ArrowLeft, Clock, MapPin, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { forumApi } from "../../services/forumApi";
+
+// Extend dayjs with isBetween plugin
+dayjs.extend(isBetween);
 
 const { Option } = Select;
 const { TextArea } = Input;
 
 const TeacherSchedule = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [classes, setClasses] = useState([]);
   const [selectedDate, setSelectedDate] = useState(dayjs());
-  const [modalVisible, setModalVisible] = useState(false);
-  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(dayjs());
 
   useEffect(() => {
-    const mockClasses = [
-      {
-        id: 1,
-        title: 'Lớp Giao Tiếp - Buổi 15',
-        date: dayjs().add(1, 'day').toISOString(),
-        startTime: '14:00',
-        endTime: '15:30',
-        type: 'online',
-        students: 20,
-        description: 'Ôn tập chương 5: Giao tiếp trong công việc'
-      },
-      {
-        id: 2,
-        title: 'Lớp IELTS Writing',
-        date: dayjs().add(2, 'day').toISOString(),
-        startTime: '09:00',
-        endTime: '11:00',
-        type: 'offline',
-        students: 15,
-        location: 'Phòng 301 - Tòa nhà A',
-        description: 'Luyện viết Task 2 - Opinion Essay'
+    if (user?.id) {
+      fetchClassesByMonth(currentMonth);
+    }
+  }, [user, currentMonth]);
+
+  const fetchClassesByMonth = async (date) => {
+    try {
+      setLoading(true);
+      const startOfMonth = date.startOf("month").format("YYYY-MM-DD");
+      const endOfMonth = date.endOf("month").format("YYYY-MM-DD");
+
+      const response = await forumApi.getClassesByTime({
+        fromDate: startOfMonth,
+        toDate: endOfMonth,
+      });
+
+      const data = response?.data?.data || [];
+      console.log("📅 Classes by time:", data);
+      setClasses(data);
+    } catch (err) {
+      console.error("Error fetching classes:", err);
+      message.error("Không thể tải dữ liệu lịch dạy");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const dayNames = {
+    1: "T2",
+    2: "T3",
+    3: "T4",
+    4: "T5",
+    5: "T6",
+    6: "T7",
+    7: "CN",
+  };
+
+  const isClassOnDate = (classItem, date) => {
+    const classStartDate = dayjs(classItem.startDate);
+    const classEndDate = dayjs(classItem.endDate);
+    const currentDate = dayjs(date);
+
+    // Check if the date is within the class date range
+    if (!currentDate.isBetween(classStartDate, classEndDate, "day", "[]")) {
+      return false;
+    }
+
+    // Check if the day of week matches
+    const dayOfWeek = currentDate.day(); // 0 (Sunday) to 6 (Saturday)
+    const adjustedDay = dayOfWeek === 0 ? 7 : dayOfWeek; // Convert Sunday from 0 to 7
+
+    return classItem.dayOfWeeks && classItem.dayOfWeeks.includes(adjustedDay);
+  };
+
+  const calculateMonthlyHours = () => {
+    let totalMinutes = 0;
+
+    classes.forEach((classItem) => {
+      if (!classItem.startTime || !classItem.endTime) return;
+
+      // Parse time strings "HH:mm:ss"
+      const [startHour, startMin] = classItem.startTime.split(":").map(Number);
+      const [endHour, endMin] = classItem.endTime.split(":").map(Number);
+
+      // Calculate duration in minutes per session
+      const durationMinutes =
+        endHour * 60 + endMin - (startHour * 60 + startMin);
+
+      // Count number of sessions this month
+      const startOfMonth = currentMonth.startOf("month");
+      const endOfMonth = currentMonth.endOf("month");
+      let sessionsCount = 0;
+
+      for (
+        let d = startOfMonth;
+        d.isBefore(endOfMonth) || d.isSame(endOfMonth, "day");
+        d = d.add(1, "day")
+      ) {
+        if (isClassOnDate(classItem, d)) {
+          sessionsCount++;
+        }
       }
-    ];
-    setClasses(mockClasses);
-  }, []);
+
+      totalMinutes += durationMinutes * sessionsCount;
+    });
+
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    if (minutes > 0) {
+      return `${hours}h ${minutes}p`;
+    }
+    return `${hours}h`;
+  };
 
   const getClassesForDate = (date) => {
-    return classes.filter(classItem => 
-      dayjs(classItem.date).isSame(date, 'day')
-    );
+    return classes.filter((classItem) => isClassOnDate(classItem, date));
   };
 
   const dateCellRender = (value) => {
     const dateClasses = getClassesForDate(value);
     return (
       <div className="min-h-[80px]">
-        {dateClasses.map(classItem => (
+        {dateClasses.map((classItem) => (
           <div
             key={classItem.id}
-            className={`mb-1 p-1 text-xs rounded cursor-pointer ${
-              classItem.type === 'online' 
-                ? 'bg-blue-100 border border-blue-200' 
-                : 'bg-green-100 border border-green-200'
-            }`}
+            className="mb-1 p-1 text-xs rounded cursor-pointer bg-blue-100 border border-blue-200 hover:bg-blue-200 transition-colors"
             onClick={() => handleClassClick(classItem)}
           >
-            <div className="font-medium truncate">{classItem.title}</div>
-            <div className="flex items-center">
+            <div className="font-medium truncate">{classItem.name}</div>
+            <div className="flex items-center text-gray-600">
               <Clock className="w-3 h-3 mr-1" />
-              {classItem.startTime} - {classItem.endTime}
+              {classItem.startTime?.slice(0, 5)} -{" "}
+              {classItem.endTime?.slice(0, 5)}
             </div>
           </div>
         ))}
@@ -75,57 +157,60 @@ const TeacherSchedule = () => {
 
   const handleClassClick = (classItem) => {
     Modal.info({
-      title: classItem.title,
+      title: classItem.name,
       content: (
         <div className="space-y-2">
+          {classItem.description && (
+            <p className="text-gray-700 mb-3">{classItem.description}</p>
+          )}
+
           <div className="flex items-center">
             <Clock className="w-4 h-4 mr-2 text-gray-600" />
-            <span>{classItem.startTime} - {classItem.endTime}</span>
+            <span>
+              {classItem.startTime?.slice(0, 5)} -{" "}
+              {classItem.endTime?.slice(0, 5)}
+            </span>
           </div>
-          <div className="flex items-center">
-            {classItem.type === 'online' ? (
-              <Video className="w-4 h-4 mr-2 text-blue-600" />
-            ) : (
-              <Building className="w-4 h-4 mr-2 text-green-600" />
-            )}
-            <span>{classItem.type === 'online' ? 'Online' : classItem.location}</span>
-          </div>
-          <div className="flex items-center">
-            <Users className="w-4 h-4 mr-2 text-gray-600" />
-            <span>{classItem.students} học viên</span>
-          </div>
-          {classItem.description && (
-            <div>
-              <p className="text-gray-700">{classItem.description}</p>
+
+          {classItem.dayOfWeeks && classItem.dayOfWeeks.length > 0 && (
+            <div className="flex items-center">
+              <MapPin className="w-4 h-4 mr-2 text-gray-600" />
+              <span>
+                Lịch học:{" "}
+                {classItem.dayOfWeeks.map((d) => dayNames[d] || d).join(", ")}
+              </span>
             </div>
           )}
+
+          <div className="flex items-center">
+            <Users className="w-4 h-4 mr-2 text-gray-600" />
+            <span>{classItem.numberOfStudents || 0} học viên</span>
+          </div>
+
+          {classItem.teacherInfo && (
+            <div className="mt-3 p-3 bg-gray-50 rounded">
+              <div className="text-sm font-medium text-gray-700 mb-1">
+                Giáo viên:
+              </div>
+              <div className="text-sm">
+                {classItem.teacherInfo.firstName}{" "}
+                {classItem.teacherInfo.lastName}
+              </div>
+              <div className="text-xs text-gray-500">
+                {classItem.teacherInfo.email}
+              </div>
+            </div>
+          )}
+
+          <div className="mt-2 text-xs text-gray-500">
+            Thời gian: {dayjs(classItem.startDate).format("DD/MM/YYYY")} -{" "}
+            {dayjs(classItem.endDate).format("DD/MM/YYYY")}
+          </div>
         </div>
       ),
-      okText: 'Đóng'
+      okText: "Đóng",
+      width: 500,
     });
-  };
-
-  const handleAddClass = async (values) => {
-    try {
-      const newClass = {
-        id: Date.now(),
-        title: values.title,
-        date: values.date.toISOString(),
-        startTime: values.timeRange[0].format('HH:mm'),
-        endTime: values.timeRange[1].format('HH:mm'),
-        type: values.type,
-        students: values.students,
-        description: values.description,
-        ...(values.type === 'offline' && { location: values.location })
-      };
-
-      setClasses(prev => [...prev, newClass]);
-      message.success('Thêm lịch dạy thành công!');
-      setModalVisible(false);
-      form.resetFields();
-    } catch (error) {
-      message.error('Có lỗi xảy ra!');
-    }
   };
 
   const todayClasses = getClassesForDate(selectedDate);
@@ -137,18 +222,21 @@ const TeacherSchedule = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
+          <Button
+            icon={<ArrowLeft size={16} />}
+            onClick={() => navigate("/teacher")}
+            className="mb-4"
+          >
+            Quay lại Dashboard
+          </Button>
+
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Lịch Dạy Học</h1>
-              <p className="text-gray-600">Quản lý lịch dạy và lớp học của bạn</p>
+              <p className="text-gray-600">
+                Quản lý lịch dạy và lớp học của bạn
+              </p>
             </div>
-            <Button 
-              type="primary" 
-              icon={<Plus size={16} />}
-              onClick={() => setModalVisible(true)}
-            >
-              Thêm Lịch Dạy
-            </Button>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
@@ -160,13 +248,25 @@ const TeacherSchedule = () => {
                   cellRender={dateCellRender}
                   headerRender={({ value, onChange }) => (
                     <div className="flex justify-between items-center mb-4">
-                      <Button onClick={() => onChange(value.subtract(1, 'month'))}>
+                      <Button
+                        onClick={() => {
+                          const newMonth = value.subtract(1, "month");
+                          onChange(newMonth);
+                          setCurrentMonth(newMonth);
+                        }}
+                      >
                         Tháng trước
                       </Button>
                       <span className="text-lg font-semibold">
-                        {value.format('MMMM YYYY')}
+                        {value.format("MMMM YYYY")}
                       </span>
-                      <Button onClick={() => onChange(value.add(1, 'month'))}>
+                      <Button
+                        onClick={() => {
+                          const newMonth = value.add(1, "month");
+                          onChange(newMonth);
+                          setCurrentMonth(newMonth);
+                        }}
+                      >
                         Tháng sau
                       </Button>
                     </div>
@@ -176,32 +276,41 @@ const TeacherSchedule = () => {
             </div>
 
             <div className="lg:col-span-1">
-              <Card title={`Lịch dạy - ${selectedDate.format('DD/MM/YYYY')}`}>
-                {todayClasses.length > 0 ? (
+              <Card title={`Lịch dạy - ${selectedDate.format("DD/MM/YYYY")}`}>
+                {loading ? (
+                  <div className="text-center py-8">
+                    <Spin size="large" />
+                  </div>
+                ) : todayClasses.length > 0 ? (
                   <List
                     dataSource={todayClasses}
                     renderItem={(classItem) => (
                       <List.Item>
                         <div className="w-full">
                           <div className="flex justify-between items-start mb-2">
-                            <div className="font-semibold">{classItem.title}</div>
-                            <Tag color={classItem.type === 'online' ? 'blue' : 'green'}>
-                              {classItem.type === 'online' ? 'Online' : 'Offline'}
-                            </Tag>
+                            <div className="font-semibold">
+                              {classItem.name}
+                            </div>
+                            <Tag color="blue">Lớp học</Tag>
                           </div>
                           <div className="flex items-center text-sm text-gray-600 mb-1">
                             <Clock className="w-4 h-4 mr-1" />
-                            {classItem.startTime} - {classItem.endTime}
+                            {classItem.startTime?.slice(0, 5)} -{" "}
+                            {classItem.endTime?.slice(0, 5)}
                           </div>
-                          {classItem.type === 'offline' && (
-                            <div className="flex items-center text-sm text-gray-600 mb-1">
-                              <MapPin className="w-4 h-4 mr-1" />
-                              {classItem.location}
-                            </div>
-                          )}
+                          {classItem.dayOfWeeks &&
+                            classItem.dayOfWeeks.length > 0 && (
+                              <div className="flex items-center text-sm text-gray-600 mb-1">
+                                <MapPin className="w-4 h-4 mr-1" />
+                                Lịch:{" "}
+                                {classItem.dayOfWeeks
+                                  .map((d) => dayNames[d] || d)
+                                  .join(", ")}
+                              </div>
+                            )}
                           <div className="flex items-center text-sm text-gray-600">
                             <Users className="w-4 h-4 mr-1" />
-                            {classItem.students} học viên
+                            {classItem.numberOfStudents || 0} học viên
                           </div>
                         </div>
                       </List.Item>
@@ -216,134 +325,38 @@ const TeacherSchedule = () => {
               </Card>
 
               <Card className="mt-6" title="Thống kê tháng">
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span>Số lớp đã dạy:</span>
-                    <span className="font-semibold">12</span>
+                {loading ? (
+                  <div className="text-center py-4">
+                    <Spin />
                   </div>
-                  <div className="flex justify-between">
-                    <span>Số giờ giảng dạy:</span>
-                    <span className="font-semibold">36h</span>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span>Số lớp:</span>
+                      <span className="font-semibold">{classes.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Tổng học viên:</span>
+                      <span className="font-semibold">
+                        {classes.reduce(
+                          (sum, cls) => sum + (cls.numberOfStudents || 0),
+                          0
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Giờ dạy trong tháng:</span>
+                      <span className="font-semibold">
+                        {calculateMonthlyHours()}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Lớp online:</span>
-                    <span className="font-semibold">8</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Lớp offline:</span>
-                    <span className="font-semibold">4</span>
-                  </div>
-                </div>
+                )}
               </Card>
             </div>
           </div>
         </motion.div>
       </div>
-
-      <Modal
-        title="Thêm Lịch Dạy Mới"
-        open={modalVisible}
-        onCancel={() => {
-          setModalVisible(false);
-          form.resetFields();
-        }}
-        footer={null}
-        width={600}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleAddClass}
-          className="mt-6"
-        >
-          <Form.Item
-            name="title"
-            label="Tên lớp học"
-            rules={[{ required: true, message: 'Vui lòng nhập tên lớp học!' }]}
-          >
-            <Input placeholder="VD: Lớp Giao Tiếp - Buổi 15" />
-          </Form.Item>
-
-          <Form.Item
-            name="date"
-            label="Ngày dạy"
-            rules={[{ required: true, message: 'Vui lòng chọn ngày dạy!' }]}
-          >
-            <Input type="date" />
-          </Form.Item>
-
-          <Form.Item
-            name="timeRange"
-            label="Thời gian"
-            rules={[{ required: true, message: 'Vui lòng chọn thời gian!' }]}
-          >
-            <TimePicker.RangePicker 
-              format="HH:mm"
-              className="w-full"
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="type"
-            label="Hình thức"
-            rules={[{ required: true, message: 'Vui lòng chọn hình thức!' }]}
-          >
-            <Select placeholder="Chọn hình thức dạy">
-              <Option value="online">Online</Option>
-              <Option value="offline">Offline</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            noStyle
-            shouldUpdate={(prevValues, currentValues) => prevValues.type !== currentValues.type}
-          >
-            {({ getFieldValue }) =>
-              getFieldValue('type') === 'offline' ? (
-                <Form.Item
-                  name="location"
-                  label="Địa điểm"
-                  rules={[{ required: true, message: 'Vui lòng nhập địa điểm!' }]}
-                >
-                  <Input placeholder="VD: Phòng 301 - Tòa nhà A" />
-                </Form.Item>
-              ) : null
-            }
-          </Form.Item>
-
-          <Form.Item
-            name="students"
-            label="Số học viên"
-            rules={[{ required: true, message: 'Vui lòng nhập số học viên!' }]}
-          >
-            <Input type="number" placeholder="VD: 20" />
-          </Form.Item>
-
-          <Form.Item
-            name="description"
-            label="Mô tả"
-          >
-            <TextArea 
-              rows={4} 
-              placeholder="Mô tả về nội dung buổi học..."
-            />
-          </Form.Item>
-
-          <Form.Item className="mb-0">
-            <div className="flex justify-end space-x-4">
-              <Button onClick={() => {
-                setModalVisible(false);
-                form.resetFields();
-              }}>
-                Hủy
-              </Button>
-              <Button type="primary" htmlType="submit">
-                Thêm Lịch Dạy
-              </Button>
-            </div>
-          </Form.Item>
-        </Form>
-      </Modal>
     </div>
   );
 };

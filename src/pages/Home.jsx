@@ -1,23 +1,23 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import { motion, useInView } from 'framer-motion';
-import { 
-  PlayCircle, 
-  Users, 
-  Trophy, 
-  BookOpen,
-  Star,
+import { Button, Card, message, Skeleton } from "antd";
+import { motion, useInView } from "framer-motion";
+import {
   ArrowRight,
+  Award,
+  BookOpen,
   Clock,
   Globe,
-  Award,
-  TrendingUp,
+  Heart,
+  PlayCircle,
   Shield,
   Smartphone,
-  Heart
-} from 'lucide-react';
-import { Button, Card, Skeleton, message, Statistic, Row, Col } from 'antd';
-import { courseApi } from '../services/courseApi';
+  Star,
+  TrendingUp,
+  Trophy,
+  Users,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { courseApi } from "../services/courseApi";
 
 const Home = () => {
   const [courses, setCourses] = useState([]);
@@ -27,7 +27,7 @@ const Home = () => {
   const featuresRef = useRef(null);
   const coursesRef = useRef(null);
   const ctaRef = useRef(null);
-  
+
   const isHeroInView = useInView(heroRef, { once: true });
   const isStatsInView = useInView(statsRef, { once: true });
   const isFeaturesInView = useInView(featuresRef, { once: true });
@@ -38,69 +38,99 @@ const Home = () => {
     {
       icon: <BookOpen className="h-16 w-16 text-primary-600" />,
       title: "Lộ trình cá nhân hóa",
-      description: "Hệ thống AI thiết kế lộ trình học tập phù hợp với trình độ và mục tiêu của bạn",
-      gradient: "from-blue-500 to-cyan-500"
+      description:
+        "Hệ thống AI thiết kế lộ trình học tập phù hợp với trình độ và mục tiêu của bạn",
+      gradient: "from-blue-500 to-cyan-500",
     },
     {
       icon: <Users className="h-16 w-16 text-primary-600" />,
       title: "Giáo viên hàng đầu",
-      description: "Đội ngũ giảng viên bản ngữ và Việt Nam với chứng chỉ quốc tế và kinh nghiệm giảng dạy",
-      gradient: "from-purple-500 to-pink-500"
+      description:
+        "Đội ngũ giảng viên bản ngữ và Việt Nam với chứng chỉ quốc tế và kinh nghiệm giảng dạy",
+      gradient: "from-purple-500 to-pink-500",
     },
     {
       icon: <Trophy className="h-16 w-16 text-primary-600" />,
       title: "Học tập tương tác",
-      description: "Công nghệ Gamification biến mỗi bài học thành trải nghiệm thú vị và đầy cảm hứng",
-      gradient: "from-orange-500 to-red-500"
+      description:
+        "Công nghệ Gamification biến mỗi bài học thành trải nghiệm thú vị và đầy cảm hứng",
+      gradient: "from-orange-500 to-red-500",
     },
     {
       icon: <Globe className="h-16 w-16 text-primary-600" />,
       title: "Môi trường quốc tế",
-      description: "Kết nối với cộng đồng học viên toàn cầu và thực hành trong môi trường đa văn hóa",
-      gradient: "from-green-500 to-emerald-500"
+      description:
+        "Kết nối với cộng đồng học viên toàn cầu và thực hành trong môi trường đa văn hóa",
+      gradient: "from-green-500 to-emerald-500",
     },
     {
       icon: <Shield className="h-16 w-16 text-primary-600" />,
       title: "Cam kết chất lượng",
-      description: "Hoàn tiền 100% nếu không đạt kết quả như cam kết sau khóa học",
-      gradient: "from-indigo-500 to-blue-500"
+      description:
+        "Hoàn tiền 100% nếu không đạt kết quả như cam kết sau khóa học",
+      gradient: "from-indigo-500 to-blue-500",
     },
     {
       icon: <Smartphone className="h-16 w-16 text-primary-600" />,
       title: "Học mọi lúc mọi nơi",
-      description: "Ứng dụng di động thông minh cho phép học offline và đồng bộ dữ liệu đa thiết bị",
-      gradient: "from-rose-500 to-orange-500"
-    }
+      description:
+        "Ứng dụng di động thông minh cho phép học offline và đồng bộ dữ liệu đa thiết bị",
+      gradient: "from-rose-500 to-orange-500",
+    },
   ]);
 
   const [stats] = useState([
-    { number: "50.000+", label: "Học viên thành công", icon: <Users className="w-8 h-8" /> },
-    { number: "95%", label: "Hài lòng với khóa học", icon: <Heart className="w-8 h-8" /> },
-    { number: "500+", label: "Giờ học chất lượng", icon: <Clock className="w-8 h-8" /> },
-    { number: "4.9/5", label: "Đánh giá trung bình", icon: <Star className="w-8 h-8" /> }
+    {
+      number: "50.000+",
+      label: "Học viên thành công",
+      icon: <Users className="w-8 h-8" />,
+    },
+    {
+      number: "95%",
+      label: "Hài lòng với khóa học",
+      icon: <Heart className="w-8 h-8" />,
+    },
+    {
+      number: "500+",
+      label: "Giờ học chất lượng",
+      icon: <Clock className="w-8 h-8" />,
+    },
+    {
+      number: "4.9/5",
+      label: "Đánh giá trung bình",
+      icon: <Star className="w-8 h-8" />,
+    },
   ]);
 
   useEffect(() => {
     const fetchPopularCourses = async () => {
       try {
         setLoading(true);
-        const response = await courseApi.getAllCourses();
-        const popularCourses = response.data.slice(0, 6).map(course => ({
+        const response = await courseApi.getAllCourses({
+          page: 1,
+          size: 3,
+        });
+
+        const items = response.data?.data?.items || [];
+        const popularCourses = items.map((course) => ({
           id: course.id,
-          title: course.title,
+          courseId: course.courseId,
+          title: course.courseName || course.name,
           level: course.level,
-          students: course.students,
-          rating: course.rating,
-          price: new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(course.price),
-          image: course.image,
-          description: course.description,
+          teacher: course.teacher
+            ? `${course.teacher.firstName} ${course.teacher.lastName}`
+            : "Chưa có giáo viên",
+          image:
+            course.imageUrl ||
+            "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
+          description: course.description || "Khóa học chất lượng cao",
           duration: course.duration,
-          lessons: course.lessons
+          isActive: course.isActive,
         }));
         setCourses(popularCourses);
       } catch (error) {
-        console.error('Error fetching courses:', error);
-        message.error('Không thể tải danh sách khóa học');
+        console.error("Error fetching courses:", error);
+        message.error("Không thể tải danh sách khóa học");
       } finally {
         setLoading(false);
       }
@@ -114,9 +144,9 @@ const Home = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.2
-      }
-    }
+        staggerChildren: 0.2,
+      },
+    },
   };
 
   const itemVariants = {
@@ -125,21 +155,24 @@ const Home = () => {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.6
-      }
-    }
+        duration: 0.6,
+      },
+    },
   };
 
   return (
     <div className="min-h-screen bg-white">
-      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <section
+        ref={heroRef}
+        className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      >
         <div className="absolute inset-0 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900">
           <div className="absolute inset-0 bg-black/20"></div>
           <div className="absolute top-0 left-0 w-72 h-72 bg-primary-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
           <div className="absolute top-0 right-0 w-72 h-72 bg-secondary-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
           <div className="absolute -bottom-8 left-20 w-72 h-72 bg-accent-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
         </div>
-        
+
         <div className="relative z-10 container mx-auto px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -154,7 +187,9 @@ const Home = () => {
               className="inline-flex items-center px-6 py-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-8"
             >
               <TrendingUp className="w-5 h-5 mr-2" />
-              <span className="text-primary-100 font-medium">Nền tảng học tiếng Anh số 1 Việt Nam</span>
+              <span className="text-primary-100 font-medium">
+                Nền tảng học tiếng Anh số 1 Việt Nam
+              </span>
             </motion.div>
 
             <h1 className="text-6xl md:text-8xl font-black text-white mb-6 leading-tight">
@@ -163,17 +198,24 @@ const Home = () => {
                 English
               </span>
             </h1>
-            
+
             <p className="text-2xl md:text-3xl mb-8 text-primary-100 max-w-4xl mx-auto leading-relaxed">
-              Khám phá thế giới với tiếng Anh - <span className="font-semibold text-white">Hệ thống học tập thông minh</span> với công nghệ AI tiên tiến
+              Khám phá thế giới với tiếng Anh -{" "}
+              <span className="font-semibold text-white">
+                Hệ thống học tập thông minh
+              </span>{" "}
+              với công nghệ AI tiên tiến
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
               <Link to="/courses">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button 
-                    size="large" 
-                    type="primary" 
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button
+                    size="large"
+                    type="primary"
                     className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 border-0 font-bold h-14 px-10 text-lg shadow-2xl"
                   >
                     <PlayCircle className="inline w-6 h-6 mr-3" />
@@ -182,9 +224,12 @@ const Home = () => {
                 </motion.div>
               </Link>
               <Link to="/register">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button 
-                    size="large" 
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button
+                    size="large"
                     className="bg-white/10 backdrop-blur-sm text-white border-white/30 hover:bg-white/20 hover:border-white/50 h-14 px-10 text-lg font-semibold"
                   >
                     Đăng ký miễn phí
@@ -201,14 +246,16 @@ const Home = () => {
             >
               {stats.map((stat, index) => (
                 <div key={index} className="text-center">
-                  <div className="text-2xl md:text-3xl font-bold text-white mb-1">{stat.number}</div>
+                  <div className="text-2xl md:text-3xl font-bold text-white mb-1">
+                    {stat.number}
+                  </div>
                   <div className="text-primary-200 text-sm">{stat.label}</div>
                 </div>
               ))}
             </motion.div>
           </motion.div>
         </div>
-        
+
         <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
           <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center">
             <div className="w-1 h-3 bg-white rounded-full mt-2"></div>
@@ -216,7 +263,10 @@ const Home = () => {
         </div>
       </section>
 
-      <section ref={statsRef} className="py-20 bg-gradient-to-b from-gray-50 to-white">
+      <section
+        ref={statsRef}
+        className="py-20 bg-gradient-to-b from-gray-50 to-white"
+      >
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -232,7 +282,9 @@ const Home = () => {
                 <div className="flex justify-center mb-4 text-primary-600">
                   {stat.icon}
                 </div>
-                <div className="text-3xl font-bold text-gray-900 mb-2">{stat.number}</div>
+                <div className="text-3xl font-bold text-gray-900 mb-2">
+                  {stat.number}
+                </div>
                 <div className="text-gray-600 font-medium">{stat.label}</div>
               </motion.div>
             ))}
@@ -258,8 +310,8 @@ const Home = () => {
               </span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Công nghệ học tập thế hệ mới kết hợp phương pháp giảng dạy tiên tiến 
-              mang đến hiệu quả vượt trội
+              Công nghệ học tập thế hệ mới kết hợp phương pháp giảng dạy tiên
+              tiến mang đến hiệu quả vượt trội
             </p>
           </motion.div>
 
@@ -276,11 +328,13 @@ const Home = () => {
                 whileHover={{ y: -8, scale: 1.02 }}
                 className="group"
               >
-                <Card 
+                <Card
                   className="text-center border-0 shadow-xl hover:shadow-2xl transition-all duration-500 h-full bg-gradient-to-br from-white to-gray-50 group-hover:from-white group-hover:to-primary-50"
-                  bodyStyle={{ padding: '3rem 2rem' }}
+                  bodyStyle={{ padding: "3rem 2rem" }}
                 >
-                  <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-r ${feature.gradient} text-white mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                  <div
+                    className={`inline-flex p-4 rounded-2xl bg-gradient-to-r ${feature.gradient} text-white mb-6 group-hover:scale-110 transition-transform duration-300`}
+                  >
                     {feature.icon}
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-primary-700 transition-colors">
@@ -296,7 +350,10 @@ const Home = () => {
         </div>
       </section>
 
-      <section ref={coursesRef} className="py-20 bg-gradient-to-b from-gray-50 to-white">
+      <section
+        ref={coursesRef}
+        className="py-20 bg-gradient-to-b from-gray-50 to-white"
+      >
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -315,13 +372,20 @@ const Home = () => {
                 </span>
               </h2>
               <p className="text-xl text-gray-600 leading-relaxed">
-                Các khóa học được thiết kế chuyên sâu bởi đội ngũ chuyên gia 
-                với phương pháp giảng dạy hiện đại
+                Các khóa học được thiết kế chuyên sâu bởi đội ngũ chuyên gia với
+                phương pháp giảng dạy hiện đại
               </p>
             </div>
             <Link to="/courses">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button type="primary" size="large" className="h-12 px-8 font-semibold mt-6 lg:mt-0">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  type="primary"
+                  size="large"
+                  className="h-12 px-8 font-semibold mt-6 lg:mt-0"
+                >
                   Xem tất cả khóa học
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
@@ -347,7 +411,7 @@ const Home = () => {
               animate={isCoursesInView ? "visible" : "hidden"}
               className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
             >
-              {courses.map((course, index) => (
+              {courses.map((course) => (
                 <motion.div
                   key={course.id}
                   variants={itemVariants}
@@ -357,36 +421,66 @@ const Home = () => {
                   <Card
                     cover={
                       <div className="relative overflow-hidden">
-                        <img 
-                          alt={course.title} 
-                          src={course.image} 
+                        <img
+                          alt={course.title}
+                          src={course.image}
                           className="h-52 w-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          onError={(e) => {
+                            e.target.src =
+                              "https://via.placeholder.com/400x300?text=Course+Image";
+                          }}
                         />
                         <div className="absolute top-4 left-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            course.level === 'beginner' ? 'bg-green-100 text-green-800' :
-                            course.level === 'intermediate' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
-                            {course.level}
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              course.level === 0
+                                ? "bg-green-100 text-green-800"
+                                : course.level === 1
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
+                            {course.level === 0
+                              ? "Beginner"
+                              : course.level === 1
+                              ? "Intermediate"
+                              : "Advanced"}
                           </span>
                         </div>
+                        {!course.isActive && (
+                          <div className="absolute top-4 right-4">
+                            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">
+                              Không hoạt động
+                            </span>
+                          </div>
+                        )}
                       </div>
                     }
                     className="shadow-xl hover:shadow-2xl transition-all duration-500 border-0 overflow-hidden"
                     actions={[
-                      <Link to={`/courses/${course.id}`} key="view">
-                        <Button type="primary" size="large" className="w-full font-semibold">
+                      <Link
+                        to={`/courses/${course.courseId || course.id}`}
+                        key="view"
+                      >
+                        <Button
+                          type="primary"
+                          size="large"
+                          className="w-full font-semibold"
+                        >
                           Xem chi tiết
                         </Button>
-                      </Link>
+                      </Link>,
                     ]}
                   >
                     <div className="p-1">
                       <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-primary-600 transition-colors">
                         {course.title}
                       </h3>
-                      
+
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                        {course.description}
+                      </p>
+
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-4 text-sm text-gray-600">
                           <div className="flex items-center">
@@ -394,24 +488,10 @@ const Home = () => {
                             {course.duration}
                           </div>
                           <div className="flex items-center">
-                            <BookOpen className="w-4 h-4 mr-1" />
-                            {course.lessons} bài học
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center">
-                          <div className="flex items-center mr-4">
-                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                            <span className="ml-1 font-semibold">{course.rating}</span>
-                          </div>
-                          <div className="flex items-center text-gray-600">
                             <Users className="w-4 h-4 mr-1" />
-                            {course.students}
+                            {course.teacher}
                           </div>
                         </div>
-                        <span className="text-2xl font-bold text-primary-600">{course.price}</span>
                       </div>
                     </div>
                   </Card>
@@ -431,7 +511,7 @@ const Home = () => {
                 Đang cập nhật khóa học
               </h3>
               <p className="text-gray-500 text-lg max-w-md mx-auto">
-                Chúng tôi đang chuẩn bị những khóa học chất lượng nhất cho bạn. 
+                Chúng tôi đang chuẩn bị những khóa học chất lượng nhất cho bạn.
                 Hãy quay lại sau nhé!
               </p>
             </motion.div>
@@ -439,7 +519,10 @@ const Home = () => {
         </div>
       </section>
 
-      <section ref={ctaRef} className="py-20 bg-gradient-to-r from-primary-600 to-primary-800">
+      <section
+        ref={ctaRef}
+        className="py-20 bg-gradient-to-r from-primary-600 to-primary-800"
+      >
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -451,14 +534,17 @@ const Home = () => {
               <span className="block text-yellow-300">Tiếng Anh?</span>
             </h2>
             <p className="text-xl text-primary-100 mb-10 leading-relaxed">
-              Tham gia cộng đồng 50.000+ học viên đã thành công với EnglishMaster. 
-              Bắt đầu hành trình của bạn ngay hôm nay!
+              Tham gia cộng đồng 50.000+ học viên đã thành công với
+              EnglishMaster. Bắt đầu hành trình của bạn ngay hôm nay!
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
               <Link to="/register">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button 
-                    size="large" 
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button
+                    size="large"
                     className="bg-white text-primary-600 hover:bg-gray-100 border-0 font-bold h-14 px-12 text-lg shadow-2xl"
                   >
                     Đăng ký học thử miễn phí
@@ -466,9 +552,12 @@ const Home = () => {
                 </motion.div>
               </Link>
               <Link to="/courses">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button 
-                    size="large" 
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button
+                    size="large"
                     className="bg-transparent text-white border-2 border-white hover:bg-white hover:text-primary-600 h-14 px-12 text-lg font-semibold"
                   >
                     Xem lộ trình học

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Form, Input, Button, Select, Divider, message } from 'antd';
-import { Mail, Lock, User, Phone, Eye, EyeOff } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion, number } from "framer-motion";
+import { Form, Input, Button, Select, Divider, message } from "antd";
+import { Mail, Lock, User, Phone, Eye, EyeOff } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 const { Option } = Select;
 
@@ -13,31 +13,37 @@ const Register = () => {
   const navigate = useNavigate();
 
   const onFinish = async (values) => {
+    // console.log("Received values of form: ", parseInt(values.role));
     setLoading(true);
     try {
       const registerData = {
         firstName: values.firstName,
         lastName: values.lastName,
-        name: `${values.firstName} ${values.lastName}`,
         email: values.email,
         phone: values.phone,
+        username: values.username,
         password: values.password,
-        role: values.role
+        role: parseInt(values.role),
       };
+      console.log("Register data:", registerData);
 
       await register(registerData);
-      message.success('Đăng ký thành công!');
-      navigate('/');
+      message.success("Đăng ký thành công!");
+      navigate("/");
     } catch (error) {
-      message.error(error.message || 'Đăng ký thất bại!');
+      message.error(
+        error.response?.data?.data[0].errorMessage ||
+          error.response?.data?.data ||
+          "Đăng ký thất bại!"
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleRegister = () => {
-    message.info('Tính năng đăng ký Google sẽ được tích hợp sau');
-  };
+  // const handleGoogleRegister = () => {
+  //   message.info("Tính năng đăng ký Google sẽ được tích hợp sau");
+  // };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-blue-100 flex items-center justify-center py-12 px-4">
@@ -47,7 +53,7 @@ const Register = () => {
         className="max-w-md w-full space-y-8 bg-white rounded-2xl shadow-xl p-8"
       >
         <div className="text-center">
-          <motion.h2 
+          <motion.h2
             initial={{ y: -20 }}
             animate={{ y: 0 }}
             className="text-3xl font-bold text-gray-900 mb-2"
@@ -65,19 +71,31 @@ const Register = () => {
           layout="vertical"
           className="space-y-4"
           initialValues={{
-            role: 'student'
+            role: "1",
           }}
         >
+          <Form.Item
+            name="role"
+            label="Bạn là"
+            rules={[{ required: true, message: "Vui lòng chọn vai trò!" }]}
+          >
+            <Select placeholder="Chọn vai trò" size="large">
+              <Option value="1">Học sinh</Option>
+              <Option value="2">Giáo viên</Option>
+            </Select>
+          </Form.Item>
+
           <div className="grid grid-cols-2 gap-4">
             <Form.Item
               name="firstName"
               label="Họ"
+              style={{ marginBottom: 0 }}
               rules={[
-                { required: true, message: 'Vui lòng nhập họ!' },
-                { min: 2, message: 'Họ phải có ít nhất 2 ký tự!' }
+                { required: true, message: "Vui lòng nhập họ!" },
+                { min: 2, message: "Họ phải có ít nhất 2 ký tự!" },
               ]}
             >
-              <Input 
+              <Input
                 prefix={<User className="text-gray-400" size={16} />}
                 placeholder="Nhập họ"
                 size="large"
@@ -87,15 +105,13 @@ const Register = () => {
             <Form.Item
               name="lastName"
               label="Tên"
+              style={{ marginBottom: 0 }}
               rules={[
-                { required: true, message: 'Vui lòng nhập tên!' },
-                { min: 2, message: 'Tên phải có ít nhất 2 ký tự!' }
+                { required: true, message: "Vui lòng nhập tên!" },
+                { min: 2, message: "Tên phải có ít nhất 2 ký tự!" },
               ]}
             >
-              <Input 
-                placeholder="Nhập tên"
-                size="large"
-              />
+              <Input placeholder="Nhập tên" size="large" />
             </Form.Item>
           </div>
 
@@ -103,11 +119,11 @@ const Register = () => {
             name="email"
             label="Email"
             rules={[
-              { required: true, message: 'Vui lòng nhập email!' },
-              { type: 'email', message: 'Email không hợp lệ!' }
+              { required: true, message: "Vui lòng nhập email!" },
+              { type: "email", message: "Email không hợp lệ!" },
             ]}
           >
-            <Input 
+            <Input
               prefix={<Mail className="text-gray-400" size={16} />}
               placeholder="Nhập email của bạn"
               size="large"
@@ -118,11 +134,14 @@ const Register = () => {
             name="phone"
             label="Số điện thoại"
             rules={[
-              { required: true, message: 'Vui lòng nhập số điện thoại!' },
-              { pattern: /^(0|\+84)[3|5|7|8|9][0-9]{8}$/, message: 'Số điện thoại không hợp lệ!' }
+              { required: true, message: "Vui lòng nhập số điện thoại!" },
+              {
+                pattern: /^(0|\+84)[3|5|7|8|9][0-9]{8}$/,
+                message: "Số điện thoại không hợp lệ!",
+              },
             ]}
           >
-            <Input 
+            <Input
               prefix={<Phone className="text-gray-400" size={16} />}
               placeholder="Nhập số điện thoại"
               size="large"
@@ -130,30 +149,30 @@ const Register = () => {
           </Form.Item>
 
           <Form.Item
-            name="role"
-            label="Bạn là"
-            rules={[{ required: true, message: 'Vui lòng chọn vai trò!' }]}
+            name="username"
+            label="Tên đăng nhập"
+            style={{ marginBottom: 0 }}
+            rules={[
+              { required: true, message: "Vui lòng nhập tên đăng nhập!" },
+              { min: 2, message: "Tên đăng nhập phải có ít nhất 2 ký tự!" },
+            ]}
           >
-            <Select placeholder="Chọn vai trò" size="large">
-              <Option value="student">Học sinh</Option>
-              <Option value="teacher">Giáo viên</Option>
-            </Select>
+            <Input placeholder="Nhập tên đăng nhập" size="large" />
           </Form.Item>
 
           <Form.Item
             name="password"
             label="Mật khẩu"
             rules={[
-              { required: true, message: 'Vui lòng nhập mật khẩu!' },
-              { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' },
-              { pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, message: 'Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường và 1 số!' }
+              { required: true, message: "Vui lòng nhập mật khẩu!" },
+              { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" },
             ]}
           >
             <Input.Password
               prefix={<Lock className="text-gray-400" size={16} />}
               placeholder="Nhập mật khẩu"
               size="large"
-              iconRender={(visible) => 
+              iconRender={(visible) =>
                 visible ? <Eye size={16} /> : <EyeOff size={16} />
               }
             />
@@ -162,15 +181,17 @@ const Register = () => {
           <Form.Item
             name="confirmPassword"
             label="Xác nhận mật khẩu"
-            dependencies={['password']}
+            dependencies={["password"]}
             rules={[
-              { required: true, message: 'Vui lòng xác nhận mật khẩu!' },
+              { required: true, message: "Vui lòng xác nhận mật khẩu!" },
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  if (!value || getFieldValue('password') === value) {
+                  if (!value || getFieldValue("password") === value) {
                     return Promise.resolve();
                   }
-                  return Promise.reject(new Error('Mật khẩu xác nhận không khớp!'));
+                  return Promise.reject(
+                    new Error("Mật khẩu xác nhận không khớp!")
+                  );
                 },
               }),
             ]}
@@ -179,26 +200,26 @@ const Register = () => {
               prefix={<Lock className="text-gray-400" size={16} />}
               placeholder="Xác nhận mật khẩu"
               size="large"
-              iconRender={(visible) => 
+              iconRender={(visible) =>
                 visible ? <Eye size={16} /> : <EyeOff size={16} />
               }
             />
           </Form.Item>
 
           <Form.Item>
-            <Button 
-              type="primary" 
-              htmlType="submit" 
+            <Button
+              type="primary"
+              htmlType="submit"
               loading={loading}
               size="large"
               className="w-full h-12 text-lg font-semibold"
             >
-              {loading ? 'Đang đăng ký...' : 'Đăng ký'}
+              {loading ? "Đang đăng ký..." : "Đăng ký"}
             </Button>
           </Form.Item>
         </Form>
 
-        <Divider>Hoặc</Divider>
+        {/* <Divider>Hoặc</Divider>
 
         <div className="space-y-4">
           <Button 
@@ -214,17 +235,28 @@ const Register = () => {
             </svg>
             Đăng ký với Google
           </Button>
-        </div>
+        </div> */}
 
         <div className="text-center">
           <span className="text-gray-600">Đã có tài khoản? </span>
-          <Link to="/login" className="text-primary-600 hover:text-primary-700 font-semibold">
+          <Link
+            to="/login"
+            className="text-primary-600 hover:text-primary-700 font-semibold"
+          >
             Đăng nhập ngay
           </Link>
         </div>
 
         <div className="text-center text-xs text-gray-500">
-          Bằng việc đăng ký, bạn đồng ý với <Link to="/terms" className="text-primary-600">Điều khoản sử dụng</Link> và <Link to="/privacy" className="text-primary-600">Chính sách bảo mật</Link> của chúng tôi.
+          Bằng việc đăng ký, bạn đồng ý với{" "}
+          <Link to="/terms" className="text-primary-600">
+            Điều khoản sử dụng
+          </Link>{" "}
+          và{" "}
+          <Link to="/privacy" className="text-primary-600">
+            Chính sách bảo mật
+          </Link>{" "}
+          của chúng tôi.
         </div>
       </motion.div>
     </div>

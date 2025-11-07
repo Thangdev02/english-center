@@ -1,437 +1,702 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Card, List, Tag, Button, Empty, Skeleton, message, Tabs, Progress } from 'antd';
-import { Users, BookOpen, Clock, PlayCircle, ArrowLeft, Eye, FileText } from 'lucide-react';
-import { forumService } from '../../services/forumApi';
-import { courseApi } from '../../services/courseApi';
-import { useAuth } from '../../context/AuthContext';
-import { examApi } from '../../services/examApi';
+import {
+  Button,
+  Card,
+  Empty,
+  List,
+  message,
+  Pagination,
+  Skeleton,
+  Tabs,
+  Tag,
+} from "antd";
+import { motion } from "framer-motion";
+import { ArrowLeft, Calendar, Clock, FileText, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { examApi } from "../../services/examApi";
+import { forumApi } from "../../services/forumApi";
 
 const { TabPane } = Tabs;
 
 const StudentClassDetail = () => {
-    const { id } = useParams();
-    const { user } = useAuth();
-    const navigate = useNavigate();
-    const [classDetail, setClassDetail] = useState(null);
-    const [classCourses, setClassCourses] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('courses');
-    const [enrolling, setEnrolling] = useState(false);
-    const [classExams, setClassExams] = useState([]);
-    const [examsLoading, setExamsLoading] = useState(false);
-    useEffect(() => {
-        if (id) {
-            fetchClassDetail();
-            fetchClassExams();
-        }
-    }, [id]);
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [classDetail, setClassDetail] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [examsLoading, setExamsLoading] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("members");
+  const [classExams, setClassExams] = useState([]);
+  const [examHistory, setExamHistory] = useState([]);
+  const [examsPagination, setExamsPagination] = useState({
+    current: 1,
+    pageSize: 5,
+    total: 0,
+    totalPages: 0,
+  });
+  const [historyPagination, setHistoryPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+    totalPages: 0,
+  });
 
-    const fetchClassDetail = async () => {
-        try {
-            setLoading(true);
-            const classResponse = await forumService.getClassWithDetails(id);
-            console.log('📊 Class details:', classResponse);
-
-            setClassDetail(classResponse);
-
-            if (classResponse.courses) {
-                const courses = classResponse.courses.map(item => item.course).filter(Boolean);
-                setClassCourses(courses);
-            }
-        } catch (error) {
-            console.error('Error fetching class detail:', error);
-            message.error('Không thể tải thông tin lớp học');
-        } finally {
-            setLoading(false);
-        }
-    };
-    const fetchClassExams = async () => {
-        try {
-            setExamsLoading(true);
-            const response = await examApi.getClassExams(id);
-            const examsWithDetails = await Promise.all(
-                response.data.map(async (classExam) => {
-                    const examResponse = await examApi.getExam(classExam.examId);
-                    const resultResponse = await examApi.getStudentExamResult(classExam.examId, user.id);
-
-                    return {
-                        ...classExam,
-                        exam: examResponse.data,
-                        hasTaken: resultResponse.data.length > 0,
-                        result: resultResponse.data[0] || null
-                    };
-                })
-            );
-            setClassExams(examsWithDetails);
-        } catch (error) {
-            console.error('Error fetching class exams:', error);
-        } finally {
-            setExamsLoading(false);
-        }
-    };
-
-    const handleStartLearning = async (courseId) => {
-        if (!user?.id) {
-            message.error('Vui lòng đăng nhập để học');
-            return;
-        }
-
-        try {
-            setEnrolling(true);
-            console.log(' Starting learning process for course:', courseId, 'user:', user.id);
-
-            const enrollmentsResponse = await courseApi.getMyEnrollments(user.id);
-            console.log('Existing enrollments:', enrollmentsResponse.data);
-
-            const existingEnrollment = enrollmentsResponse.data.find(
-                e => e.courseId === courseId && e.userId === user.id
-            );
-
-            if (existingEnrollment) {
-                console.log(' Already enrolled, redirecting to learning page with enrollment:', existingEnrollment.id);
-                navigate(`/learning/${existingEnrollment.id}`);
-                return;
-            }
-
-            console.log(' Enrolling in course:', courseId);
-
-            const enrollResponse = await courseApi.enrollCourse(courseId, user.id);
-            console.log(' Enrollment response:', enrollResponse);
-
-            if (enrollResponse.data && enrollResponse.data.id) {
-                message.success('Đã tự động đăng ký khóa học!');
-
-                console.log(' Redirecting to learning page with new enrollment:', enrollResponse.data.id);
-                navigate(`/learning/${enrollResponse.data.id}`);
-            } else {
-                console.log('Enrollment created but no ID, searching for it...');
-
-                setTimeout(async () => {
-                    try {
-                        const newEnrollments = await courseApi.getMyEnrollments(user.id);
-                        const newEnrollment = newEnrollments.data.find(
-                            e => e.courseId === courseId && e.userId === user.id
-                        );
-
-                        if (newEnrollment) {
-                            console.log(' Found new enrollment:', newEnrollment.id);
-                            navigate(`/learning/${newEnrollment.id}`);
-                        } else {
-                            console.error(' No enrollment found after enrollment');
-                            message.error('Không thể tìm thấy thông tin đăng ký');
-                        }
-                    } catch (searchError) {
-                        console.error(' Error searching for enrollment:', searchError);
-                        message.error('Lỗi khi tìm thông tin đăng ký');
-                    }
-                }, 1000);
-            }
-
-        } catch (error) {
-            console.error(' Error enrolling course:', error);
-            message.error('Không thể bắt đầu học: ' + (error.message || 'Lỗi không xác định'));
-        } finally {
-            setEnrolling(false);
-        }
-    };
-
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-gray-50 py-8">
-                <div className="container mx-auto px-4">
-                    <Skeleton active />
-                </div>
-            </div>
-        );
+  useEffect(() => {
+    if (id) {
+      fetchClassDetail();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
-    if (!classDetail) {
-        return (
-            <div className="min-h-screen bg-gray-50 py-8">
-                <div className="container mx-auto px-4 text-center">
-                    <Empty
-                        description="Lớp học không tồn tại hoặc bạn không có quyền truy cập"
-                    />
-                    <Link to="/student/classes">
-                        <Button type="primary" className="mt-4">
-                            Quay lại danh sách lớp học
-                        </Button>
-                    </Link>
-                </div>
-            </div>
-        );
+  useEffect(() => {
+    if (id && activeTab === "exams") {
+      fetchClassExams(examsPagination.current, examsPagination.pageSize);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, activeTab]);
 
+  useEffect(() => {
+    if (id && activeTab === "history") {
+      fetchExamHistory(historyPagination.current, historyPagination.pageSize);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, activeTab]);
+
+  const fetchClassDetail = async () => {
+    try {
+      setLoading(true);
+      const response = await forumApi.getClassById(id);
+      const data = response?.data?.data;
+
+      if (data) {
+        console.log("📊 Class details:", data);
+        setClassDetail(data);
+      }
+    } catch (error) {
+      console.error("Error fetching class detail:", error);
+      message.error("Không thể tải thông tin lớp học");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchClassExams = async (page = 1, size = 5) => {
+    try {
+      setExamsLoading(true);
+      const response = await forumApi.getClassExams(id, { page, size });
+      const data = response?.data?.data;
+
+      if (data) {
+        setClassExams(data.items || []);
+        setExamsPagination({
+          current: data.page || page,
+          pageSize: data.size || size,
+          total: data.total || 0,
+          totalPages: data.totalPages || 0,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching class exams:", error);
+      message.error("Không thể tải danh sách bài thi");
+    } finally {
+      setExamsLoading(false);
+    }
+  };
+
+  const handleExamsPageChange = (page, pageSize) => {
+    fetchClassExams(page, pageSize);
+  };
+
+  const fetchExamHistory = async (page = 1, size = 10) => {
+    try {
+      setHistoryLoading(true);
+      const response = await forumApi.getClassExamsHistory(id, { page, size });
+      const data = response?.data?.data;
+
+      if (data) {
+        setExamHistory(data.items || []);
+        setHistoryPagination({
+          current: data.page || page,
+          pageSize: data.size || size,
+          total: data.total || 0,
+          totalPages: data.totalPages || 0,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching exam history:", error);
+      message.error("Không thể tải lịch sử thi");
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const handleHistoryPageChange = (page, pageSize) => {
+    fetchExamHistory(page, pageSize);
+  };
+
+  const handleTakeExam = async (forumExamId) => {
+    try {
+      message.loading({ content: "Đang chuẩn bị bài thi...", key: "takeExam" });
+      const response = await examApi.takeExam(forumExamId);
+      const data = response?.data?.data;
+
+      if (data?.id) {
+        message.success({
+          content: "Bắt đầu làm bài!",
+          key: "takeExam",
+          duration: 1,
+        });
+        navigate(`/student/exams/${data.id}`);
+      } else {
+        message.error({
+          content: "Không thể bắt đầu bài thi",
+          key: "takeExam",
+        });
+      }
+    } catch (error) {
+      console.error("Error taking exam:", error);
+      message.error({ content: "Không thể bắt đầu bài thi", key: "takeExam" });
+    }
+  };
+
+  const dayNames = {
+    1: "T2",
+    2: "T3",
+    3: "T4",
+    4: "T5",
+    5: "T6",
+    6: "T7",
+    7: "CN",
+  };
+
+  const isActiveByDate = (startDate, endDate) => {
+    try {
+      const now = new Date();
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      return start <= now && now <= end;
+    } catch {
+      return false;
+    }
+  };
+
+  const formatDuration = (duration) => {
+    if (!duration) return "-";
+    const parts = duration.split(":");
+    if (parts.length >= 2) {
+      const hours = parseInt(parts[0]);
+      const minutes = parseInt(parts[1]);
+      if (hours > 0) return `${hours}h ${minutes}m`;
+      return `${minutes} phút`;
+    }
+    return duration;
+  };
+
+  const getExamTypeText = (type) => {
+    if (type === 0) return "Trắc nghiệm";
+    if (type === 1) return "Tự luận";
+    return "Chưa xác định";
+  };
+
+  const getExamTypeColor = (type) => {
+    if (type === 0) return "blue";
+    if (type === 1) return "green";
+    return "default";
+  };
+
+  const getExamStatusText = (status) => {
+    if (status === 0) return "Đang làm";
+    if (status === 1) return "Đã nộp";
+    return "Chưa xác định";
+  };
+
+  const getExamStatusColor = (status) => {
+    if (status === 0) return "orange";
+    if (status === 1) return "green";
+    return "default";
+  };
+
+  if (loading) {
     return (
-        <div className="min-h-screen bg-gray-50">
-            <div className="bg-white shadow-sm">
-                <div className="container mx-auto px-4 py-4">
-                    <Link
-                        to="/student/classes"
-                        className="inline-flex items-center text-primary-600 hover:text-primary-700 mb-4"
-                    >
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Quay lại danh sách lớp học
-                    </Link>
-
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-2xl font-bold text-gray-900">
-                                {classDetail.name}
-                            </h1>
-                            <p className="text-gray-600 mt-1">
-                                {classDetail.description}
-                            </p>
-                        </div>
-                        <Tag color={classDetail.isActive ? 'green' : 'red'}>
-                            {classDetail.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}
-                        </Tag>
-                    </div>
-                </div>
-            </div>
-
-            <div className="container mx-auto px-4 py-8">
-                <div className="grid lg:grid-cols-4 gap-8">
-                    <div className="lg:col-span-3">
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                        >
-                            <Card>
-                                <Tabs activeKey={activeTab} onChange={setActiveTab}>
-                                    <TabPane
-                                        tab={
-                                            <span className="flex items-center">
-                                                <BookOpen className="w-4 h-4 mr-2" />
-                                                Khóa học trong lớp ({classCourses.length})
-                                            </span>
-                                        }
-                                        key="courses"
-                                    >
-                                        {classCourses.length > 0 ? (
-                                            <div className="grid md:grid-cols-2 gap-6">
-                                                {classCourses.map((course, index) => (
-                                                    <motion.div
-                                                        key={course.id}
-                                                        initial={{ opacity: 0, scale: 0.9 }}
-                                                        animate={{ opacity: 1, scale: 1 }}
-                                                        transition={{ delay: index * 0.1 }}
-                                                    >
-                                                        <Card
-                                                            cover={
-                                                                <img
-                                                                    alt={course.title}
-                                                                    src={course.image}
-                                                                    className="h-48 object-cover"
-                                                                />
-                                                            }
-                                                            actions={[
-                                                                <Button
-                                                                    type="primary"
-                                                                    icon={<PlayCircle className="w-4 h-4" />}
-                                                                    onClick={() => handleStartLearning(course.id)}
-                                                                    loading={enrolling}
-                                                                    disabled={enrolling}
-                                                                >
-                                                                    {enrolling ? 'Đang xử lý...' : 'Bắt đầu học'}
-                                                                </Button>,
-                                                                <Link to={`/courses/${course.id}`}>
-                                                                    <Button icon={<Eye className="w-4 h-4" />}>
-                                                                        Xem chi tiết
-                                                                    </Button>
-                                                                </Link>
-                                                            ]}
-                                                        >
-                                                            <div className="space-y-3">
-                                                                <h3 className="font-semibold text-lg">
-                                                                    {course.title}
-                                                                </h3>
-                                                                <p className="text-gray-600 text-sm">
-                                                                    {course.description}
-                                                                </p>
-
-                                                                <div className="flex items-center justify-between text-sm text-gray-500">
-                                                                    <div className="flex items-center">
-                                                                        <Clock className="w-4 h-4 mr-1" />
-                                                                        <span>{course.duration}</span>
-                                                                    </div>
-                                                                    <Tag color="blue" className="capitalize">
-                                                                        {course.level}
-                                                                    </Tag>
-                                                                </div>
-
-                                                                <div className="flex items-center text-sm text-gray-500">
-                                                                    <Users className="w-4 h-4 mr-1" />
-                                                                    <span>{course.students} học viên</span>
-                                                                </div>
-                                                            </div>
-                                                        </Card>
-                                                    </motion.div>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <Empty
-                                                description="Chưa có khóa học nào trong lớp"
-                                            />
-                                        )}
-                                    </TabPane>
-                                    <TabPane
-                                        tab={
-                                            <span className="flex items-center">
-                                                <FileText className="w-4 h-4 mr-2" />
-                                                Bài thi ({classExams.length})
-                                            </span>
-                                        }
-                                        key="exams"
-                                    >
-                                        {classExams.length > 0 ? (
-                                            <div className="space-y-4">
-                                                {classExams.map((classExam, index) => (
-                                                    <Card key={classExam.id}>
-                                                        <div className="flex items-center justify-between">
-                                                            <div className="flex-1">
-                                                                <h3 className="font-semibold text-lg">{classExam.exam.title}</h3>
-                                                                <p className="text-gray-600">{classExam.exam.description}</p>
-
-                                                                <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
-                                                                    <div className="flex items-center">
-                                                                        <Clock className="w-4 h-4 mr-1" />
-                                                                        <span>{classExam.exam.duration} phút</span>
-                                                                    </div>
-                                                                    <div className="flex items-center">
-                                                                        <FileText className="w-4 h-4 mr-1" />
-                                                                        <span>{classExam.exam.totalQuestions} câu</span>
-                                                                    </div>
-                                                                    <div className="flex items-center">
-                                                                        <span>Hạn nộp: {new Date(classExam.dueDate).toLocaleDateString('vi-VN')}</span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <div className="text-right">
-                                                                {classExam.hasTaken ? (
-                                                                    <div>
-                                                                        <Tag color="green">Đã hoàn thành</Tag>
-                                                                        <div className="text-sm text-gray-600">
-                                                                            Điểm: {classExam.result.score}/{classExam.exam.totalPoints}
-                                                                        </div>
-                                                                    </div>
-                                                                ) : (
-                                                                    <Button 
-                                                                    type="primary" 
-                                                                    onClick={() => {
-                                                                      console.log('🎯 Clicked Start Exam:', classExam.examId);
-                                                                      console.log('📝 Exam details:', classExam.exam);
-                                                                      navigate(`/exam/${classExam.examId}`);
-                                                                    }}
-                                                                  >
-                                                                    Bắt đầu thi
-                                                                  </Button>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </Card>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <Empty description="Chưa có bài thi nào trong lớp" />
-                                        )}
-                                    </TabPane>
-                                    <TabPane
-                                        tab={
-                                            <span className="flex items-center">
-                                                <Users className="w-4 h-4 mr-2" />
-                                                Thành viên ({classDetail.members?.length || 0})
-                                            </span>
-                                        }
-                                        key="members"
-                                    >
-                                        {classDetail.members && classDetail.members.length > 0 ? (
-                                            <List
-                                                dataSource={classDetail.members}
-                                                renderItem={(member) => (
-                                                    <List.Item>
-                                                        <List.Item.Meta
-                                                            avatar={
-                                                                <img
-                                                                    src={member.user?.avatar}
-                                                                    alt={member.user?.name}
-                                                                    className="w-10 h-10 rounded-full"
-                                                                />
-                                                            }
-                                                            title={member.user?.name}
-                                                            description={member.user?.email}
-                                                        />
-                                                        <Tag color={member.role === 'teacher' ? 'red' : 'blue'}>
-                                                            {member.role === 'teacher' ? 'Giáo viên' : 'Học sinh'}
-                                                        </Tag>
-                                                    </List.Item>
-                                                )}
-                                            />
-                                        ) : (
-                                            <Empty description="Chưa có thành viên nào trong lớp" />
-                                        )}
-                                    </TabPane>
-                                </Tabs>
-                            </Card>
-                        </motion.div>
-                    </div>
-
-                    <div className="lg:col-span-1">
-                        <motion.div
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.2 }}
-                            className="space-y-6"
-                        >
-                            <Card title="Giáo viên">
-                                <div className="flex items-center space-x-3">
-                                    <img
-                                        src={classDetail.teacher?.avatar}
-                                        alt={classDetail.teacher?.name}
-                                        className="w-12 h-12 rounded-full"
-                                    />
-                                    <div>
-                                        <div className="font-semibold">
-                                            {classDetail.teacher?.name}
-                                        </div>
-                                        <div className="text-sm text-gray-500">
-                                            Giáo viên chủ nhiệm
-                                        </div>
-                                    </div>
-                                </div>
-                            </Card>
-
-                            <Card title="Thống kê lớp">
-                                <div className="space-y-3">
-                                    <div className="flex justify-between">
-                                        <span>Tổng thành viên:</span>
-                                        <span className="font-semibold">
-                                            {classDetail.members?.length || 0}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Khóa học:</span>
-                                        <span className="font-semibold">
-                                            {classCourses.length}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Ngày tạo:</span>
-                                        <span className="font-semibold">
-                                            {new Date(classDetail.createdAt).toLocaleDateString('vi-VN')}
-                                        </span>
-                                    </div>
-                                </div>
-                            </Card>
-                        </motion.div>
-                    </div>
-                </div>
-            </div>
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="container mx-auto px-4">
+          <Skeleton active />
         </div>
+      </div>
     );
+  }
+
+  if (!classDetail) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="container mx-auto px-4 text-center">
+          <Empty description="Lớp học không tồn tại hoặc bạn không có quyền truy cập" />
+          <Link to="/student/classes">
+            <Button type="primary" className="mt-4">
+              Quay lại danh sách lớp học
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-white shadow-sm">
+        <div className="container mx-auto px-4 py-4">
+          <Link
+            to="/student/classes"
+            className="inline-flex items-center text-primary-600 hover:text-primary-700 mb-4"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Quay lại danh sách lớp học
+          </Link>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {classDetail.name}
+              </h1>
+              <p className="text-gray-600 mt-1">
+                {classDetail.description || "Chưa có mô tả"}
+              </p>
+
+              {/* Class schedule info */}
+              <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                {classDetail.dayOfWeeks &&
+                  classDetail.dayOfWeeks.length > 0 && (
+                    <div className="flex items-center">
+                      <Calendar className="w-4 h-4 mr-1" />
+                      <span>
+                        {classDetail.dayOfWeeks
+                          .map((d) => dayNames[d] || d)
+                          .join(", ")}
+                      </span>
+                    </div>
+                  )}
+                {classDetail.startTime && classDetail.endTime && (
+                  <div className="flex items-center">
+                    <Clock className="w-4 h-4 mr-1" />
+                    <span>
+                      {classDetail.startTime.slice(0, 5)} -{" "}
+                      {classDetail.endTime.slice(0, 5)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+            <Tag
+              color={
+                isActiveByDate(classDetail.startDate, classDetail.endDate)
+                  ? "green"
+                  : "red"
+              }
+            >
+              {isActiveByDate(classDetail.startDate, classDetail.endDate)
+                ? "Đang hoạt động"
+                : "Ngừng hoạt động"}
+            </Tag>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid lg:grid-cols-4 gap-8">
+          <div className="lg:col-span-3">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <Card>
+                <Tabs activeKey={activeTab} onChange={setActiveTab}>
+                  <TabPane
+                    tab={
+                      <span className="flex items-center">
+                        <Users className="w-4 h-4 mr-2" />
+                        Thành viên ({classDetail.numberOfStudents || 0})
+                      </span>
+                    }
+                    key="members"
+                  >
+                    {classDetail.assignedStudents &&
+                    classDetail.assignedStudents.length > 0 ? (
+                      <List
+                        dataSource={classDetail.assignedStudents}
+                        renderItem={(student) => (
+                          <List.Item>
+                            <List.Item.Meta
+                              avatar={
+                                <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
+                                  {student.firstName?.[0]}
+                                  {student.lastName?.[0]}
+                                </div>
+                              }
+                              title={`${student.firstName} ${student.lastName}`}
+                              description={
+                                <div>
+                                  <div>{student.email}</div>
+                                  {student.phone && (
+                                    <div className="text-xs">
+                                      📞 {student.phone}
+                                    </div>
+                                  )}
+                                  {student.assignDate && (
+                                    <div className="text-xs text-gray-400">
+                                      Tham gia:{" "}
+                                      {new Date(
+                                        student.assignDate
+                                      ).toLocaleDateString("vi-VN")}
+                                    </div>
+                                  )}
+                                </div>
+                              }
+                            />
+                            <Tag color="blue">Học sinh</Tag>
+                          </List.Item>
+                        )}
+                      />
+                    ) : (
+                      <Empty description="Chưa có thành viên nào trong lớp" />
+                    )}
+                  </TabPane>
+                  <TabPane
+                    tab={
+                      <span className="flex items-center">
+                        <FileText className="w-4 h-4 mr-2" />
+                        Bài thi mới
+                      </span>
+                    }
+                    key="exams"
+                  >
+                    {examsLoading ? (
+                      <div className="space-y-4">
+                        {[1, 2, 3].map((n) => (
+                          <Card key={n} loading={true} />
+                        ))}
+                      </div>
+                    ) : classExams.length > 0 ? (
+                      <>
+                        <div className="space-y-4 mb-6">
+                          {classExams.map((exam) => (
+                            <Card
+                              key={exam.id}
+                              className="hover:shadow-md transition-shadow"
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-3 mb-2">
+                                    <h3 className="font-semibold text-lg">
+                                      {exam.examName || "Chưa có tên"}
+                                    </h3>
+                                    <Tag color={getExamTypeColor(exam.type)}>
+                                      {getExamTypeText(exam.type)}
+                                    </Tag>
+                                  </div>
+
+                                  <p className="text-gray-600 mb-3">
+                                    {exam.description || "Chưa có mô tả"}
+                                  </p>
+
+                                  <div className="flex items-center gap-4 text-sm text-gray-500">
+                                    <div className="flex items-center">
+                                      <Clock className="w-4 h-4 mr-1" />
+                                      <span>
+                                        {formatDuration(exam.duration)}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center">
+                                      <FileText className="w-4 h-4 mr-1" />
+                                      <span>{exam.quantity || 0} câu hỏi</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="text-right ml-4">
+                                  <Button
+                                    type="primary"
+                                    onClick={() => {
+                                      if (exam.id) {
+                                        handleTakeExam(exam.id);
+                                      } else {
+                                        message.warning(
+                                          "Bài thi chưa có thông tin"
+                                        );
+                                      }
+                                    }}
+                                  >
+                                    Bắt đầu thi
+                                  </Button>
+                                </div>
+                              </div>
+                            </Card>
+                          ))}
+                        </div>
+
+                        <div className="flex justify-center">
+                          <Pagination
+                            current={examsPagination.current}
+                            pageSize={examsPagination.pageSize}
+                            total={examsPagination.total}
+                            onChange={handleExamsPageChange}
+                            showSizeChanger
+                            showTotal={(total) => `Tổng ${total} bài thi`}
+                            pageSizeOptions={["5", "10", "15", "20"]}
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      <Empty description="Chưa có bài thi nào trong lớp" />
+                    )}
+                  </TabPane>
+                  <TabPane
+                    tab={
+                      <span className="flex items-center">
+                        <Clock className="w-4 h-4 mr-2" />
+                        Lịch sử thi
+                      </span>
+                    }
+                    key="history"
+                  >
+                    {historyLoading ? (
+                      <div className="space-y-4">
+                        {[1, 2, 3].map((n) => (
+                          <Card key={n} loading={true} />
+                        ))}
+                      </div>
+                    ) : examHistory.length > 0 ? (
+                      <>
+                        <div className="space-y-4 mb-6">
+                          {examHistory.map((history) => (
+                            <Card
+                              key={history.id}
+                              className="hover:shadow-md transition-shadow"
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-3 mb-2">
+                                    <h3 className="font-semibold text-lg">
+                                      {history.examName || "Chưa có tên"}
+                                    </h3>
+                                    <Tag
+                                      color={getExamTypeColor(history.examType)}
+                                    >
+                                      {getExamTypeText(history.examType)}
+                                    </Tag>
+                                    <Tag
+                                      color={getExamStatusColor(history.status)}
+                                    >
+                                      {getExamStatusText(history.status)}
+                                    </Tag>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                                    <div>
+                                      <div className="text-gray-500">
+                                        Điểm số
+                                      </div>
+                                      <div className="font-semibold text-lg text-blue-600">
+                                        {history.grade || 0}
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <div className="text-gray-500">
+                                        Câu đúng
+                                      </div>
+                                      <div className="font-semibold">
+                                        {history.totalCorrectAnswers}/
+                                        {history.quantity}
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <div className="text-gray-500">
+                                        Đã trả lời
+                                      </div>
+                                      <div className="font-semibold">
+                                        {history.answeredQuestions}/
+                                        {history.quantity}
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <div className="text-gray-500">
+                                        Thời gian
+                                      </div>
+                                      <div className="font-semibold">
+                                        {formatDuration(history.duration)}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {history.status === 0 && (
+                                  <div className="text-right ml-4">
+                                    <Button
+                                      type="primary"
+                                      onClick={() => {
+                                        navigate(
+                                          `/student/exams/${history.id}`
+                                        );
+                                      }}
+                                    >
+                                      Tiếp tục làm
+                                    </Button>
+                                  </div>
+                                )}
+                                {history.status === 1 && (
+                                  <div className="text-right ml-4">
+                                    <Button
+                                      onClick={() => {
+                                        navigate(
+                                          `/student/exams/${history.id}`
+                                        );
+                                      }}
+                                    >
+                                      Xem kết quả
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
+                            </Card>
+                          ))}
+                        </div>
+
+                        <div className="flex justify-center">
+                          <Pagination
+                            current={historyPagination.current}
+                            pageSize={historyPagination.pageSize}
+                            total={historyPagination.total}
+                            onChange={handleHistoryPageChange}
+                            showSizeChanger
+                            showTotal={(total) => `Tổng ${total} bài thi`}
+                            pageSizeOptions={["5", "10", "15", "20"]}
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      <Empty description="Chưa có lịch sử thi nào" />
+                    )}
+                  </TabPane>
+                </Tabs>
+              </Card>
+            </motion.div>
+          </div>
+
+          <div className="lg:col-span-1">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="space-y-6"
+            >
+              <Card title="Giáo viên">
+                {classDetail.teacherInfo ? (
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-lg">
+                      {classDetail.teacherInfo.firstName?.[0]}
+                      {classDetail.teacherInfo.lastName?.[0]}
+                    </div>
+                    <div>
+                      <div className="font-semibold">
+                        {classDetail.teacherInfo.firstName}{" "}
+                        {classDetail.teacherInfo.lastName}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Giáo viên chủ nhiệm
+                      </div>
+                      {classDetail.teacherInfo.email && (
+                        <div className="text-xs text-gray-400">
+                          {classDetail.teacherInfo.email}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <Empty
+                    description="Chưa có thông tin giáo viên"
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  />
+                )}
+              </Card>
+
+              <Card title="Thống kê lớp">
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span>Tổng thành viên:</span>
+                    <span className="font-semibold">
+                      {classDetail.numberOfStudents || 0}
+                    </span>
+                  </div>
+                  {classDetail.dayOfWeeks &&
+                    classDetail.dayOfWeeks.length > 0 && (
+                      <div className="flex justify-between">
+                        <span>Lịch học:</span>
+                        <span className="font-semibold">
+                          {classDetail.dayOfWeeks
+                            .map((d) => dayNames[d] || d)
+                            .join(", ")}
+                        </span>
+                      </div>
+                    )}
+                  {classDetail.startTime && classDetail.endTime && (
+                    <div className="flex justify-between">
+                      <span>Giờ học:</span>
+                      <span className="font-semibold">
+                        {classDetail.startTime.slice(0, 5)} -{" "}
+                        {classDetail.endTime.slice(0, 5)}
+                      </span>
+                    </div>
+                  )}
+                  {classDetail.startDate && classDetail.endDate && (
+                    <div className="flex justify-between">
+                      <span>Thời gian:</span>
+                      <span className="font-semibold text-xs">
+                        {new Date(classDetail.startDate).toLocaleDateString(
+                          "vi-VN"
+                        )}{" "}
+                        -{" "}
+                        {new Date(classDetail.endDate).toLocaleDateString(
+                          "vi-VN"
+                        )}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span>Ngày tạo:</span>
+                    <span className="font-semibold">
+                      {classDetail.createdDate &&
+                        new Date(classDetail.createdDate).toLocaleDateString(
+                          "vi-VN"
+                        )}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Trạng thái:</span>
+                    <Tag
+                      color={
+                        isActiveByDate(
+                          classDetail.startDate,
+                          classDetail.endDate
+                        )
+                          ? "green"
+                          : "red"
+                      }
+                    >
+                      {isActiveByDate(
+                        classDetail.startDate,
+                        classDetail.endDate
+                      )
+                        ? "Đang hoạt động"
+                        : "Ngừng hoạt động"}
+                    </Tag>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default StudentClassDetail;
