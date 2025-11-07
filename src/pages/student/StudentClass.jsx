@@ -1,11 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Card, List, Tag, Empty, Skeleton, message, Tabs, Badge, Progress, Button } from 'antd';
-import { Users, BookOpen, Eye, ArrowRight, Calendar, UserCheck } from 'lucide-react';
-import { forumService } from '../../services/forumApi'; // Sửa import
-import { courseApi } from '../../services/courseApi';
-import { useAuth } from '../../context/AuthContext';
+import {
+  Badge,
+  Button,
+  Card,
+  Empty,
+  List,
+  message,
+  Pagination,
+  Progress,
+  Tabs,
+  Tag,
+} from "antd";
+import { motion } from "framer-motion";
+import {
+  ArrowRight,
+  BookOpen,
+  Calendar,
+  Clock,
+  Eye,
+  UserCheck,
+  Users,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { courseApi } from "../../services/courseApi";
+import { forumApi } from "../../services/forumApi";
 
 const { TabPane } = Tabs;
 
@@ -14,27 +33,47 @@ const StudentClasses = () => {
   const [myClasses, setMyClasses] = useState([]);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('classes');
+  const [activeTab, setActiveTab] = useState("classes");
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 9,
+    total: 0,
+    totalPages: 0,
+  });
 
   useEffect(() => {
     if (user?.id) {
-      fetchMyClasses();
+      fetchMyClasses(pagination.current, pagination.pageSize);
       fetchEnrolledCourses();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  const fetchMyClasses = async () => {
+  const fetchMyClasses = async (page = 1, size = 9) => {
     try {
       setLoading(true);
-      const classesWithDetails = await forumService.getMyClassesWithDetails(user.id);
-      console.log('✅ My classes with details:', classesWithDetails);
-      setMyClasses(classesWithDetails);
+      const response = await forumApi.getClasses({ page, size });
+      const data = response?.data?.data;
+
+      if (data) {
+        setMyClasses(data.items || []);
+        setPagination({
+          current: data.page || page,
+          pageSize: data.size || size,
+          total: data.total || 0,
+          totalPages: data.totalPages || 0,
+        });
+      }
     } catch (error) {
-      console.error('Error fetching my classes:', error);
-      message.error('Không thể tải danh sách lớp học');
+      console.error("Error fetching my classes:", error);
+      message.error("Không thể tải danh sách lớp học");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (page, pageSize) => {
+    fetchMyClasses(page, pageSize);
   };
 
   const fetchEnrolledCourses = async () => {
@@ -48,33 +87,53 @@ const StudentClasses = () => {
             ...courseResponse.data,
             progress: enrollment.progress,
             enrolledAt: enrollment.enrolledAt,
-            enrollmentId: enrollment.id
+            enrollmentId: enrollment.id,
           };
         })
       );
       setEnrolledCourses(coursesWithProgress);
     } catch (error) {
-      console.error('Error fetching enrolled courses:', error);
+      console.error("Error fetching enrolled courses:", error);
     }
   };
 
   const getLevelColor = (level) => {
     const colors = {
-      beginner: 'green',
-      intermediate: 'blue',
-      advanced: 'red'
+      beginner: "green",
+      intermediate: "blue",
+      advanced: "red",
     };
-    return colors[level] || 'default';
+    return colors[level] || "default";
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
+    return new Date(dateString).toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
     });
   };
 
+  const dayNames = {
+    1: "T2",
+    2: "T3",
+    3: "T4",
+    4: "T5",
+    5: "T6",
+    6: "T7",
+    7: "CN",
+  };
+
+  const isActiveByDate = (startDate, endDate) => {
+    try {
+      const now = new Date();
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      return start <= now && now <= end;
+    } catch {
+      return false;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -93,200 +152,285 @@ const StudentClasses = () => {
           </div>
 
           <Card>
-            <Tabs 
-              activeKey={activeTab} 
+            <Tabs
+              activeKey={activeTab}
               onChange={setActiveTab}
               items={[
                 {
-                  key: 'classes',
+                  key: "classes",
                   label: (
                     <span className="flex items-center">
                       <Users className="w-4 h-4 mr-2" />
                       Lớp học của tôi
-                      <Badge 
-                        count={myClasses.length} 
-                        style={{ backgroundColor: '#1890ff', marginLeft: 8 }} 
+                      <Badge
+                        count={pagination.total}
+                        style={{ backgroundColor: "#1890ff", marginLeft: 8 }}
                       />
                     </span>
                   ),
-                  children: myClasses.length > 0 ? (
+                  children: loading ? (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {myClasses.map((classItem, index) => (
-                        <motion.div
-                          key={classItem.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                        >
-                          <Card
-                            className="h-full hover:shadow-lg transition-shadow duration-300"
-                            actions={[
-                              <Link to={`/student/classes/${classItem.id}`} key="view">
-                                <div className="flex items-center justify-center text-primary-600">
-                                  <Eye className="w-4 h-4 mr-2" />
-                                  Vào lớp học
-                                </div>
-                              </Link>
-                            ]}
-                          >
-                            <div className="space-y-4">
-                              <div>
-                                <h3 className="font-bold text-lg text-gray-900 mb-2">
-                                  {classItem.name}
-                                </h3>
-                                <p className="text-gray-600 text-sm">
-                                  {classItem.description}
-                                </p>
-                              </div>
-
-                              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                                <img 
-                                  src={classItem.teacher?.avatar} 
-                                  alt={classItem.teacher?.name}
-                                  className="w-10 h-10 rounded-full"
-                                />
-                                <div className="flex-1">
-                                  <div className="font-medium text-sm">
-                                    {classItem.teacher?.name}
-                                  </div>
-                                  <div className="text-xs text-gray-500">
-                                    Giáo viên
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="flex justify-between text-sm text-gray-600">
-                                <div className="flex items-center">
-                                  <Users className="w-4 h-4 mr-1" />
-                                  <span>{classItem.memberCount} thành viên</span>
-                                </div>
-                                <div className="flex items-center">
-                                  <BookOpen className="w-4 h-4 mr-1" />
-                                  <span>{classItem.courseCount} khóa học</span>
-                                </div>
-                              </div>
-
-                              <div className="flex items-center text-xs text-gray-500">
-                                <Calendar className="w-3 h-3 mr-1" />
-                                <span>Tham gia: {formatDate(classItem.joinedAt)}</span>
-                              </div>
-
-                              <Tag color={classItem.isActive ? 'green' : 'red'}>
-                                {classItem.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}
-                              </Tag>
-                            </div>
-                          </Card>
-                        </motion.div>
+                      {[1, 2, 3].map((n) => (
+                        <Card key={n} loading={true} />
                       ))}
                     </div>
+                  ) : myClasses.length > 0 ? (
+                    <>
+                      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                        {myClasses.map((classItem, index) => (
+                          <motion.div
+                            key={classItem.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.1 }}
+                          >
+                            <Card
+                              className="h-full hover:shadow-lg transition-shadow duration-300"
+                              actions={[
+                                <Link
+                                  to={`/student/classes/${classItem.id}`}
+                                  key="view"
+                                >
+                                  <div className="flex items-center justify-center text-primary-600">
+                                    <Eye className="w-4 h-4 mr-2" />
+                                    Vào lớp học
+                                  </div>
+                                </Link>,
+                              ]}
+                            >
+                              <div className="space-y-4">
+                                <div>
+                                  <h3 className="font-bold text-lg text-gray-900 mb-2">
+                                    {classItem.name}
+                                  </h3>
+                                  <p className="text-gray-600 text-sm">
+                                    {classItem.description || "Chưa có mô tả"}
+                                  </p>
+                                </div>
+
+                                {classItem.teacherInfo && (
+                                  <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                                    <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
+                                      {classItem.teacherInfo.firstName?.[0]}
+                                      {classItem.teacherInfo.lastName?.[0]}
+                                    </div>
+                                    <div className="flex-1">
+                                      <div className="font-medium text-sm">
+                                        {classItem.teacherInfo.firstName}{" "}
+                                        {classItem.teacherInfo.lastName}
+                                      </div>
+                                      <div className="text-xs text-gray-500">
+                                        Giáo viên
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+
+                                <div className="space-y-2">
+                                  <div className="flex items-center text-sm text-gray-600">
+                                    <Users className="w-4 h-4 mr-2" />
+                                    <span>
+                                      {classItem.numberOfStudents || 0} học viên
+                                    </span>
+                                  </div>
+
+                                  {classItem.dayOfWeeks &&
+                                    classItem.dayOfWeeks.length > 0 && (
+                                      <div className="flex items-center text-sm text-gray-600">
+                                        <Calendar className="w-4 h-4 mr-2" />
+                                        <span>
+                                          Lịch:{" "}
+                                          {classItem.dayOfWeeks
+                                            .map((d) => dayNames[d] || d)
+                                            .join(", ")}
+                                        </span>
+                                      </div>
+                                    )}
+
+                                  {classItem.startTime && classItem.endTime && (
+                                    <div className="flex items-center text-sm text-gray-600">
+                                      <Clock className="w-4 h-4 mr-2" />
+                                      <span>
+                                        {classItem.startTime.slice(0, 5)} -{" "}
+                                        {classItem.endTime.slice(0, 5)}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {classItem.startDate && classItem.endDate && (
+                                  <div className="flex items-center text-xs text-gray-500">
+                                    <Calendar className="w-3 h-3 mr-1" />
+                                    <span>
+                                      {formatDate(classItem.startDate)} -{" "}
+                                      {formatDate(classItem.endDate)}
+                                    </span>
+                                  </div>
+                                )}
+
+                                <Tag
+                                  color={
+                                    isActiveByDate(
+                                      classItem.startDate,
+                                      classItem.endDate
+                                    )
+                                      ? "green"
+                                      : "red"
+                                  }
+                                >
+                                  {isActiveByDate(
+                                    classItem.startDate,
+                                    classItem.endDate
+                                  )
+                                    ? "Đang hoạt động"
+                                    : "Ngừng hoạt động"}
+                                </Tag>
+                              </div>
+                            </Card>
+                          </motion.div>
+                        ))}
+                      </div>
+
+                      <div className="flex justify-center mt-6">
+                        <Pagination
+                          current={pagination.current}
+                          pageSize={pagination.pageSize}
+                          total={pagination.total}
+                          onChange={handlePageChange}
+                          showSizeChanger
+                          showTotal={(total) => `Tổng ${total} lớp học`}
+                          pageSizeOptions={["6", "9", "12", "18"]}
+                        />
+                      </div>
+                    </>
                   ) : (
                     <Empty
                       image={Empty.PRESENTED_IMAGE_SIMPLE}
                       description={
                         <div>
-                          <p className="text-lg mb-2">Bạn chưa tham gia lớp học nào</p>
+                          <p className="text-lg mb-2">
+                            Bạn chưa tham gia lớp học nào
+                          </p>
                           <p className="text-gray-500">
                             Hãy liên hệ với giáo viên để được thêm vào lớp học
                           </p>
                         </div>
                       }
                     />
-                  )
+                  ),
                 },
                 {
-                  key: 'courses',
+                  key: "courses",
                   label: (
                     <span className="flex items-center">
                       <BookOpen className="w-4 h-4 mr-2" />
                       Khóa học của tôi
-                      <Badge 
-                        count={enrolledCourses.length} 
-                        style={{ backgroundColor: '#52c41a', marginLeft: 8 }} 
+                      <Badge
+                        count={enrolledCourses.length}
+                        style={{ backgroundColor: "#52c41a", marginLeft: 8 }}
                       />
                     </span>
                   ),
-                  children: enrolledCourses.length > 0 ? (
-                    <List
-                      dataSource={enrolledCourses}
-                      renderItem={(course, index) => (
-                        <motion.div
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                        >
-                          <List.Item
-                            className="bg-white rounded-lg mb-4 shadow-sm hover:shadow-md transition-shadow"
-                            actions={[
-                              course.progress === 100 ? (
-                                <Tag color="success">Đã hoàn thành</Tag>
-                              ) : (
-                                <Link to={`/learning/${course.enrollmentId}`}>
-                                  <Button type="primary">
-                                    {course.progress > 0 ? 'Tiếp tục học' : 'Bắt đầu học'}
-                                  </Button>
-                                </Link>
-                              )
-                            ]}
+                  children:
+                    enrolledCourses.length > 0 ? (
+                      <List
+                        dataSource={enrolledCourses}
+                        renderItem={(course, index) => (
+                          <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.1 }}
                           >
-                            <List.Item.Meta
-                              avatar={
-                                <img 
-                                  src={course.image} 
-                                  alt={course.title}
-                                  className="w-20 h-16 object-cover rounded-lg"
-                                />
-                              }
-                              title={
-                                <div className="flex items-center space-x-3">
-                                  <span className="font-semibold">{course.title}</span>
-                                  <Tag color={getLevelColor(course.level)} className="capitalize">
-                                    {course.level}
-                                  </Tag>
-                                </div>
-                              }
-                              description={
-                                <div className="space-y-2">
-                                  <p className="text-gray-600">{course.description}</p>
-                                  <div className="flex items-center space-x-4 text-sm text-gray-500">
-                                    <div className="flex items-center">
-                                      <UserCheck className="w-4 h-4 mr-1" />
-                                      <span>Tiến độ: {course.progress}%</span>
-                                    </div>
-                                    <div className="flex items-center">
-                                      <Calendar className="w-4 h-4 mr-1" />
-                                      <span>Đăng ký: {formatDate(course.enrolledAt)}</span>
-                                    </div>
+                            <List.Item
+                              className="bg-white rounded-lg mb-4 shadow-sm hover:shadow-md transition-shadow"
+                              actions={[
+                                course.progress === 100 ? (
+                                  <Tag color="success">Đã hoàn thành</Tag>
+                                ) : (
+                                  <Link to={`/learning/${course.enrollmentId}`}>
+                                    <Button type="primary">
+                                      {course.progress > 0
+                                        ? "Tiếp tục học"
+                                        : "Bắt đầu học"}
+                                    </Button>
+                                  </Link>
+                                ),
+                              ]}
+                            >
+                              <List.Item.Meta
+                                avatar={
+                                  <img
+                                    src={course.image}
+                                    alt={course.title}
+                                    className="w-20 h-16 object-cover rounded-lg"
+                                  />
+                                }
+                                title={
+                                  <div className="flex items-center space-x-3">
+                                    <span className="font-semibold">
+                                      {course.title}
+                                    </span>
+                                    <Tag
+                                      color={getLevelColor(course.level)}
+                                      className="capitalize"
+                                    >
+                                      {course.level}
+                                    </Tag>
                                   </div>
-                                  {course.progress > 0 && (
-                                    <Progress 
-                                      percent={course.progress} 
-                                      size="small" 
-                                      className="mt-2"
-                                    />
-                                  )}
-                                </div>
-                              }
-                            />
-                          </List.Item>
-                        </motion.div>
-                      )}
-                    />
-                  ) : (
-                    <Empty
-                      image={Empty.PRESENTED_IMAGE_SIMPLE}
-                      description={
-                        <div>
-                          <p className="text-lg mb-2">Bạn chưa đăng ký khóa học nào</p>
-                          <Link to="/courses">
-                            <Button type="primary" icon={<ArrowRight className="w-4 h-4" />}>
-                              Khám phá khóa học
-                            </Button>
-                          </Link>
-                        </div>
-                      }
-                    />
-                  )
-                }
+                                }
+                                description={
+                                  <div className="space-y-2">
+                                    <p className="text-gray-600">
+                                      {course.description}
+                                    </p>
+                                    <div className="flex items-center space-x-4 text-sm text-gray-500">
+                                      <div className="flex items-center">
+                                        <UserCheck className="w-4 h-4 mr-1" />
+                                        <span>Tiến độ: {course.progress}%</span>
+                                      </div>
+                                      <div className="flex items-center">
+                                        <Calendar className="w-4 h-4 mr-1" />
+                                        <span>
+                                          Đăng ký:{" "}
+                                          {formatDate(course.enrolledAt)}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    {course.progress > 0 && (
+                                      <Progress
+                                        percent={course.progress}
+                                        size="small"
+                                        className="mt-2"
+                                      />
+                                    )}
+                                  </div>
+                                }
+                              />
+                            </List.Item>
+                          </motion.div>
+                        )}
+                      />
+                    ) : (
+                      <Empty
+                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                        description={
+                          <div>
+                            <p className="text-lg mb-2">
+                              Bạn chưa đăng ký khóa học nào
+                            </p>
+                            <Link to="/courses">
+                              <Button
+                                type="primary"
+                                icon={<ArrowRight className="w-4 h-4" />}
+                              >
+                                Khám phá khóa học
+                              </Button>
+                            </Link>
+                          </div>
+                        }
+                      />
+                    ),
+                },
               ]}
             />
           </Card>

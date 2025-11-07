@@ -1,37 +1,31 @@
-import axios from "axios";
-
-// ✅ Cấu hình gọi API local
-const api = axios.create({
-  baseURL: "http://localhost:3001", // 👉 JSON Server chạy local tại cổng 3001
-});
+import api from "./api";
 
 // =================== EXAM API ===================
 export const examApi = {
   // Exam management
-  getAllExams: (teacherId) => api.get(`/exams?createdBy=${teacherId}`),
+  getAllExams: (params) => api.get(`/exams`, { params }),
   getExam: (id) => api.get(`/exams/${id}`),
   createExam: (examData) => api.post(`/exams`, examData),
   updateExam: (id, examData) => api.patch(`/exams/${id}`, examData),
+  addMoreQuestions: (id, questionData) =>
+    api.post(`/exams/${id}/exam-questions`, questionData),
+  removeExamQuestions: (id) => api.delete(`/exam-questions/${id}`),
   deleteExam: (id) => api.delete(`/exams/${id}`),
 
   // Exam questions
+  getAllQuestions: (params) => api.get(`/questions`, { params }),
+  getQuestion: (id) => api.get(`/questions/${id}`),
   getExamQuestions: (examId) => api.get(`/examQuestions?examId=${examId}`),
-  createQuestion: (questionData) => api.post(`/examQuestions`, questionData),
-  updateQuestion: (id, questionData) => api.patch(`/examQuestions/${id}`, questionData),
-  deleteQuestion: (id) => api.delete(`/examQuestions/${id}`),
+  createQuestion: (questionData) => api.post(`/questions`, questionData),
+  updateQuestion: (id, questionData) =>
+    api.patch(`/questions/${id}`, questionData),
+  deleteQuestion: (id) => api.delete(`/questions/${id}`),
 
   // Class exams
-  getClassExams: (classId) => api.get(`/classExams?classId=${classId}`),
-  assignExamToClass: (classId, examId, teacherId, dueDate) =>
-    api.post(`/classExams`, {
-      classId,
-      examId,
-      assignedBy: teacherId,
-      assignedAt: new Date().toISOString(),
-      dueDate,
-      isActive: true,
-    }),
-  removeExamFromClass: (id) => api.delete(`/classExams/${id}`),
+  getClassExams: (id) => api.get(`/forums/${id}/forum-exams`),
+  assignExamToClass: (forumId, examData) =>
+    api.post(`/forums/${forumId}/forum-exams`, examData),
+  removeExamFromClass: (id) => api.delete(`/forum-exams/${id}`),
 
   // Exam results
   getExamResults: (examId) => api.get(`/examResults?examId=${examId}`),
@@ -39,6 +33,13 @@ export const examApi = {
   submitExam: (resultData) => api.post(`/examResults`, resultData),
   getStudentExamResult: (examId, userId) =>
     api.get(`/examResults?examId=${examId}&userId=${userId}`),
+
+  // Exam doings (history)
+  takeExam: (forumExamId) =>
+    api.post(`/forum-exams/${forumExamId}/exam-doings`),
+  getExamDoings: (examDoingId) => api.get(`/exam-doings/${examDoingId}`),
+  updateExamDoing: (examDoingId, doingData) =>
+    api.patch(`/exam-doings/${examDoingId}`, doingData),
 };
 
 // =================== EXAM SERVICE ===================

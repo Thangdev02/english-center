@@ -1,13 +1,13 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authApi } from '../services/userApi';
-import { testApiConnection } from '../services/testApi';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { authApi } from "../services/userApi";
+import { testApiConnection } from "../services/testApi";
 
 const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -22,11 +22,11 @@ export const AuthProvider = ({ children }) => {
       const connected = await testApiConnection();
       setApiConnected(connected);
 
-      const savedUser = localStorage.getItem('user');
+      const savedUser = localStorage.getItem("user");
       if (savedUser) {
         setUser(JSON.parse(savedUser));
       }
-      
+
       setLoading(false);
     };
 
@@ -34,33 +34,23 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (credentials) => {
-    try {
-      if (!apiConnected) {
-        throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
-      }
-  
+    {
+      // if (!apiConnected) {
+      //   throw new Error(
+      //     "Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng."
+      //   );
+      // }
+
       const { user: userData } = await authApi.login(credentials);
       setUser(userData);
-      console.log('🏠 Login successful, should navigate to home');
+      console.log("🏠 Login successful, should navigate to home");
       return userData;
-    } catch (error) {
-      console.error('🚫 Login failed:', error.message);
-      throw new Error('Đăng nhập thất bại: ' + error.message);
     }
   };
 
   const register = async (userData) => {
-    try {
-      if (!apiConnected) {
-        throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
-      }
-
-      const { user: newUser } = await authApi.register(userData);
-      setUser(newUser);
-      return newUser;
-    } catch (error) {
-      throw new Error('Đăng ký thất bại: ' + error.message);
-    }
+    const { user: newUser } = await authApi.register(userData);
+    setUser(newUser);
   };
 
   const logout = () => {
@@ -71,7 +61,7 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = (profileData) => {
     const updatedUser = { ...user, ...profileData };
     setUser(updatedUser);
-    localStorage.setItem('user', JSON.stringify(updatedUser));
+    localStorage.setItem("user", JSON.stringify(updatedUser));
   };
 
   const value = {
@@ -81,12 +71,8 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateProfile,
     loading,
-    apiConnected
+    apiConnected,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

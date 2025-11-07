@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { 
-  BookOpen, 
-  Users, 
-  Trophy, 
-  User, 
-  LogOut, 
-  Menu, 
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  BookOpen,
+  Users,
+  Trophy,
+  User,
+  LogOut,
+  Menu,
   X,
-  Shield
-} from 'lucide-react';
-import { Dropdown, Button } from 'antd';
-import { useAuth } from '../../context/AuthContext';
+  Shield,
+} from "lucide-react";
+import { Dropdown, Button } from "antd";
+import { useAuth } from "../../context/AuthContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,40 +21,40 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate("/");
   };
 
   const userMenuItems = [
     {
-      key: 'profile',
+      key: "profile",
       icon: <User size={16} />,
       label: <Link to="/profile">Hồ sơ</Link>,
     },
     {
-      key: 'logout',
+      key: "logout",
       icon: <LogOut size={16} />,
       label: <span onClick={handleLogout}>Đăng xuất</span>,
     },
   ];
 
-  if (user?.role === 'admin') {
+  if (user?.role === 0) {
     userMenuItems.unshift({
-      key: 'admin',
+      key: "admin",
       icon: <Shield size={16} />,
       label: <Link to="/admin">Quản trị</Link>,
     });
   }
 
-  if (user?.role === 'teacher') {
+  if (user?.role === 2) {
     userMenuItems.unshift({
-      key: 'teacher',
+      key: "teacher",
       icon: <Users size={16} />,
       label: <Link to="/teacher">Giáo viên</Link>,
     });
   }
 
   return (
-    <motion.nav 
+    <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       className="bg-white shadow-lg sticky top-0 z-50"
@@ -74,32 +74,35 @@ const Navbar = () => {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link 
-              to="/courses" 
+            <Link
+              to="/courses"
               className="text-gray-700 hover:text-primary-600 transition-colors duration-200 font-medium"
             >
               Khóa học
             </Link>
-            <Link 
-              to="/student/classes" 
+            <Link
+              to="/student/classes"
               className="text-gray-700 hover:text-primary-600 transition-colors duration-200 font-medium"
             >
               Lớp học của tôi
             </Link>
-            <Link 
-              to="/leaderboard" 
+            <Link
+              to="/leaderboard"
               className="text-gray-700 hover:text-primary-600 transition-colors duration-200 font-medium"
             >
               <Trophy className="inline w-4 h-4 mr-1" />
               Bảng xếp hạng
             </Link>
-            
+
             {user ? (
               <div className="flex items-center space-x-4">
-                <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
+                <Dropdown
+                  menu={{ items: userMenuItems }}
+                  placement="bottomRight"
+                >
                   <Button type="text" className="flex items-center space-x-2">
                     <User size={16} />
-                    <span>{user.name}</span>
+                    <span>{user.firstName + " " + user.lastName}</span>
                   </Button>
                 </Dropdown>
               </div>
@@ -132,37 +135,37 @@ const Navbar = () => {
             className="md:hidden py-4 border-t"
           >
             <div className="flex flex-col space-y-4">
-              <Link 
-                to="/courses" 
+              <Link
+                to="/courses"
                 className="text-gray-700 hover:text-primary-600"
                 onClick={() => setIsOpen(false)}
               >
                 Khóa học
               </Link>
-              <Link 
-              to="/student/classes" 
-              className="text-gray-700 hover:text-primary-600 transition-colors duration-200 font-medium"
-            >
-              Lớp học của tôi
-            </Link>
-              <Link 
-                to="/leaderboard" 
+              <Link
+                to="/student/classes"
+                className="text-gray-700 hover:text-primary-600 transition-colors duration-200 font-medium"
+              >
+                Lớp học của tôi
+              </Link>
+              <Link
+                to="/leaderboard"
                 className="text-gray-700 hover:text-primary-600"
                 onClick={() => setIsOpen(false)}
               >
                 Bảng xếp hạng
               </Link>
-              
+
               {user ? (
                 <>
-                  <Link 
-                    to="/profile" 
+                  <Link
+                    to="/profile"
                     className="text-gray-700 hover:text-primary-600"
                     onClick={() => setIsOpen(false)}
                   >
                     Hồ sơ
                   </Link>
-                  <button 
+                  <button
                     onClick={handleLogout}
                     className="text-left text-gray-700 hover:text-primary-600"
                   >
@@ -171,15 +174,15 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
-                  <Link 
-                    to="/login" 
+                  <Link
+                    to="/login"
                     className="text-gray-700 hover:text-primary-600"
                     onClick={() => setIsOpen(false)}
                   >
                     Đăng nhập
                   </Link>
-                  <Link 
-                    to="/register" 
+                  <Link
+                    to="/register"
                     className="text-gray-700 hover:text-primary-600"
                     onClick={() => setIsOpen(false)}
                   >
