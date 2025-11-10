@@ -37,9 +37,15 @@ export const examApi = {
   // Exam doings (history)
   takeExam: (forumExamId) =>
     api.post(`/forum-exams/${forumExamId}/exam-doings`),
+  takeFreeExam: (examId) => api.post(`/exams/${examId}/free-exam-doings`),
   getExamDoings: (examDoingId) => api.get(`/exam-doings/${examDoingId}`),
+  getAllFreeExamDoings: (params) => api.get(`/free-exam-doings`, { params }),
+  getFreeExamDoings: (examDoingId) =>
+    api.get(`/free-exam-doings/${examDoingId}`),
   updateExamDoing: (examDoingId, doingData) =>
     api.patch(`/exam-doings/${examDoingId}`, doingData),
+  updateFreeExamDoing: (examDoingId, doingData) =>
+    api.patch(`/free-exam-doings/${examDoingId}`, doingData),
 };
 
 // =================== EXAM SERVICE ===================
