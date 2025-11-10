@@ -194,9 +194,11 @@ const AdminDashboard = () => {
                     Quản lý người dùng
                   </Button>
                 </Link>
-                <Button size="large" block>
-                  Xem báo cáo
-                </Button>
+                <Link to="/admin/exams">
+                  <Button size="large" block>
+                    Bài thi miễn phí
+                  </Button>
+                </Link>
                 <Button size="large" block>
                   Cài đặt hệ thống
                 </Button>

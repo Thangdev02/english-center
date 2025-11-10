@@ -8,13 +8,31 @@ import {
   Skeleton,
   Tabs,
   Tag,
+  Table,
+  Progress,
+  Calendar,
+  Badge,
 } from "antd";
 import { motion } from "framer-motion";
-import { ArrowLeft, Calendar, Clock, FileText, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  Calendar as CalendarIcon,
+  Clock,
+  FileText,
+  Users,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { examApi } from "../../services/examApi";
 import { forumApi } from "../../services/forumApi";
+import dayjs from "dayjs";
+import isBetween from "dayjs/plugin/isBetween";
+
+// Extend dayjs with isBetween plugin
+dayjs.extend(isBetween);
 
 const { TabPane } = Tabs;
 
@@ -40,6 +58,8 @@ const StudentClassDetail = () => {
     total: 0,
     totalPages: 0,
   });
+  const [attendanceDashboard, setAttendanceDashboard] = useState(null);
+  const [attendanceLoading, setAttendanceLoading] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -58,6 +78,13 @@ const StudentClassDetail = () => {
   useEffect(() => {
     if (id && activeTab === "history") {
       fetchExamHistory(historyPagination.current, historyPagination.pageSize);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, activeTab]);
+
+  useEffect(() => {
+    if (id && activeTab === "attendance") {
+      fetchAttendanceDashboard();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, activeTab]);
@@ -132,6 +159,19 @@ const StudentClassDetail = () => {
 
   const handleHistoryPageChange = (page, pageSize) => {
     fetchExamHistory(page, pageSize);
+  };
+
+  const fetchAttendanceDashboard = async () => {
+    try {
+      setAttendanceLoading(true);
+      const response = await forumApi.getAttendancesDashboard(id);
+      setAttendanceDashboard(response.data?.data || null);
+    } catch (error) {
+      console.error("Error fetching attendance dashboard:", error);
+      message.error("Không thể tải báo cáo điểm danh");
+    } finally {
+      setAttendanceLoading(false);
+    }
   };
 
   const handleTakeExam = async (forumExamId) => {
@@ -216,6 +256,89 @@ const StudentClassDetail = () => {
     return "default";
   };
 
+  const getAttendanceStatusIcon = (status) => {
+    if (status === "Có mặt")
+      return <CheckCircle className="w-4 h-4 text-green-500" />;
+    if (status === "Vắng mặt")
+      return <XCircle className="w-4 h-4 text-red-500" />;
+    if (status === "Chưa điểm danh")
+      return <AlertCircle className="w-4 h-4 text-orange-500" />;
+    return <Clock className="w-4 h-4 text-gray-400" />;
+  };
+
+  const getAttendanceStatusColor = (status) => {
+    if (status === "Có mặt") return "green";
+    if (status === "Vắng mặt") return "red";
+    if (status === "Chưa điểm danh") return "orange";
+    return "default";
+  };
+
+  const getAttendanceForDate = (date) => {
+    if (!attendanceDashboard?.items) return null;
+    const dateStr = dayjs(date).format("YYYY-MM-DD");
+    return attendanceDashboard.items.find((item) => item.date === dateStr);
+  };
+
+  const getListData = (value) => {
+    const attendance = getAttendanceForDate(value);
+    if (!attendance) return [];
+
+    const statusConfig = {
+      "Có mặt": { type: "success", content: "Có mặt" },
+      "Vắng mặt": { type: "error", content: "Vắng mặt" },
+      "Chưa điểm danh": { type: "warning", content: "Chưa điểm danh" },
+      "Chưa học": { type: "default", content: "Chưa học" },
+    };
+
+    const config = statusConfig[attendance.status] || {
+      type: "default",
+      content: attendance.status,
+    };
+
+    return [config];
+  };
+
+  const dateCellRender = (value) => {
+    const listData = getListData(value);
+    return (
+      <ul className="events">
+        {listData.map((item, index) => (
+          <li key={index}>
+            <Badge status={item.type} text={item.content} />
+          </li>
+        ))}
+      </ul>
+    );
+  };
+
+  const attendanceColumns = [
+    {
+      title: "Ngày học",
+      dataIndex: "date",
+      key: "date",
+      width: 150,
+      render: (date) => dayjs(date).format("DD/MM/YYYY"),
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      width: 180,
+      render: (status) => (
+        <div className="flex items-center space-x-2">
+          {getAttendanceStatusIcon(status)}
+          <Tag color={getAttendanceStatusColor(status)}>{status}</Tag>
+        </div>
+      ),
+    },
+    {
+      title: "Ghi chú",
+      dataIndex: "note",
+      key: "note",
+      render: (note) => note || "-",
+    },
+  ];
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
@@ -267,7 +390,7 @@ const StudentClassDetail = () => {
                 {classDetail.dayOfWeeks &&
                   classDetail.dayOfWeeks.length > 0 && (
                     <div className="flex items-center">
-                      <Calendar className="w-4 h-4 mr-1" />
+                      <CalendarIcon className="w-4 h-4 mr-1" />
                       <span>
                         {classDetail.dayOfWeeks
                           .map((d) => dayNames[d] || d)
@@ -574,6 +697,110 @@ const StudentClassDetail = () => {
                       </>
                     ) : (
                       <Empty description="Chưa có lịch sử thi nào" />
+                    )}
+                  </TabPane>
+
+                  {/* Attendance Report Tab */}
+                  <TabPane
+                    tab={
+                      <span className="flex items-center">
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Báo cáo điểm danh
+                      </span>
+                    }
+                    key="attendance"
+                  >
+                    {attendanceLoading ? (
+                      <div className="space-y-4">
+                        <Skeleton active paragraph={{ rows: 6 }} />
+                      </div>
+                    ) : attendanceDashboard ? (
+                      <>
+                        {/* Summary Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                          <Card className="text-center">
+                            <div className="text-3xl font-bold text-blue-600 mb-2">
+                              {attendanceDashboard.totalDate || 0}
+                            </div>
+                            <div className="text-gray-600">Tổng số buổi</div>
+                          </Card>
+                          <Card className="text-center">
+                            <div className="text-3xl font-bold text-green-600 mb-2">
+                              {attendanceDashboard.totalPresent || 0}
+                            </div>
+                            <div className="text-gray-600">Có mặt</div>
+                            <Progress
+                              percent={Math.round(
+                                ((attendanceDashboard.totalPresent || 0) /
+                                  (attendanceDashboard.totalDate || 1)) *
+                                  100
+                              )}
+                              size="small"
+                              status="success"
+                              className="mt-2"
+                            />
+                          </Card>
+                          <Card className="text-center">
+                            <div className="text-3xl font-bold text-red-600 mb-2">
+                              {attendanceDashboard.totalAbsent || 0}
+                            </div>
+                            <div className="text-gray-600">Vắng mặt</div>
+                            <Progress
+                              percent={Math.round(
+                                ((attendanceDashboard.totalAbsent || 0) /
+                                  (attendanceDashboard.totalDate || 1)) *
+                                  100
+                              )}
+                              size="small"
+                              status="exception"
+                              className="mt-2"
+                            />
+                          </Card>
+                        </div>
+
+                        {/* Calendar View */}
+                        <Card title="Lịch điểm danh" className="mb-6">
+                          <div className="mb-4 flex flex-wrap gap-4 text-sm">
+                            <div className="flex items-center">
+                              <Badge status="success" />
+                              <span className="ml-2">Có mặt</span>
+                            </div>
+                            <div className="flex items-center">
+                              <Badge status="error" />
+                              <span className="ml-2">Vắng mặt</span>
+                            </div>
+                            <div className="flex items-center">
+                              <Badge status="warning" />
+                              <span className="ml-2">Chưa điểm danh</span>
+                            </div>
+                            <div className="flex items-center">
+                              <Badge status="default" />
+                              <span className="ml-2">Chưa học</span>
+                            </div>
+                          </div>
+                          <Calendar
+                            cellRender={dateCellRender}
+                            fullscreen={false}
+                          />
+                        </Card>
+
+                        {/* Attendance Table */}
+                        <Card title="Chi tiết điểm danh">
+                          <Table
+                            dataSource={attendanceDashboard.items || []}
+                            columns={attendanceColumns}
+                            rowKey="date"
+                            pagination={{
+                              pageSize: 10,
+                              showSizeChanger: true,
+                              showTotal: (total) => `Tổng ${total} buổi học`,
+                            }}
+                            scroll={{ x: 600 }}
+                          />
+                        </Card>
+                      </>
+                    ) : (
+                      <Empty description="Chưa có dữ liệu điểm danh" />
                     )}
                   </TabPane>
                 </Tabs>

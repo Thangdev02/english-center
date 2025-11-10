@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm run tailwind:watch\" \"vite\" \"npm run server\"",
+    "dev": "concurrently \"npm run tailwind:watch\" \"vite --port 2468\" \"npm run server\"",
     "server": "json-server --watch db.json --port 3001",
     "build": "npm run tailwind:build && vite build",
     "preview": "vite preview",

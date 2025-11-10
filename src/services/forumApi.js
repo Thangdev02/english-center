@@ -41,6 +41,16 @@ export const forumApi = {
     api.get(`/forums/${forumId}/forum-exams`, { params }),
   getClassExamsHistory: (forumId, params) =>
     api.get(`/forums/${forumId}/exam-doings`, { params }),
+
+  getAttendances: (forumId, date) =>
+    api.get(`/forums/${forumId}/attendances?date=${date}`),
+  postAttendances: (forumId, date) =>
+    api.post(`/forums/${forumId}/attendances?date=${date}`),
+  updateAttendance: (forumId, date, attendanceData) =>
+    api.patch(`/forums/${forumId}/attendances?date=${date}`, attendanceData),
+
+  getAttendancesDashboard: (forumId) =>
+    api.get(`/forums/${forumId}/attendance-dashboard`),
 };
 
 export const forumService = {

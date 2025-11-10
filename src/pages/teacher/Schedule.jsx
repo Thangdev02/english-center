@@ -9,11 +9,14 @@ import {
   Select,
   Spin,
   Tag,
+  Checkbox,
+  Form,
+  Table,
 } from "antd";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import { motion } from "framer-motion";
-import { ArrowLeft, Clock, MapPin, Users } from "lucide-react";
+import { ArrowLeft, Clock, MapPin, Users, UserCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -32,6 +35,13 @@ const TeacherSchedule = () => {
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [loading, setLoading] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(dayjs());
+  const [attendanceModalVisible, setAttendanceModalVisible] = useState(false);
+  const [selectedClassForAttendance, setSelectedClassForAttendance] =
+    useState(null);
+  const [attendanceDate, setAttendanceDate] = useState(null);
+  const [attendances, setAttendances] = useState([]);
+  const [loadingAttendance, setLoadingAttendance] = useState(false);
+  const [savingAttendance, setSavingAttendance] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -155,6 +165,85 @@ const TeacherSchedule = () => {
     );
   };
 
+  const handleAttendanceClick = async (classItem, date) => {
+    if (!classItem.numberOfStudents || classItem.numberOfStudents === 0) {
+      message.warning("Lớp học chưa có học viên");
+      return;
+    }
+
+    setSelectedClassForAttendance(classItem);
+    setAttendanceDate(date);
+    setAttendanceModalVisible(true);
+    await fetchAttendances(classItem.id, date);
+  };
+
+  const fetchAttendances = async (forumId, date) => {
+    try {
+      setLoadingAttendance(true);
+      const formattedDate = dayjs(date).format("YYYY-MM-DD");
+      const response = await forumApi.getAttendances(forumId, formattedDate);
+
+      if (
+        !response.data?.data ||
+        (Array.isArray(response.data.data) && response.data.data.length === 0)
+      ) {
+        // Empty array - need to create attendance
+        await forumApi.postAttendances(forumId, formattedDate);
+        // Fetch again after creating
+        const newResponse = await forumApi.getAttendances(
+          forumId,
+          formattedDate
+        );
+        setAttendances(newResponse.data?.data || []);
+      } else {
+        setAttendances(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching attendances:", error);
+      message.error(
+        error.response?.data?.data || "Không thể tải danh sách điểm danh"
+      );
+    } finally {
+      setLoadingAttendance(false);
+    }
+  };
+
+  const handleAttendanceChange = (attendanceId, field, value) => {
+    setAttendances((prev) =>
+      prev.map((att) =>
+        att.id === attendanceId ? { ...att, [field]: value } : att
+      )
+    );
+  };
+
+  const handleSaveAttendance = async () => {
+    try {
+      setSavingAttendance(true);
+
+      const attendanceData = attendances.map((att) => ({
+        attendanceId: att.id,
+        isPresent: att.isPresent,
+        note: att.note || null,
+      }));
+
+      await forumApi.updateAttendance(
+        selectedClassForAttendance.id,
+        attendanceDate.format("YYYY-MM-DD"),
+        attendanceData
+      );
+
+      message.success("Cập nhật điểm danh thành công!");
+      setAttendanceModalVisible(false);
+    } catch (error) {
+      console.error("Error saving attendance:", error);
+      message.error(
+        error.response?.data?.data || "Không thể cập nhật điểm danh"
+      );
+    } finally {
+      setSavingAttendance(false);
+    }
+  };
+
   const handleClassClick = (classItem) => {
     Modal.info({
       title: classItem.name,
@@ -214,6 +303,52 @@ const TeacherSchedule = () => {
   };
 
   const todayClasses = getClassesForDate(selectedDate);
+
+  const attendanceColumns = [
+    {
+      title: "Học viên",
+      dataIndex: "studentName",
+      key: "studentName",
+      width: 200,
+    },
+    {
+      title: "Có mặt",
+      dataIndex: "isPresent",
+      key: "isPresent",
+      width: 100,
+      render: (isPresent, record) => (
+        <Checkbox
+          checked={isPresent}
+          onChange={(e) =>
+            handleAttendanceChange(record.id, "isPresent", e.target.checked)
+          }
+        />
+      ),
+    },
+    {
+      title: "Thời gian",
+      dataIndex: "checkInTime",
+      key: "checkInTime",
+      width: 150,
+      render: (time) => (time ? dayjs(time, "HH:mm:ss").format("HH:mm") : "-"),
+    },
+    {
+      title: "Ghi chú",
+      dataIndex: "note",
+      key: "note",
+      render: (note, record) => (
+        <Input.TextArea
+          value={note || ""}
+          onChange={(e) =>
+            handleAttendanceChange(record.id, "note", e.target.value)
+          }
+          placeholder="Nhập ghi chú..."
+          rows={2}
+          maxLength={200}
+        />
+      ),
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -308,10 +443,25 @@ const TeacherSchedule = () => {
                                   .join(", ")}
                               </div>
                             )}
-                          <div className="flex items-center text-sm text-gray-600">
+                          <div className="flex items-center text-sm text-gray-600 mb-2">
                             <Users className="w-4 h-4 mr-1" />
                             {classItem.numberOfStudents || 0} học viên
                           </div>
+                          <Button
+                            type="primary"
+                            size="middle"
+                            icon={<UserCheck className="w-3 h-3" />}
+                            onClick={() =>
+                              handleAttendanceClick(classItem, selectedDate)
+                            }
+                            disabled={
+                              !classItem.numberOfStudents ||
+                              classItem.numberOfStudents === 0
+                            }
+                            className="w-full"
+                          >
+                            Điểm danh
+                          </Button>
                         </div>
                       </List.Item>
                     )}
@@ -355,6 +505,69 @@ const TeacherSchedule = () => {
               </Card>
             </div>
           </div>
+
+          {/* Attendance Modal */}
+          <Modal
+            title={
+              <div>
+                <div className="text-lg font-semibold">
+                  Điểm danh - {selectedClassForAttendance?.name}
+                </div>
+                <div className="text-sm text-gray-500 font-normal">
+                  Ngày: {attendanceDate?.format("DD/MM/YYYY")}
+                </div>
+              </div>
+            }
+            open={attendanceModalVisible}
+            onCancel={() => setAttendanceModalVisible(false)}
+            width={800}
+            footer={[
+              <Button
+                key="cancel"
+                onClick={() => setAttendanceModalVisible(false)}
+              >
+                Hủy
+              </Button>,
+              <Button
+                key="save"
+                type="primary"
+                loading={savingAttendance}
+                onClick={handleSaveAttendance}
+              >
+                Lưu điểm danh
+              </Button>,
+            ]}
+          >
+            {loadingAttendance ? (
+              <div className="text-center py-8">
+                <Spin size="large" />
+                <p className="mt-4 text-gray-500">Đang tải danh sách...</p>
+              </div>
+            ) : (
+              <div>
+                <div className="mb-4 p-3 bg-blue-50 rounded">
+                  <div className="text-sm text-gray-700">
+                    <strong>Tổng số học viên:</strong> {attendances.length}
+                  </div>
+                  <div className="text-sm text-gray-700">
+                    <strong>Có mặt:</strong>{" "}
+                    {attendances.filter((a) => a.isPresent).length}
+                  </div>
+                  <div className="text-sm text-gray-700">
+                    <strong>Vắng:</strong>{" "}
+                    {attendances.filter((a) => !a.isPresent).length}
+                  </div>
+                </div>
+                <Table
+                  dataSource={attendances}
+                  columns={attendanceColumns}
+                  rowKey="id"
+                  pagination={false}
+                  scroll={{ y: 400 }}
+                />
+              </div>
+            )}
+          </Modal>
         </motion.div>
       </div>
     </div>

@@ -81,6 +81,12 @@ const Navbar = () => {
               Khóa học
             </Link>
             <Link
+              to="/exams"
+              className="text-gray-700 hover:text-primary-600 transition-colors duration-200 font-medium"
+            >
+              Bài thi
+            </Link>
+            <Link
               to="/student/classes"
               className="text-gray-700 hover:text-primary-600 transition-colors duration-200 font-medium"
             >

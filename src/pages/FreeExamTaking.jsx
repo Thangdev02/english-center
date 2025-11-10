@@ -20,12 +20,12 @@ import {
 } from "antd";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { examApi } from "../../services/examApi";
+import { examApi } from "../services/examApi";
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 
-const StudentExam = () => {
+const FreeExamTaking = () => {
   const { id } = useParams(); // exam doing id
   const navigate = useNavigate();
 
@@ -47,7 +47,7 @@ const StudentExam = () => {
   const fetchExamDoing = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await examApi.getExamDoings(id);
+      const response = await examApi.getFreeExamDoings(id);
       const data = response?.data?.data;
 
       if (!data) {
@@ -131,7 +131,7 @@ const StudentExam = () => {
 
         if (currentAnswer && currentAnswer !== lastSavedAnswer) {
           console.log(`Saving essay answer for question ${qh.id}`);
-          await examApi.updateExamDoing(id, {
+          await examApi.updateFreeExamDoing(id, {
             questionHistoryId: qh.id,
             yourAnswer: currentAnswer,
             duration: formatTime(currentTime),
@@ -142,7 +142,7 @@ const StudentExam = () => {
       }
 
       // Update duration
-      await examApi.updateExamDoing(id, {
+      await examApi.updateFreeExamDoing(id, {
         duration: formatTime(currentTime),
         status: 0,
       });
@@ -170,7 +170,7 @@ const StudentExam = () => {
 
       for (const qh of essayQuestions) {
         if (answers[qh.id]) {
-          await examApi.updateExamDoing(id, {
+          await examApi.updateFreeExamDoing(id, {
             questionHistoryId: qh.id,
             yourAnswer: answers[qh.id],
             duration: formatTime(currentTime),
@@ -180,7 +180,7 @@ const StudentExam = () => {
       }
 
       // Submit the exam
-      await examApi.updateExamDoing(id, {
+      await examApi.updateFreeExamDoing(id, {
         duration: formatTime(currentTime),
         status: 1, // Đã nộp
       });
@@ -304,7 +304,7 @@ const StudentExam = () => {
     // For multiple choice, immediately save the answer
     if (questionType === 0) {
       try {
-        await examApi.updateExamDoing(id, {
+        await examApi.updateFreeExamDoing(id, {
           questionHistoryId,
           yourAnswer: answerContent, // Send answer content, not ID
           duration: formatTime(timeRemainingRef.current),
@@ -676,4 +676,4 @@ const StudentExam = () => {
   );
 };
 
-export default StudentExam;
+export default FreeExamTaking;

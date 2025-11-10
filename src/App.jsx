@@ -21,9 +21,12 @@ import TeacherSchedule from "./pages/teacher/Schedule";
 import ForumManager from "./pages/teacher/ForumManager";
 import StudentClasses from "./pages/student/StudentClass";
 import StudentClassDetail from "./pages/student/StudentClassDetail";
-import ExamManager from "./pages/teacher/ExamManager";
-import ExamEditor from "./pages/teacher/ExamEditor";
-import ExamCreator from "./pages/teacher/ExamCreator";
+import TeacherExamManager from "./pages/teacher/ExamManager";
+import TeacherExamEditor from "./pages/teacher/ExamEditor";
+import TeacherExamCreator from "./pages/teacher/ExamCreator";
+import AdminExamManager from "./pages/admin/ExamManager";
+import AdminExamEditor from "./pages/admin/ExamEditor";
+import AdminExamCreator from "./pages/admin/ExamCreator";
 import ExamTaking from "./pages/ExamTaking";
 import AddCourse from "./pages/admin/AddCourse";
 import ScrollToTop from "./components/ScrollToTop";
@@ -32,6 +35,8 @@ import UserManagement from "./pages/admin/UserManagement";
 import CourseManagement from "./pages/admin/CourseManagement";
 import StudentExam from "./pages/student/StudentExam";
 import EditCourse from "./pages/admin/EditCourse";
+import FreeExams from "./pages/FreeExams";
+import FreeExamTaking from "./pages/FreeExamTaking";
 
 function App() {
   return (
@@ -63,6 +68,7 @@ function App() {
                 <Route path="/student/exams/:id" element={<StudentExam />} />
                 <Route path="/learning/:courseId" element={<Learning />} />
                 <Route path="/forum/:courseId" element={<Forum />} />
+                <Route path="/free-exams" element={<FreeExams />} />
                 {/* <Route path="/exam/:courseId" element={<Exam />} /> */}
                 <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/admin" element={<AdminDashboard />} />
@@ -70,6 +76,15 @@ function App() {
                 <Route path="/admin/courses/:id" element={<EditCourse />} />
                 <Route path="/admin/users" element={<UserManagement />} />
                 <Route path="/admin/courses" element={<CourseManagement />} />
+                <Route path="/admin/exams" element={<AdminExamManager />} />
+                <Route
+                  path="/admin/exams/:id/edit"
+                  element={<AdminExamEditor />}
+                />
+                <Route
+                  path="/admin/exams/create"
+                  element={<AdminExamCreator />}
+                />
                 <Route path="/teacher" element={<TeacherDashboard />} />
                 <Route path="/teacher/schedule" element={<TeacherSchedule />} />
                 <Route path="/teacher/forum" element={<ForumManager />} />
@@ -77,13 +92,18 @@ function App() {
                   path="/teacher/students"
                   element={<StudentManagement />}
                 />
-                <Route path="/teacher/exams" element={<ExamManager />} />
-                <Route path="/teacher/exams/create" element={<ExamCreator />} />
+                <Route path="/teacher/exams" element={<TeacherExamManager />} />
+                <Route
+                  path="/teacher/exams/create"
+                  element={<TeacherExamCreator />}
+                />
                 <Route
                   path="/teacher/exams/:id/edit"
-                  element={<ExamEditor />}
+                  element={<TeacherExamEditor />}
                 />
                 <Route path="/exam/:id" element={<ExamTaking />} />
+                <Route path="/exams" element={<FreeExams />} />
+                <Route path="/exams/:id" element={<FreeExamTaking />} />
                 <Route path="/test-tailwind" element={<TestTailwind />} />
               </Routes>
             </main>
