@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://localhost:7133/api/v1";
+const API_BASE_URL = "https://super-panda.winnertech.cloud/api/v1";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
