@@ -121,31 +121,63 @@ const StudentExam = () => {
         formatTime(currentTime)
       );
 
-      // Save essay answers that have been modified since last save
-      const essayQuestions =
-        examData.questionHistories?.filter((qh) => qh.questionType === 1) || [];
+      // For essay exams (type 1), save the answer with questionHistoryId
+      if (examData.examType === 1) {
+        const essayQuestion = examData.questionHistories?.[0];
+        if (essayQuestion) {
+          const currentAnswer = answers[essayQuestion.id];
+          const lastSavedAnswer = lastSavedAnswersRef.current[essayQuestion.id];
 
-      for (const qh of essayQuestions) {
-        const currentAnswer = answers[qh.id];
-        const lastSavedAnswer = lastSavedAnswersRef.current[qh.id];
-
-        if (currentAnswer && currentAnswer !== lastSavedAnswer) {
-          console.log(`Saving essay answer for question ${qh.id}`);
-          await examApi.updateExamDoing(id, {
-            questionHistoryId: qh.id,
-            yourAnswer: currentAnswer,
-            duration: formatTime(currentTime),
-            status: 0,
-          });
-          lastSavedAnswersRef.current[qh.id] = currentAnswer;
+          if (
+            currentAnswer !== undefined &&
+            currentAnswer !== lastSavedAnswer
+          ) {
+            console.log(`Saving essay answer for question ${essayQuestion.id}`);
+            await examApi.updateExamDoing(id, {
+              questionHistoryId: essayQuestion.id,
+              yourAnswer: currentAnswer || "",
+              duration: formatTime(currentTime),
+              status: 0,
+            });
+            lastSavedAnswersRef.current[essayQuestion.id] = currentAnswer;
+          } else {
+            // Update duration only
+            await examApi.updateExamDoing(id, {
+              questionHistoryId: essayQuestion.id,
+              yourAnswer: currentAnswer || "",
+              duration: formatTime(currentTime),
+              status: 0,
+            });
+          }
         }
-      }
+      } else {
+        // For multiple choice exams, save essay answers that have been modified
+        const essayQuestions =
+          examData.questionHistories?.filter((qh) => qh.questionType === 1) ||
+          [];
 
-      // Update duration
-      await examApi.updateExamDoing(id, {
-        duration: formatTime(currentTime),
-        status: 0,
-      });
+        for (const qh of essayQuestions) {
+          const currentAnswer = answers[qh.id];
+          const lastSavedAnswer = lastSavedAnswersRef.current[qh.id];
+
+          if (currentAnswer && currentAnswer !== lastSavedAnswer) {
+            console.log(`Saving essay answer for question ${qh.id}`);
+            await examApi.updateExamDoing(id, {
+              questionHistoryId: qh.id,
+              yourAnswer: currentAnswer,
+              duration: formatTime(currentTime),
+              status: 0,
+            });
+            lastSavedAnswersRef.current[qh.id] = currentAnswer;
+          }
+        }
+
+        // Update duration
+        await examApi.updateExamDoing(id, {
+          duration: formatTime(currentTime),
+          status: 0,
+        });
+      }
 
       console.log(
         "Auto-save completed successfully with duration:",
@@ -163,27 +195,40 @@ const StudentExam = () => {
 
       const currentTime = timeRemainingRef.current;
 
-      // Save all essay answers before submitting
-      const essayQuestions = examData.questionHistories.filter(
-        (qh) => qh.questionType === 1
-      );
-
-      for (const qh of essayQuestions) {
-        if (answers[qh.id]) {
+      // For essay exams (type 1), submit with questionHistoryId and yourAnswer
+      if (examData.examType === 1) {
+        const essayQuestion = examData.questionHistories?.[0];
+        if (essayQuestion) {
           await examApi.updateExamDoing(id, {
-            questionHistoryId: qh.id,
-            yourAnswer: answers[qh.id],
+            questionHistoryId: essayQuestion.id,
+            yourAnswer: answers[essayQuestion.id] || "",
             duration: formatTime(currentTime),
-            status: 0,
+            status: 1, // Đã nộp
           });
         }
-      }
+      } else {
+        // For multiple choice exams, save all essay answers before submitting
+        const essayQuestions = examData.questionHistories.filter(
+          (qh) => qh.questionType === 1
+        );
 
-      // Submit the exam
-      await examApi.updateExamDoing(id, {
-        duration: formatTime(currentTime),
-        status: 1, // Đã nộp
-      });
+        for (const qh of essayQuestions) {
+          if (answers[qh.id]) {
+            await examApi.updateExamDoing(id, {
+              questionHistoryId: qh.id,
+              yourAnswer: answers[qh.id],
+              duration: formatTime(currentTime),
+              status: 0,
+            });
+          }
+        }
+
+        // Submit the exam
+        await examApi.updateExamDoing(id, {
+          duration: formatTime(currentTime),
+          status: 1, // Đã nộp
+        });
+      }
 
       // Clear intervals
       if (autoSaveIntervalRef.current) {
@@ -432,9 +477,12 @@ const StudentExam = () => {
                   <div className="text-2xl font-bold text-blue-600 mb-1">
                     {examData.grade || 0} điểm
                   </div>
-                  <div className="text-sm text-gray-600">
-                    {examData.totalCorrectAnswers}/{examData.quantity} câu đúng
-                  </div>
+                  {examData.examType !== 1 && (
+                    <div className="text-sm text-gray-600">
+                      {examData.totalCorrectAnswers}/{examData.quantity} câu
+                      đúng
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -643,19 +691,25 @@ const StudentExam = () => {
         {/* Results summary - Only show for completed exams */}
         {examData.status === 1 && (
           <Card className="shadow-lg">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div
+              className={`grid grid-cols-2 ${
+                examData.examType === 1 ? "md:grid-cols-3" : "md:grid-cols-4"
+              } gap-4`}
+            >
               <div className="text-center">
                 <div className="text-gray-500 text-sm mb-1">Điểm số</div>
                 <div className="text-2xl font-bold text-blue-600">
                   {examData.grade || 0}
                 </div>
               </div>
-              <div className="text-center">
-                <div className="text-gray-500 text-sm mb-1">Câu đúng</div>
-                <div className="text-2xl font-bold text-green-600">
-                  {examData.totalCorrectAnswers}/{examData.quantity}
+              {examData.examType !== 1 && (
+                <div className="text-center">
+                  <div className="text-gray-500 text-sm mb-1">Câu đúng</div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {examData.totalCorrectAnswers}/{examData.quantity}
+                  </div>
                 </div>
-              </div>
+              )}
               <div className="text-center">
                 <div className="text-gray-500 text-sm mb-1">Đã trả lời</div>
                 <div className="text-2xl font-bold text-orange-600">

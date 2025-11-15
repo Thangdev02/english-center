@@ -80,25 +80,31 @@ const Navbar = () => {
             >
               Khóa học
             </Link>
-            <Link
-              to="/exams"
-              className="text-gray-700 hover:text-primary-600 transition-colors duration-200 font-medium"
-            >
-              Bài thi
-            </Link>
-            <Link
-              to="/student/classes"
-              className="text-gray-700 hover:text-primary-600 transition-colors duration-200 font-medium"
-            >
-              Lớp học của tôi
-            </Link>
-            <Link
-              to="/leaderboard"
-              className="text-gray-700 hover:text-primary-600 transition-colors duration-200 font-medium"
-            >
-              <Trophy className="inline w-4 h-4 mr-1" />
-              Bảng xếp hạng
-            </Link>
+            {user?.role === 1 && (
+              <Link
+                to="/exams"
+                className="text-gray-700 hover:text-primary-600 transition-colors duration-200 font-medium"
+              >
+                Bài thi
+              </Link>
+            )}
+            {user?.role === 1 && (
+              <Link
+                to="/student/classes"
+                className="text-gray-700 hover:text-primary-600 transition-colors duration-200 font-medium"
+              >
+                Lớp học của tôi
+              </Link>
+            )}
+            {user?.role === 1 && (
+              <Link
+                to="/leaderboard"
+                className="text-gray-700 hover:text-primary-600 transition-colors duration-200 font-medium"
+              >
+                <Trophy className="inline w-4 h-4 mr-1" />
+                Bảng xếp hạng
+              </Link>
+            )}
 
             {user ? (
               <div className="flex items-center space-x-4">
