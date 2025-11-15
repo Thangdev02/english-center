@@ -13,10 +13,16 @@ const Login = () => {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      await login(values);
+      const user = await login(values);
       console.log("Login successful, navigating to home");
       message.success("Đăng nhập thành công!");
-      navigate("/");
+      if (user.role === 0) {
+        navigate("/admin");
+      } else if (user.role === 2) {
+        navigate("/teacher");
+      } else {
+        navigate("/");
+      }
     } catch (error) {
       console.log("Login failed:", error);
       message.error(

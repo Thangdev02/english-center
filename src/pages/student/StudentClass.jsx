@@ -121,7 +121,7 @@ const StudentClasses = () => {
     4: "T5",
     5: "T6",
     6: "T7",
-    7: "CN",
+    0: "CN",
   };
 
   const isActiveByDate = (startDate, endDate) => {

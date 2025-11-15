@@ -144,6 +144,8 @@ const ForumManager = () => {
         startTime: values.startTime?.format("HH:mm:ss") || "",
         endTime: values.endTime?.format("HH:mm:ss") || "",
         dayOfWeeks: values.dayOfWeeks || [],
+        classMeetUrl: values.classMeetUrl?.trim() || null,
+        subClassMeetUrl: values.subClassMeetUrl?.trim() || null,
       };
 
       await forumApi.createClass(classData);
@@ -154,7 +156,11 @@ const ForumManager = () => {
       setTableKey((k) => k + 1);
     } catch (error) {
       console.error("Error creating class:", error);
-      message.error("Tạo lớp học thất bại!");
+      message.error(
+        error.response.data.data[0].errorMessage ||
+          error.response.data.data ||
+          "Tạo lớp học thất bại!"
+      );
     }
   };
 
@@ -259,6 +265,8 @@ const ForumManager = () => {
         ? dayjs(selectedClass.endTime, "HH:mm:ss")
         : undefined,
       dayOfWeeks: selectedClass.dayOfWeeks || [],
+      classMeetUrl: selectedClass.classMeetUrl || null,
+      subClassMeetUrl: selectedClass.subClassMeetUrl || null,
     });
     setEditModalVisible(true);
   };
@@ -279,6 +287,8 @@ const ForumManager = () => {
           : null,
         endTime: values.endTime ? values.endTime.format("HH:mm:ss") : null,
         dayOfWeeks: values.dayOfWeeks || [],
+        classMeetUrl: values.classMeetUrl?.trim() || null,
+        subClassMeetUrl: values.subClassMeetUrl?.trim() || null,
       };
 
       await forumApi.updateClass(selectedClass.id, payload);
@@ -289,7 +299,11 @@ const ForumManager = () => {
       setTableKey((k) => k + 1);
     } catch (error) {
       console.error("Error updating forum:", error);
-      message.error("Cập nhật diễn đàn thất bại!");
+      message.error(
+        error.response.data.data[0].errorMessage ||
+          error.response.data.data ||
+          "Cập nhật diễn đàn thất bại!"
+      );
     }
   };
 
@@ -315,13 +329,13 @@ const ForumManager = () => {
   };
 
   const dayNames = {
+    0: "CN",
     1: "T2",
     2: "T3",
     3: "T4",
     4: "T5",
     5: "T6",
     6: "T7",
-    7: "CN",
   };
 
   const isActiveByDate = (start, end) => {
@@ -589,7 +603,10 @@ const ForumManager = () => {
                             {selectedClass.description}
                           </p>
                           <div className="flex flex-wrap gap-2">
-                            <Tag color="blue">Giáo viên: {user?.name}</Tag>
+                            <Tag color="blue">
+                              Giáo viên:{" "}
+                              {user?.firstName + " " + user?.lastName}
+                            </Tag>
                             <Tag
                               color={selectedClass.isActive ? "green" : "red"}
                             >
@@ -790,6 +807,68 @@ const ForumManager = () => {
                             </div>
                           </div>
                         </Card>
+
+                        {(selectedClass.classMeetUrl ||
+                          selectedClass.subClassMeetUrl) && (
+                          <Card className="mt-6" title="Phòng học trực tuyến">
+                            <div className="space-y-3">
+                              {selectedClass.classMeetUrl && (
+                                <div>
+                                  <div className="text-sm text-gray-500 mb-1">
+                                    Phòng học chính:
+                                  </div>
+                                  <a
+                                    href={selectedClass.classMeetUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:text-blue-800 break-all"
+                                  >
+                                    {selectedClass.classMeetUrl}
+                                  </a>
+                                  <Button
+                                    type="link"
+                                    size="small"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(
+                                        selectedClass.classMeetUrl
+                                      );
+                                      message.success("Đã sao chép link!");
+                                    }}
+                                  >
+                                    Sao chép
+                                  </Button>
+                                </div>
+                              )}
+                              {selectedClass.subClassMeetUrl && (
+                                <div>
+                                  <div className="text-sm text-gray-500 mb-1">
+                                    Phòng học phụ:
+                                  </div>
+                                  <a
+                                    href={selectedClass.subClassMeetUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:text-blue-800 break-all"
+                                  >
+                                    {selectedClass.subClassMeetUrl}
+                                  </a>
+                                  <Button
+                                    type="link"
+                                    size="small"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(
+                                        selectedClass.subClassMeetUrl
+                                      );
+                                      message.success("Đã sao chép link!");
+                                    }}
+                                  >
+                                    Sao chép
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </Card>
+                        )}
                       </div>
                     </div>
                   ) : (
@@ -913,8 +992,16 @@ const ForumManager = () => {
               <Select.Option value={4}>Thứ 5</Select.Option>
               <Select.Option value={5}>Thứ 6</Select.Option>
               <Select.Option value={6}>Thứ 7</Select.Option>
-              <Select.Option value={7}>Chủ nhật</Select.Option>
+              <Select.Option value={0}>Chủ nhật</Select.Option>
             </Select>
+          </Form.Item>
+
+          <Form.Item name="classMeetUrl" label="Link phòng học chính">
+            <Input placeholder="https://meet.google.com/..." />
+          </Form.Item>
+
+          <Form.Item name="subClassMeetUrl" label="Link phòng học phụ">
+            <Input placeholder="https://meet.google.com/..." />
           </Form.Item>
 
           <Form.Item className="mb-0">
@@ -980,8 +1067,16 @@ const ForumManager = () => {
               <Select.Option value={4}>Thứ 5</Select.Option>
               <Select.Option value={5}>Thứ 6</Select.Option>
               <Select.Option value={6}>Thứ 7</Select.Option>
-              <Select.Option value={7}>Chủ nhật</Select.Option>
+              <Select.Option value={0}>Chủ nhật</Select.Option>
             </Select>
+          </Form.Item>
+
+          <Form.Item name="classMeetUrl" label="Link phòng học chính">
+            <Input placeholder="https://meet.google.com/..." />
+          </Form.Item>
+
+          <Form.Item name="subClassMeetUrl" label="Link phòng học phụ">
+            <Input placeholder="https://meet.google.com/..." />
           </Form.Item>
 
           <Form.Item className="mb-0">

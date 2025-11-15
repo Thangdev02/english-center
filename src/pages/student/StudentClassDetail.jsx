@@ -200,13 +200,13 @@ const StudentClassDetail = () => {
   };
 
   const dayNames = {
+    0: "CN",
     1: "T2",
     2: "T3",
     3: "T4",
     4: "T5",
     5: "T6",
     6: "T7",
-    7: "CN",
   };
 
   const isActiveByDate = (startDate, endDate) => {
@@ -918,6 +918,69 @@ const StudentClassDetail = () => {
                   </div>
                 </div>
               </Card>
+
+              {(classDetail.classMeetUrl || classDetail.subClassMeetUrl) && (
+                <Card title="Phòng học trực tuyến" className="mt-6">
+                  <div className="space-y-3">
+                    {classDetail.classMeetUrl && (
+                      <div>
+                        <div className="text-sm text-gray-500 mb-1">
+                          Phòng học chính:
+                        </div>
+                        <a
+                          href={classDetail.classMeetUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 break-all block mb-1"
+                        >
+                          {classDetail.classMeetUrl}
+                        </a>
+                        <Button
+                          type="link"
+                          size="small"
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              classDetail.classMeetUrl
+                            );
+                            message.success("Đã sao chép link!");
+                          }}
+                          className="p-0 h-auto"
+                        >
+                          Sao chép
+                        </Button>
+                      </div>
+                    )}
+                    {classDetail.subClassMeetUrl && (
+                      <div>
+                        <div className="text-sm text-gray-500 mb-1">
+                          Phòng học phụ:
+                        </div>
+                        <a
+                          href={classDetail.subClassMeetUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 break-all block mb-1"
+                        >
+                          {classDetail.subClassMeetUrl}
+                        </a>
+                        <Button
+                          type="link"
+                          size="small"
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              classDetail.subClassMeetUrl
+                            );
+                            message.success("Đã sao chép link!");
+                          }}
+                          className="p-0 h-auto"
+                        >
+                          Sao chép
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              )}
             </motion.div>
           </div>
         </div>
