@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Form, Input, Button, Divider, Alert, message } from "antd";
-import { Mail, Lock, Eye, EyeOff, Wifi, WifiOff } from "lucide-react";
+import { Form, Input, Button, Alert, message } from "antd";
+import { Mail, Lock, Eye, EyeOff, WifiOff } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
@@ -14,7 +15,6 @@ const Login = () => {
     setLoading(true);
     try {
       const user = await login(values);
-      console.log("Login successful, navigating to home");
       message.success("Đăng nhập thành công!");
       if (user.role === 0) {
         navigate("/admin");
@@ -24,144 +24,134 @@ const Login = () => {
         navigate("/");
       }
     } catch (error) {
-      console.log("Login failed:", error);
       message.error(
-        error.response.data.data[0].errorMessage ||
-          error.response.data.data ||
-          "Đăng nhập thất bại!"
+        error.response?.data?.data?.[0]?.errorMessage ||
+          error.response?.data?.data ||
+          "Đăng nhập thất bại! Vui lòng kiểm tra lại email/mật khẩu."
       );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleLogin = () => {
-    message.info("Tính năng đăng nhập Google sẽ được tích hợp sau");
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-blue-100 flex items-center justify-center py-12 px-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="max-w-md w-full space-y-8 bg-white rounded-2xl shadow-xl p-8"
-      >
-        {!apiConnected && (
-          <Alert
-            message="Mất kết nối server"
-            description="Không thể kết nối đến localhost:3001. Vui lòng chạy JSON Server."
-            type="warning"
-            showIcon
-            icon={<WifiOff size={16} />}
-          />
-        )}
-
-        <div className="text-center">
-          <motion.h2
-            initial={{ y: -20 }}
-            animate={{ y: 0 }}
-            className="text-3xl font-bold text-gray-900 mb-2"
-          >
-            Đăng nhập
-          </motion.h2>
-          <p className="text-gray-600">
-            Chào mừng trở lại! Vui lòng đăng nhập vào tài khoản của bạn.
-          </p>
-        </div>
-
-        <Form
-          name="login"
-          onFinish={onFinish}
-          layout="vertical"
-          className="space-y-6"
-          // initialValues={{
-          //   email: 'student@example.com',
-          //   password: 'password123'
-          // }}
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-rose-50 flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md">
+        {/* Logo + Title */}
+        <motion.div
+          initial={{ opacity: 0, y: -40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+          className="text-center mb-10"
         >
-          <Form.Item
-            name="email"
-            label="Email hoặc tên đăng nhập"
-            rules={[
-              {
-                required: true,
-                message: "Vui lòng nhập email hoặc tên đăng nhập!",
-              },
-              // { type: 'email', message: 'Email không hợp lệ!' }
-            ]}
-          >
-            <Input
-              prefix={<Mail className="text-gray-400" size={18} />}
-              placeholder="Nhập email của bạn"
-              size="large"
-            />
-          </Form.Item>
+          <img
+            src="./logoRM.png"
+            alt="Logo"
+            className="mx-auto h-20 w-20 object-contain drop-shadow-lg mb-6 rounded-2xl"
+          />
+          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-red-600 to-rose-700 bg-clip-text text-transparent">
+            Chào mừng trở lại!
+          </h1>
+          <p className="mt-3 text-gray-600 text-lg font-medium">
+            Đăng nhập để tiếp tục hành trình chinh phục kiến thức
+          </p>
+        </motion.div>
 
-          <Form.Item
-            name="password"
-            label="Mật khẩu"
-            rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
-          >
-            <Input.Password
-              prefix={<Lock className="text-gray-400" size={18} />}
-              placeholder="Nhập mật khẩu"
-              size="large"
-              iconRender={(visible) =>
-                visible ? <Eye size={18} /> : <EyeOff size={18} />
-              }
-            />
-          </Form.Item>
-
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              size="large"
-              className="w-full h-12 text-lg font-semibold"
-            >
-              {loading ? "Đang đăng nhập..." : "Đăng nhập"}
-            </Button>
-          </Form.Item>
-        </Form>
-
-        {/* <Divider>Hoặc</Divider>
-
-        <div className="space-y-4">
-          <Button 
-            size="large" 
-            className="w-full h-12 border-gray-300 flex items-center justify-center"
-            onClick={handleGoogleLogin}
-          >
-            <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-            </svg>
-            Đăng nhập với Google
-          </Button>
-        </div> */}
-
-        <div className="text-center">
-          <span className="text-gray-600">Chưa có tài khoản? </span>
-          <Link
-            to="/register"
-            className="text-primary-600 hover:text-primary-700 font-semibold"
-          >
-            Đăng ký ngay
-          </Link>
-        </div>
-
-        {/* <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <h4 className="font-semibold text-sm mb-2">Tài khoản demo:</h4>
-          <div className="text-xs space-y-1">
-            <div><strong>Học sinh:</strong> student@example.com / password123</div>
-            <div><strong>Giáo viên:</strong> teacher@example.com / password123</div>
-            <div><strong>Admin:</strong> admin@example.com / password123</div>
+        {/* Main Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-red-100"
+        >
+          {/* Header Card - Đỏ đẹp */}
+          <div className="bg-gradient-to-r from-red-600 to-rose-600 px-8 py-6 text-center">
+            <h2 className="text-2xl font-bold text-white">Đăng Nhập Tài Khoản</h2>
           </div>
-        </div> */}
-      </motion.div>
+
+          <div className="p-8 pt-10">
+            {/* Cảnh báo mất kết nối */}
+            {!apiConnected && (
+              <Alert
+                message="Mất kết nối server"
+                description="Không thể kết nối đến localhost:3001. Vui lòng chạy server."
+                type="warning"
+                showIcon
+                icon={<WifiOff className="text-yellow-600" />}
+                className="mb-6 rounded-xl"
+              />
+            )}
+
+            <Form name="login" onFinish={onFinish} layout="vertical" size="large">
+              <Form.Item
+                name="email"
+                label={<span className="font-semibold text-gray-700">Email hoặc tên đăng nhập</span>}
+                rules={[{ required: true, message: "Vui lòng nhập email hoặc tên đăng nhập!" }]}
+              >
+                <Input
+                  prefix={<Mail className="text-red-500" size={20} />}
+                  placeholder="nhập email hoặc tên đăng nhập"
+                  className="h-12 rounded-xl border-gray-300 hover:border-red-400 focus:border-red-500"
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="password"
+                label={<span className="font-semibold text-gray-700">Mật khẩu</span>}
+                rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
+              >
+                <Input.Password
+                  prefix={<Lock className="text-red-500" size={20} />}
+                  placeholder="nhập mật khẩu của bạn"
+                  className="h-12 rounded-xl"
+                  iconRender={(visible) => (visible ? <Eye className="text-gray-500" /> : <EyeOff className="text-gray-500" />)}
+                />
+              </Form.Item>
+
+
+              <Form.Item className="mt-8">
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={loading}
+                  className="w-full h-14 text-lg font-bold rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 border-0 shadow-lg transform transition hover:scale-105"
+                >
+                  {loading ? "Đang đăng nhập..." : "ĐĂNG NHẬP"}
+                </Button>
+              </Form.Item>
+            </Form>
+
+            {/* Divider + Register Link */}
+            <div className="mt-8 text-center">
+              <span className="text-gray-600">Chưa có tài khoản? </span>
+              <Link
+                to="/register"
+                className="font-bold text-red-600 hover:text-rose-700 transition"
+              >
+                Đăng ký ngay
+              </Link>
+            </div>
+
+            {/* Optional: Google Login (comment lại vẫn đẹp) */}
+            {/* <div className="mt-6">
+              <Divider className="text-gray-500">Hoặc tiếp tục với</Divider>
+              <Button
+                size="large"
+                className="w-full h-12 rounded-xl border-gray-300 flex items-center justify-center gap-3 hover:border-red-300"
+                onClick={() => message.info("Sắp ra mắt!")}
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24"> ... </svg>
+                Đăng nhập bằng Google
+              </Button>
+            </div> */}
+          </div>
+        </motion.div>
+
+        {/* Footer nhỏ xinh */}
+        <div className="text-center mt-10 text-gray-500 text-sm">
+          © 2025 Tên App Của Bạn. Made with passion in Vietnam
+        </div>
+      </div>
     </div>
   );
 };

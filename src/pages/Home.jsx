@@ -451,10 +451,10 @@ const Home = () => {
 
       {/* === FLOATING BUTTONS === */}
       <div className="fixed bottom-6 left-6 flex flex-col gap-3 z-50">
-        <a href="https://zalo.me/0931715889" className="bg-green-500 text-white p-4 rounded-full shadow-lg flex items-center gap-2 hover:scale-110 transition-transform">
+        <a href="https://zalo.me/0369960429" className="bg-green-500 text-white p-4 rounded-full shadow-lg flex items-center gap-2 hover:scale-110 transition-transform">
           <MessageCircle className="w-5 h-5" /> Chat Zalo
         </a>
-        <a href="https://m.me/superpanda.english" className="bg-blue-600 text-white p-4 rounded-full shadow-lg flex items-center gap-2 hover:scale-110 transition-transform">
+        <a href="https://www.facebook.com/profile.php?id=61551807950988&locale=vi_VN" className="bg-blue-600 text-white p-4 rounded-full shadow-lg flex items-center gap-2 hover:scale-110 transition-transform">
           <Facebook className="w-5 h-5" /> Chat Facebook
         </a>
         <a href="tel:0931715889" className="bg-red-600 text-white p-4 rounded-full shadow-lg flex items-center gap-2 hover:scale-110 transition-transform">

@@ -16,12 +16,7 @@ const Footer = () => {
             <p className="text-gray-400">
               Nền tảng học tiếng Anh trực tuyến hàng đầu Việt Nam với phương pháp giảng dạy hiện đại và hiệu quả.
             </p>
-            <div className="flex space-x-4">
-              <div className="flex items-center text-gray-400">
-                <Phone className="w-4 h-4 mr-2" />
-                <span>1900 1234</span>
-              </div>
-            </div>
+          
           </div>
 
           <div>
@@ -49,15 +44,15 @@ const Footer = () => {
             <div className="space-y-3 text-gray-400">
               <div className="flex items-center">
                 <Mail className="w-4 h-4 mr-3" />
-                <span>support@englishmaster.edu.vn</span>
+                <span>superpanda@gmail.com</span>
               </div>
               <div className="flex items-center">
                 <Phone className="w-4 h-4 mr-3" />
-                <span>+84 1900 1234</span>
+                <span>0369960429</span>
               </div>
               <div className="flex items-center">
                 <MapPin className="w-4 h-4 mr-3" />
-                <span>123 Nguyễn Văn Linh, Quận 7, TP.HCM</span>
+                <span>Mặt hồ tân xã , thạch thất hà nội</span>
               </div>
             </div>
           </div>

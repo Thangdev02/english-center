@@ -10,6 +10,7 @@ import {
   Menu,
   X,
   Shield,
+  Building2
 } from "lucide-react";
 import { Dropdown, Button } from "antd";
 import { useAuth } from "../../context/AuthContext";
@@ -66,9 +67,9 @@ const Navbar = () => {
             whileHover={{ scale: 1.05 }}
             className="flex items-center space-x-2  "
           >
-            <Link to="/"  style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <img src="./PanadLogo.png" alt="" className="w-24 h-24" />
-              <h2 style={{ fontSize: "20px", fontWeight: "bold", marginLeft: "10px"}} className="text-red-800">Super Panda</h2>
+            <Link to="/" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <img src="./PanadLogo.png" alt="" className="w-24 h-24" />
+              <h2 style={{ fontSize: "20px", fontWeight: "bold", marginLeft: "10px" }} className="text-red-800">Super Panda</h2>
             </Link>
 
           </motion.div>
@@ -106,7 +107,15 @@ const Navbar = () => {
                 Bảng xếp hạng
               </Link>
             )}
-
+            {user?.role === 1 && (
+              <Link
+                to="/about"
+                className="text-red-800 hover:text-red-600 transition-colors duration-200 font-medium"
+              >
+                <Building2 className="inline w-4 h-4 mr-1" />
+                Về Chúng Tôi
+              </Link>
+            )}
             {user ? (
               <div className="flex items-center space-x-4">
                 <Dropdown
