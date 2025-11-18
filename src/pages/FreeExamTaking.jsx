@@ -401,332 +401,333 @@ const FreeExamTaking = () => {
   const isTimeRunningOut = timeRemaining < 300; // Less than 5 minutes
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-6xl">
-        {/* Back button - Only show for completed exams */}
-        {examData.status === 1 && (
-          <Button
-            type="link"
-            onClick={() => navigate(-1)}
-            className="mb-4"
-            icon={
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-              </svg>
-            }
-          >
-            Quay lại
-          </Button>
-        )}
-
-        {/* Header */}
-        <Card className="mb-6 shadow-lg">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div className="flex-1">
-              <Title level={3} className="!mb-2">
-                {examData.examName}
-              </Title>
-              <Space wrap>
-                <Tag
-                  icon={<FileTextOutlined />}
-                  color={examData.examType === 0 ? "blue" : "purple"}
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="container mx-auto px-4 max-w-6xl">
+          
+          {/* Back */}
+          {examData.status === 1 && (
+            <Button
+              type="link"
+              onClick={() => navigate(-1)}
+              className="mb-4 text-blue-600 hover:text-blue-700"
+              icon={
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  {examData.examType === 0 ? "Trắc nghiệm" : "Tự luận"}
-                </Tag>
-                <Tag
-                  icon={<CheckCircleOutlined />}
-                  color={examData.status === 0 ? "orange" : "green"}
-                >
-                  {examData.status === 0 ? "Đang làm" : "Đã nộp"}
-                </Tag>
-                <Text type="secondary">{examData.quantity} câu hỏi</Text>
-              </Space>
+                  <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+              }
+            >
+              Quay lại
+            </Button>
+          )}
+    
+          {/* Header */}
+          <Card className="mb-6 shadow-md border border-gray-200">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div className="flex-1">
+                <Title level={3} className="!mb-2 text-blue-700">
+                  {examData.examName}
+                </Title>
+    
+                <Space wrap>
+                  <Tag
+                    icon={<FileTextOutlined />}
+                    color={examData.examType === 0 ? "blue" : "purple"}
+                  >
+                    {examData.examType === 0 ? "Trắc nghiệm" : "Tự luận"}
+                  </Tag>
+    
+                  <Tag
+                    icon={<CheckCircleOutlined />}
+                    color={examData.status === 0 ? "orange" : "green"}
+                  >
+                    {examData.status === 0 ? "Đang làm" : "Đã nộp"}
+                  </Tag>
+    
+                  <Text className="text-gray-600">{examData.quantity} câu hỏi</Text>
+                </Space>
+              </div>
+    
+              {/* Clock */}
+              <div className="flex flex-col items-end gap-2">
+                {examData.status === 0 ? (
+                  <>
+                    <div
+                      className={`flex items-center gap-2 text-lg font-semibold ${
+                        isTimeRunningOut ? "text-red-500" : "text-blue-600"
+                      }`}
+                    >
+                      <ClockCircleOutlined
+                        className={isTimeRunningOut ? "animate-pulse" : ""}
+                      />
+                      <span>{formatTime(timeRemaining)}</span>
+                    </div>
+    
+                    {isTimeRunningOut && (
+                      <Tag icon={<WarningOutlined />} color="error">
+                        Sắp hết giờ!
+                      </Tag>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-blue-600 mb-1">
+                      {examData.grade || 0} điểm
+                    </div>
+                    {examData.examType !== 1 && (
+                      <div className="text-sm text-gray-600">
+                        {examData.totalCorrectAnswers}/{examData.quantity} câu đúng
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-
-            <div className="flex flex-col items-end gap-2">
-              {examData.status === 0 ? (
-                <>
+    
+            {/* Progress */}
+            {examData.status === 0 && (
+              <div className="mt-4">
+                <Text className="text-sm text-gray-600 mb-2 block">
+                  Tiến độ: {Object.keys(answers).length}/{examData.quantity} câu
+                </Text>
+    
+                <Progress
+                  percent={progress}
+                  status={progress === 100 ? "success" : "active"}
+                  strokeColor={{
+                    "0%": "#3B82F6",
+                    "100%": "#2563EB",
+                  }}
+                />
+              </div>
+            )}
+          </Card>
+    
+          {/* Questions */}
+          <Card className="mb-6 shadow-md border border-gray-200">
+            <Space direction="vertical" size="large" className="w-full">
+              {currentQuestions.map((question, index) => {
+                const questionNumber =
+                  (currentPage - 1) * QUESTIONS_PER_PAGE + index + 1;
+                const isAnswered = !!answers[question.id];
+    
+                return (
                   <div
-                    className={`flex items-center gap-2 text-lg font-semibold ${
-                      isTimeRunningOut ? "text-red-500" : "text-blue-600"
+                    key={question.id}
+                    className={`p-4 rounded-xl border transition-all ${
+                      isAnswered
+                        ? "border-blue-300 bg-blue-50"
+                        : "border-gray-200 bg-white hover:border-blue-300"
                     }`}
                   >
-                    <ClockCircleOutlined
-                      className={isTimeRunningOut ? "animate-pulse" : ""}
-                    />
-                    <span>{formatTime(timeRemaining)}</span>
-                  </div>
-                  {isTimeRunningOut && (
-                    <Tag icon={<WarningOutlined />} color="error">
-                      Sắp hết giờ!
-                    </Tag>
-                  )}
-                </>
-              ) : (
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-blue-600 mb-1">
-                    {examData.grade || 0} điểm
-                  </div>
-                  {examData.examType !== 1 && (
-                    <div className="text-sm text-gray-600">
-                      {examData.totalCorrectAnswers}/{examData.quantity} câu
-                      đúng
+                    <div className="flex items-start gap-3 mb-3">
+                      <Tag
+                        color={isAnswered ? "blue" : "default"}
+                        className="text-base px-3 py-1 rounded"
+                      >
+                        Câu {questionNumber}
+                      </Tag>
+    
+                      <Paragraph className="flex-1 !mb-0 text-base font-medium text-gray-700">
+                        {question.questionContent}
+                      </Paragraph>
                     </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Progress bar - Only show for in-progress exams */}
-          {examData.status === 0 && (
-            <div className="mt-4">
-              <Text className="text-sm text-gray-600 mb-2 block">
-                Tiến độ: {Object.keys(answers).length}/{examData.quantity} câu
-              </Text>
-              <Progress
-                percent={progress}
-                status={progress === 100 ? "success" : "active"}
-                strokeColor={{
-                  "0%": "#108ee9",
-                  "100%": "#87d068",
-                }}
+    
+                    {/* Multiple Choice */}
+                    {question.questionType === 0 ? (
+                      <Radio.Group
+                        value={answers[question.id]}
+                        disabled={examData.status === 1}
+                        onChange={(e) => {
+                          const selectedAnswer = question.answers.find(
+                            (ans) => ans.id === e.target.value
+                          );
+                          handleAnswerChange(
+                            question.id,
+                            e.target.value,
+                            selectedAnswer?.content,
+                            0
+                          );
+                        }}
+                        className="w-full"
+                      >
+                        <Space direction="vertical" className="w-full">
+                          {question.answers?.map((answer) => {
+                            const isCorrect = answer.isCorrect === true;
+                            const isWrong = answer.isCorrect === false;
+                            const isSelected = answers[question.id] === answer.id;
+    
+                            return (
+                              <Radio
+                                key={answer.id}
+                                value={answer.id}
+                                className={`text-base p-3 rounded-lg w-full transition ${
+                                  examData.status === 1
+                                    ? isCorrect
+                                      ? "!bg-green-100 !border-green-500"
+                                      : isWrong && isSelected
+                                      ? "!bg-red-100 !border-red-500"
+                                      : ""
+                                    : "hover:bg-blue-50"
+                                }`}
+                              >
+                                <div className="flex items-center justify-between w-full">
+                                  <span>{answer.content}</span>
+    
+                                  {examData.status === 1 && isCorrect && (
+                                    <Tag color="success">Đúng</Tag>
+                                  )}
+                                  {examData.status === 1 && isWrong && isSelected && (
+                                    <Tag color="error">Sai</Tag>
+                                  )}
+                                </div>
+                              </Radio>
+                            );
+                          })}
+                        </Space>
+                      </Radio.Group>
+                    ) : (
+                      <TextArea
+                        rows={5}
+                        className="text-base"
+                        disabled={examData.status === 1}
+                        placeholder="Nhập câu trả lời..."
+                        value={answers[question.id] || ""}
+                        onChange={(e) =>
+                          handleEssayChange(question.id, e.target.value)
+                        }
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </Space>
+    
+            {/* Pagination */}
+            <div className="mt-6 flex justify-center">
+              <Pagination
+                current={currentPage}
+                total={examData.questionHistories.length}
+                pageSize={QUESTIONS_PER_PAGE}
+                showSizeChanger={false}
+                onChange={setCurrentPage}
               />
             </div>
-          )}
-        </Card>
-
-        {/* Questions */}
-        <Card className="mb-6 shadow-lg">
-          <Space direction="vertical" size="large" className="w-full">
-            {currentQuestions.map((question, index) => {
-              const questionNumber =
-                (currentPage - 1) * QUESTIONS_PER_PAGE + index + 1;
-              const isAnswered = !!answers[question.id];
-
-              return (
-                <div
-                  key={question.id}
-                  className={`p-4 rounded-lg border-2 ${
-                    isAnswered
-                      ? "border-green-200 bg-green-50"
-                      : "border-gray-200 bg-white"
-                  }`}
-                >
-                  <div className="flex items-start gap-3 mb-3">
-                    <Tag
-                      color={isAnswered ? "success" : "default"}
-                      className="text-base px-3 py-1"
-                    >
-                      Câu {questionNumber}
-                    </Tag>
-                    <Paragraph className="flex-1 !mb-0 text-base font-medium">
-                      {question.questionContent}
-                    </Paragraph>
-                  </div>
-
-                  {question.questionType === 0 ? (
-                    // Multiple choice
-                    <Radio.Group
-                      value={answers[question.id]}
-                      onChange={(e) => {
-                        const selectedAnswer = question.answers.find(
-                          (ans) => ans.id === e.target.value
-                        );
-                        handleAnswerChange(
-                          question.id,
-                          e.target.value,
-                          selectedAnswer?.content,
-                          0
-                        );
-                      }}
-                      disabled={examData.status === 1}
-                      className="w-full"
-                    >
-                      <Space direction="vertical" className="w-full">
-                        {question.answers?.map((answer) => {
-                          const isCorrect = answer.isCorrect === true;
-                          const isWrong = answer.isCorrect === false;
-                          const isSelected = answers[question.id] === answer.id;
-
-                          return (
-                            <Radio
-                              key={answer.id}
-                              value={answer.id}
-                              className={`text-base p-3 rounded-lg w-full ${
-                                examData.status === 1
-                                  ? isCorrect
-                                    ? "!bg-green-100 !border-green-500"
-                                    : isWrong && isSelected
-                                    ? "!bg-red-100 !border-red-500"
-                                    : ""
-                                  : "hover:bg-blue-50"
-                              }`}
-                            >
-                              <div className="flex items-center justify-between w-full">
-                                <span>{answer.content}</span>
-                                {examData.status === 1 && isCorrect && (
-                                  <Tag color="success" className="ml-2">
-                                    Đáp án đúng
-                                  </Tag>
-                                )}
-                                {examData.status === 1 &&
-                                  isWrong &&
-                                  isSelected && (
-                                    <Tag color="error" className="ml-2">
-                                      Sai
-                                    </Tag>
-                                  )}
-                              </div>
-                            </Radio>
-                          );
-                        })}
-                      </Space>
-                    </Radio.Group>
-                  ) : (
-                    // Essay question
-                    <TextArea
-                      rows={6}
-                      placeholder="Nhập câu trả lời của bạn..."
-                      value={answers[question.id] || ""}
-                      onChange={(e) =>
-                        handleEssayChange(question.id, e.target.value)
-                      }
-                      disabled={examData.status === 1}
-                      className="text-base"
-                    />
-                  )}
-                </div>
-              );
-            })}
-          </Space>
-
-          {/* Pagination */}
-          <div className="mt-6 flex justify-center">
-            <Pagination
-              current={currentPage}
-              total={examData.questionHistories.length}
-              pageSize={QUESTIONS_PER_PAGE}
-              onChange={setCurrentPage}
-              showSizeChanger={false}
-              showTotal={(total, range) =>
-                `${range[0]}-${range[1]} trong ${total} câu`
-              }
-            />
-          </div>
-        </Card>
-
-        {/* Question navigator */}
-        <Card className="mb-6 shadow-lg" title="Câu hỏi">
-          <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
-            {examData.questionHistories.map((question, index) => {
-              const questionNumber = index + 1;
-              const isAnswered = !!answers[question.id];
-              const isCurrentPage =
-                Math.ceil(questionNumber / QUESTIONS_PER_PAGE) === currentPage;
-
-              return (
+          </Card>
+    
+          {/* Navigator */}
+          <Card
+            className="mb-6 shadow-md border border-gray-200"
+            title={<span className="text-blue-700 font-semibold">Câu hỏi</span>}
+          >
+            <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
+              {examData.questionHistories.map((q, index) => {
+                const num = index + 1;
+                const isAnswered = !!answers[q.id];
+                const isCurrent =
+                  Math.ceil(num / QUESTIONS_PER_PAGE) === currentPage;
+    
+                return (
+                  <Button
+                    key={q.id}
+                    type={isCurrent ? "primary" : "default"}
+                    className={`rounded-lg ${
+                      isAnswered
+                        ? "!bg-blue-500 !border-blue-500 hover:!bg-blue-600"
+                        : ""
+                    }`}
+                    onClick={() =>
+                      setCurrentPage(Math.ceil(num / QUESTIONS_PER_PAGE))
+                    }
+                  >
+                    {num}
+                  </Button>
+                );
+              })}
+            </div>
+    
+            <div className="flex gap-4 mt-4 text-sm">
+              <Space>
+                <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                <Text>Đã trả lời</Text>
+              </Space>
+              <Space>
+                <div className="w-4 h-4 bg-gray-200 border border-gray-300 rounded"></div>
+                <Text>Chưa trả lời</Text>
+              </Space>
+            </div>
+          </Card>
+    
+          {/* Submit */}
+          {examData.status === 0 && (
+            <Card className="shadow-md border border-gray-200">
+              <div className="flex justify-between items-center">
+                <Text type="secondary">
+                  Đã trả lời: {Object.keys(answers).length}/{examData.quantity} câu
+                </Text>
+    
                 <Button
-                  key={question.id}
-                  type={isCurrentPage ? "primary" : "default"}
-                  className={`${
-                    isAnswered
-                      ? "!bg-green-500 !border-green-500 hover:!bg-green-600"
-                      : ""
-                  }`}
-                  onClick={() =>
-                    setCurrentPage(
-                      Math.ceil(questionNumber / QUESTIONS_PER_PAGE)
-                    )
-                  }
+                  type="primary"
+                  danger
+                  size="large"
+                  loading={isSubmitting}
+                  className="bg-red-600 hover:bg-red-700"
+                  onClick={() => handleSubmitExam(false)}
                 >
-                  {questionNumber}
+                  Nộp bài
                 </Button>
-              );
-            })}
-          </div>
-          <div className="flex gap-4 mt-4 text-sm">
-            <Space>
-              <div className="w-4 h-4 bg-green-500 rounded"></div>
-              <Text>Đã trả lời</Text>
-            </Space>
-            <Space>
-              <div className="w-4 h-4 bg-gray-200 border border-gray-300 rounded"></div>
-              <Text>Chưa trả lời</Text>
-            </Space>
-          </div>
-        </Card>
-
-        {/* Submit button - Only show for in-progress exams */}
-        {examData.status === 0 && (
-          <Card className="shadow-lg">
-            <div className="flex justify-between items-center">
-              <Text type="secondary">
-                Đã trả lời: {Object.keys(answers).length}/{examData.quantity}{" "}
-                câu
-              </Text>
-              <Button
-                type="primary"
-                size="large"
-                danger
-                onClick={() => handleSubmitExam(false)}
-                loading={isSubmitting}
-              >
-                Nộp bài
-              </Button>
-            </div>
-          </Card>
-        )}
-
-        {/* Results summary - Only show for completed exams */}
-        {examData.status === 1 && (
-          <Card className="shadow-lg">
-            <div
-              className={`grid grid-cols-2 ${
-                examData.examType === 1 ? "md:grid-cols-3" : "md:grid-cols-4"
-              } gap-4`}
-            >
-              <div className="text-center">
-                <div className="text-gray-500 text-sm mb-1">Điểm số</div>
-                <div className="text-2xl font-bold text-blue-600">
-                  {examData.grade || 0}
-                </div>
               </div>
-              {examData.examType !== 1 && (
+            </Card>
+          )}
+    
+          {/* Summary */}
+          {examData.status === 1 && (
+            <Card className="shadow-md border border-gray-200">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center">
-                  <div className="text-gray-500 text-sm mb-1">Câu đúng</div>
-                  <div className="text-2xl font-bold text-green-600">
-                    {examData.totalCorrectAnswers}/{examData.quantity}
+                  <div className="text-gray-500 text-sm">Điểm</div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {examData.grade || 0}
                   </div>
                 </div>
-              )}
-              <div className="text-center">
-                <div className="text-gray-500 text-sm mb-1">Đã trả lời</div>
-                <div className="text-2xl font-bold text-orange-600">
-                  {examData.answeredQuestions}/{examData.quantity}
+    
+                {examData.examType !== 1 && (
+                  <div className="text-center">
+                    <div className="text-gray-500 text-sm">Câu đúng</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      {examData.totalCorrectAnswers}/{examData.quantity}
+                    </div>
+                  </div>
+                )}
+    
+                <div className="text-center">
+                  <div className="text-gray-500 text-sm">Đã trả lời</div>
+                  <div className="text-2xl font-bold text-blue-500">
+                    {examData.answeredQuestions}
+                  </div>
+                </div>
+    
+                <div className="text-center">
+                  <div className="text-gray-500 text-sm">Thời gian</div>
+                  <div className="text-2xl font-semibold text-purple-600">
+                    {formatTime(timeRemaining)}
+                  </div>
                 </div>
               </div>
-              <div className="text-center">
-                <div className="text-gray-500 text-sm mb-1">Thời gian</div>
-                <div className="text-2xl font-bold text-purple-600">
-                  {formatTime(timeRemaining)}
-                </div>
-              </div>
-            </div>
-          </Card>
-        )}
+            </Card>
+          )}
+        </div>
       </div>
-    </div>
+    
   );
 };
 

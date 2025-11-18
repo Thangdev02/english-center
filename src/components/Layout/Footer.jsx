@@ -9,8 +9,9 @@ const Footer = () => {
         <div className="grid md:grid-cols-4 gap-8">
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <BookOpen className="h-8 w-8 text-primary-400" />
-              <span className="text-xl font-bold">EnglishMaster</span>
+              <Link to="/" className=" h-64 w-64">
+                <img src="./logoRM.png" alt="" />
+              </Link>
             </div>
             <p className="text-gray-400">
               Nền tảng học tiếng Anh trực tuyến hàng đầu Việt Nam với phương pháp giảng dạy hiện đại và hiệu quả.
@@ -63,7 +64,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; 2024 EnglishMaster. Tất cả quyền được bảo lưu.</p>
+          <p>&copy; 2025 Super Panda. Tất cả quyền được bảo lưu.</p>
         </div>
       </div>
     </footer>

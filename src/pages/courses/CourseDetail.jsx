@@ -14,6 +14,14 @@ import { courseApi } from "../../services/courseApi";
 
 const { TabPane } = Tabs;
 
+// MÀU CHỦ ĐẠO SUPER PANDA
+const RED_DARK = "#991b1b";   // đỏ đậm (tiêu đề, nút)
+const RED_MAIN = "#dc2626";   // đỏ chính (icon, hover)
+const RED_LIGHT = "#fee2e2";  // nền đỏ nhạt
+const GRAY_DARK = "#1f2937";  // chữ chính
+const GRAY_MED = "#6b7280";   // chữ phụ
+const BG_LIGHT = "#f9fafb";   // nền card
+
 const CourseDetail = () => {
   const { id } = useParams();
   const [course, setCourse] = useState(null);
@@ -25,12 +33,9 @@ const CourseDetail = () => {
     const fetchCourseData = async () => {
       try {
         setLoading(true);
-
-        // Fetch course details
         const courseResponse = await courseApi.getCourse(id);
         const courseData = courseResponse?.data?.data;
 
-        // Fetch chapters with pagination
         const chaptersResponse = await courseApi.getChapters({
           courseId: id,
           page: 1,
@@ -40,7 +45,6 @@ const CourseDetail = () => {
         });
         const chapters = chaptersResponse.data?.data?.items || [];
 
-        // Fetch lessons for each chapter
         const chaptersWithLessons = await Promise.all(
           chapters.map(async (chapter) => {
             try {
@@ -54,23 +58,13 @@ const CourseDetail = () => {
                 lessons: lessonsResponse.data?.data?.items || [],
               };
             } catch (error) {
-              console.error(
-                `Error fetching lessons for chapter ${chapter.id}:`,
-                error
-              );
-              return {
-                ...chapter,
-                lessons: [],
-              };
+              console.error(`Error fetching lessons for chapter ${chapter.id}:`, error);
+              return { ...chapter, lessons: [] };
             }
           })
         );
 
-        // Fetch related courses
-        const allCoursesResponse = await courseApi.getAllCourses({
-          page: 1,
-          size: 4,
-        });
+        const allCoursesResponse = await courseApi.getAllCourses({ page: 1, size: 4 });
         const allCourses = allCoursesResponse.data?.data?.items || [];
         const related = allCourses
           .filter((c) => c.courseId !== id && c.level === courseData.level)
@@ -81,9 +75,7 @@ const CourseDetail = () => {
           courseId: courseData.id,
           title: courseData.name || courseData.name,
           description: courseData.description || "Khóa học chất lượng cao",
-          image:
-            courseData.imageUrl ||
-            "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
+          image: courseData.imageUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
           level: courseData.level,
           duration: courseData.duration,
           isActive: courseData.isActive,
@@ -95,15 +87,13 @@ const CourseDetail = () => {
         });
 
         setRelatedCourses(
-          related.map((course) => ({
-            id: course.courseId,
-            courseId: course.courseId,
-            title: course.courseName || course.name,
-            description: course.description,
-            image:
-              course.imageUrl ||
-              "https://via.placeholder.com/400x300?text=Course+Image",
-            level: course.level,
+          related.map((c) => ({
+            id: c.courseId,
+            courseId: c.courseId,
+            title: c.courseName || c.name,
+            description: c.description,
+            image: c.imageUrl || "https://via.placeholder.com/400x300?text=Course+Image",
+            level: c.level,
             rating: (4 + Math.random()).toFixed(1),
             students: Math.floor(Math.random() * 2000) + 100,
           }))
@@ -116,18 +106,12 @@ const CourseDetail = () => {
       }
     };
 
-    if (id) {
-      fetchCourseData();
-    }
+    if (id) fetchCourseData();
   }, [id]);
 
   const handleEnroll = async () => {
-    try {
-      message.success("Đăng ký khóa học thành công!");
-      setEnrollModal(false);
-    } catch {
-      message.error("Đăng ký thất bại!");
-    }
+    message.success("Đăng ký khóa học thành công!");
+    setEnrollModal(false);
   };
 
   if (loading) {
@@ -136,12 +120,8 @@ const CourseDetail = () => {
         <div className="container mx-auto px-4">
           <Skeleton active paragraph={{ rows: 2 }} />
           <div className="grid lg:grid-cols-3 gap-8 mt-6">
-            <div className="lg:col-span-2">
-              <Skeleton active paragraph={{ rows: 8 }} />
-            </div>
-            <div className="lg:col-span-1">
-              <Skeleton active paragraph={{ rows: 6 }} />
-            </div>
+            <div className="lg:col-span-2"><Skeleton active paragraph={{ rows: 8 }} /></div>
+            <div className="lg:col-span-1"><Skeleton active paragraph={{ rows: 6 }} /></div>
           </div>
         </div>
       </div>
@@ -152,12 +132,10 @@ const CourseDetail = () => {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="container mx-auto px-4 text-center">
-          <div className="text-6xl mb-4">😞</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Khóa học không tồn tại
-          </h1>
+          <div className="text-6xl mb-4">Khóa học không tồn tại</div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Khóa học không tồn tại</h1>
           <Link to="/courses">
-            <Button type="primary">Quay lại danh sách khóa học</Button>
+            <Button style={{ background: RED_DARK, borderColor: RED_DARK }}>Quay lại danh sách khóa học</Button>
           </Link>
         </div>
       </div>
@@ -166,13 +144,14 @@ const CourseDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow-sm">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="container mx-auto px-4 py-4">
           <Link
             to="/courses"
-            className="inline-flex items-center text-primary-600 hover:text-primary-700 mb-4"
+            className="inline-flex items-center text-red-700 hover:text-red-800 font-medium transition-colors"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
+            <ArrowLeft className="w-5 h-5 mr-2" style={{ color: RED_MAIN }} />
             Quay lại danh sách khóa học
           </Link>
         </div>
@@ -180,183 +159,149 @@ const CourseDetail = () => {
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <div>
-              <Card className="mb-6">
-                <div className="flex flex-col md:flex-row gap-6">
-                  <img
-                    src={course.image}
-                    alt={course.title}
-                    className="w-full md:w-64 h-48 object-cover rounded-lg"
-                    onError={(e) => {
-                      e.target.src =
-                        "https://via.placeholder.com/400x300?text=Course+Image";
-                    }}
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between mb-4">
+          {/* Left Column */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Course Info Card */}
+            <Card className="border-0 shadow-lg" style={{ background: BG_LIGHT }}>
+              <div className="flex flex-col md:flex-row gap-6">
+                <img
+                  src={course.image}
+                  alt={course.title}
+                  className="w-full md:w-64 h-48 object-cover rounded-xl shadow-md"
+                  onError={(e) => { e.target.src = "https://via.placeholder.com/400x300?text=Course+Image"; }}
+                />
+                <div className="flex-1">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <Tag
+                        color="red"
+                        style={{ background: RED_DARK, borderColor: RED_DARK, fontWeight: "bold" }}
+                        className="mb-2 text-white"
+                      >
+                        {course.level === 0 ? "Beginner" : course.level === 1 ? "Intermediate" : "Advanced"}
+                      </Tag>
+                      <h1 className="text-3xl font-black text-red-900 mb-2 tracking-tight">
+                        {course.title}
+                      </h1>
+                      <p className="text-gray-700 text-lg leading-relaxed">
+                        {course.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-6 text-gray-700 mb-4">
+                    <div className="flex items-center">
+                      <Clock className="w-5 h-5 mr-2" style={{ color: RED_MAIN }} />
+                      <span className="font-medium">{course.duration}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center">
+                      <BookOpen className="w-6 h-6 mr-3" style={{ color: RED_MAIN }} />
                       <div>
-                        <Tag
-                          color={
-                            course.level === 0
-                              ? "green"
-                              : course.level === 1
-                              ? "blue"
-                              : "red"
-                          }
-                          className="mb-2"
-                        >
-                          {course.level === 0
-                            ? "Beginner"
-                            : course.level === 1
-                            ? "Intermediate"
-                            : "Advanced"}
-                        </Tag>
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                          {course.title}
-                        </h1>
-                        <p className="text-gray-600 text-lg">
-                          {course.description}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-6 text-gray-600 mb-4">
-                      <div className="flex items-center">
-                        <Clock className="w-5 h-5 mr-1" />
-                        <span>{course.duration}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center">
-                        <BookOpen className="w-5 h-5 text-gray-400 mr-2" />
-                        <div>
-                          <div className="font-semibold">{course.teacher}</div>
-                          <div className="text-sm text-gray-600">Giáo viên</div>
-                        </div>
+                        <div className="font-bold text-red-900">{course.teacher}</div>
+                        <div className="text-sm text-gray-600">Giáo viên</div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </Card>
+              </div>
+            </Card>
 
-              <Card>
-                <Tabs defaultActiveKey="overview">
-                  <TabPane tab="Tổng quan" key="overview">
-                    <div className="space-y-6">
-                      <div>
-                        <h3 className="text-xl font-semibold mb-3">
-                          Giới thiệu khóa học
-                        </h3>
-                        <p className="text-gray-700 leading-relaxed">
-                          {course.longDescription || course.description}
-                        </p>
-                      </div>
-
-                      <div>
-                        <h3 className="text-xl font-semibold mb-3">
-                          Thông tin khóa học
-                        </h3>
-                        <div className="grid md:grid-cols-2 gap-4">
-                          <div className="flex items-center">
-                            <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                            <span>
-                              Trình độ:{" "}
-                              {course.level === 0
-                                ? "Beginner"
-                                : course.level === 1
-                                ? "Intermediate"
-                                : "Advanced"}
-                            </span>
-                          </div>
-                          <div className="flex items-center">
-                            <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                            <span>Thời lượng: {course.duration}</span>
-                          </div>
+            {/* Tabs */}
+            <Card className="border-0 shadow-lg" style={{ background: BG_LIGHT }}>
+              <Tabs defaultActiveKey="overview" className="custom-tabs">
+                <TabPane tab={<span className="font-bold text-red-900">Tổng quan</span>} key="overview">
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-xl font-black text-red-900 mb-3">Giới thiệu khóa học</h3>
+                      <p className="text-gray-700 leading-relaxed">
+                        {course.longDescription || course.description}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-black text-red-900 mb-3">Thông tin khóa học</h3>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="flex items-center">
+                          <CheckCircle className="w-5 h-5 mr-3" style={{ color: RED_MAIN }} />
+                          <span className="font-medium">
+                            Trình độ: {course.level === 0 ? "Beginner" : course.level === 1 ? "Intermediate" : "Advanced"}
+                          </span>
+                        </div>
+                        <div className="flex items-center">
+                          <CheckCircle className="w-5 h-5 mr-3" style={{ color: RED_MAIN }} />
+                          <span className="font-medium">Thời lượng: {course.duration}</span>
                         </div>
                       </div>
                     </div>
-                  </TabPane>
+                  </div>
+                </TabPane>
 
-                  <TabPane tab="Nội dung khóa học" key="curriculum">
-                    <div className="space-y-6">
-                      {course.chapters && course.chapters.length > 0 ? (
-                        course.chapters.map((chapter) => (
-                          <div key={chapter.id} className="border rounded-lg">
-                            <div className="bg-gray-50 px-6 py-4 border-b">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <h4 className="font-semibold text-lg">
-                                    Chương {chapter.number}: {chapter.name}
-                                  </h4>
-                                  {chapter.description && (
-                                    <p className="text-gray-600 text-sm mt-1">
-                                      {chapter.description}
-                                    </p>
-                                  )}
-                                </div>
-                                <Tag color="blue">
-                                  {chapter.lessons?.length || 0} bài học
-                                </Tag>
+                <TabPane tab={<span className="font-bold text-red-900">Nội dung khóa học</span>} key="curriculum">
+                  <div className="space-y-6">
+                    {course.chapters?.length > 0 ? (
+                      course.chapters.map((chapter) => (
+                        <div key={chapter.id} className="border-2 border-red-100 rounded-xl overflow-hidden">
+                          <div className="bg-red-50 px-6 py-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h4 className="font-black text-lg text-red-900">
+                                  Chương {chapter.number}: {chapter.name}
+                                </h4>
+                                {chapter.description && (
+                                  <p className="text-gray-700 text-sm mt-1">{chapter.description}</p>
+                                )}
                               </div>
+                              <Tag style={{ background: RED_DARK, color: "white", fontWeight: "bold" }}>
+                                {chapter.lessons?.length || 0} bài học
+                              </Tag>
                             </div>
-                            <div className="divide-y">
-                              {chapter.lessons && chapter.lessons.length > 0 ? (
-                                chapter.lessons.map((lesson) => (
-                                  <div
-                                    key={lesson.id}
-                                    className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-                                  >
-                                    <div className="flex items-center flex-1">
-                                      <PlayCircle className="w-5 h-5 text-primary-500 mr-3" />
-                                      <div>
-                                        <div className="font-medium">
-                                          {lesson.name}
-                                        </div>
-                                        {lesson.content && (
-                                          <div className="text-sm text-gray-500 mt-1 line-clamp-1">
-                                            {lesson.content}
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                    <div className="flex items-center space-x-4">
-                                      {lesson.duration && (
-                                        <span className="text-gray-500 text-sm flex items-center">
-                                          <Clock className="w-4 h-4 mr-1" />
-                                          {lesson.duration}
-                                        </span>
+                          </div>
+                          <div className="divide-y divide-gray-200">
+                            {chapter.lessons?.length > 0 ? (
+                              chapter.lessons.map((lesson) => (
+                                <div key={lesson.id} className="px-6 py-4 flex items-center justify-between hover:bg-red-50 transition-colors">
+                                  <div className="flex items-center flex-1">
+                                    <PlayCircle className="w-5 h-5 mr-3" style={{ color: RED_MAIN }} />
+                                    <div>
+                                      <div className="font-semibold text-gray-900">{lesson.name}</div>
+                                      {lesson.content && (
+                                        <div className="text-sm text-gray-600 mt-1 line-clamp-1">{lesson.content}</div>
                                       )}
                                     </div>
                                   </div>
-                                ))
-                              ) : (
-                                <div className="px-6 py-4 text-center text-gray-500">
-                                  Chưa có bài học nào
+                                  {lesson.duration && (
+                                    <span className="text-gray-600 text-sm flex items-center">
+                                      <Clock className="w-4 h-4 mr-1" /> {lesson.duration}
+                                    </span>
+                                  )}
                                 </div>
-                              )}
-                            </div>
+                              ))
+                            ) : (
+                              <div className="px-6 py-4 text-center text-gray-500">Chưa có bài học nào</div>
+                            )}
                           </div>
-                        ))
-                      ) : (
-                        <div className="text-center py-8 text-gray-500">
-                          <BookOpen className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                          <p>Chưa có nội dung khóa học</p>
                         </div>
-                      )}
-                    </div>
-                  </TabPane>
-                </Tabs>
-              </Card>
-            </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <BookOpen className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                        <p>Chưa có nội dung khóa học</p>
+                      </div>
+                    )}
+                  </div>
+                </TabPane>
+              </Tabs>
+            </Card>
           </div>
 
+          {/* Right Column - Sticky */}
           <div className="lg:col-span-1">
             <div className="sticky top-8">
-              <Card className="shadow-lg border-0">
+              <Card className="shadow-xl border-0" style={{ background: BG_LIGHT }}>
                 <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                  <h3 className="text-2xl font-black text-red-900 mb-4 tracking-tight">
                     Thông tin khóa học
                   </h3>
                 </div>
@@ -366,32 +311,32 @@ const CourseDetail = () => {
                     <Button
                       type="primary"
                       size="large"
-                      className="w-full h-12 text-lg font-semibold"
-                      // onClick={() => setEnrollModal(true)}
+                      className="w-full h-14 text-lg font-bold"
+                      style={{
+                        background: RED_DARK,
+                        borderColor: RED_DARK,
+                        boxShadow: "0 4px 12px rgba(153, 27, 27, 0.3)",
+                      }}
                     >
                       Bắt đầu học
                     </Button>
                   </Link>
                 </div>
 
-                <div className="mt-6 space-y-3 text-sm text-gray-600">
+                <div className="mt-6 space-y-4 text-base">
                   <div className="flex justify-between">
-                    <span>Thời lượng:</span>
-                    <span className="font-semibold">{course.duration}</span>
+                    <span className="text-gray-700 font-medium">Thời lượng:</span>
+                    <span className="font-bold text-red-900">{course.duration}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Trình độ:</span>
-                    <span className="font-semibold">
-                      {course.level === 0
-                        ? "Beginner"
-                        : course.level === 1
-                        ? "Intermediate"
-                        : "Advanced"}
+                    <span className="text-gray-700 font-medium">Trình độ:</span>
+                    <span className="font-bold text-red-900">
+                      {course.level === 0 ? "Beginner" : course.level === 1 ? "Intermediate" : "Advanced"}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Giáo viên:</span>
-                    <span className="font-semibold">{course.teacher}</span>
+                    <span className="text-gray-700 font-medium">Giáo viên:</span>
+                    <span className="font-bold text-red-900">{course.teacher}</span>
                   </div>
                 </div>
               </Card>
@@ -399,53 +344,48 @@ const CourseDetail = () => {
           </div>
         </div>
 
+        {/* Related Courses */}
         {relatedCourses.length > 0 && (
-          <div className="mt-12">
-            <h2 className="text-2xl font-bold mb-6">Khóa học liên quan</h2>
+          <div className="mt-16">
+            <h2 className="text-3xl font-black text-red-900 mb-8 text-center tracking-tight">
+              Khóa học liên quan
+            </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {relatedCourses.map((relatedCourse) => (
+              {relatedCourses.map((rc) => (
                 <Card
-                  key={relatedCourse.id}
+                  key={rc.id}
                   cover={
-                    <img
-                      alt={relatedCourse.name}
-                      src={
-                        relatedCourse.imageUrl ||
-                        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800"
-                      }
-                      className="h-48 object-cover"
-                    />
+                    <div className="relative overflow-hidden rounded-t-xl">
+                      <img
+                        alt={rc.title}
+                        src={rc.image}
+                        className="h-48 w-full object-cover transition-transform duration-300 hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                    </div>
                   }
-                  actions={[
-                    <Link to={`/courses/${relatedCourse.id}`} key="view">
-                      <Button type="primary">Xem chi tiết</Button>
-                    </Link>,
-                  ]}
+                  className="border-0 shadow-lg hover:shadow-xl transition-shadow"
+                  style={{ background: BG_LIGHT }}
                 >
                   <Card.Meta
-                    title={relatedCourse.name}
+                    title={<span className="font-black text-red-900">{rc.title}</span>}
                     description={
-                      <div className="space-y-2">
-                        <div className="text-sm text-gray-600 line-clamp-2 mb-2">
-                          {relatedCourse.description}
-                        </div>
+                      <div className="space-y-3">
+                        <p className="text-gray-700 line-clamp-2">{rc.description}</p>
                         <div className="flex justify-between items-center">
-                          <Tag
-                            color={
-                              relatedCourse.level === 0
-                                ? "green"
-                                : relatedCourse.level === 1
-                                ? "blue"
-                                : "red"
-                            }
-                          >
-                            {relatedCourse.level === 0
-                              ? "Beginner"
-                              : relatedCourse.level === 1
-                              ? "Intermediate"
-                              : "Advanced"}
+                          <Tag style={{ background: RED_DARK, color: "white", fontWeight: "bold" }}>
+                            {rc.level === 0 ? "Beginner" : rc.level === 1 ? "Intermediate" : "Advanced"}
                           </Tag>
                         </div>
+                        <Link to={`/courses/${rc.id}`} className="block mt-3">
+                          <Button
+                            type="primary"
+                            className="w-full font-bold"
+                            style={{ background: RED_DARK, borderColor: RED_DARK }}
+                          >
+                            Xem chi tiết
+                          </Button>
+                        </Link>
                       </div>
                     }
                   />
@@ -456,24 +396,30 @@ const CourseDetail = () => {
         )}
       </div>
 
+      {/* Modal */}
       <Modal
-        title="Đăng ký khóa học"
+        title={<span className="font-black text-red-900">Đăng ký khóa học</span>}
         open={enrollModal}
         onCancel={() => setEnrollModal(false)}
         footer={null}
         width={600}
       >
         <div className="text-center py-8">
-          <BookOpen className="w-16 h-16 text-primary-600 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold mb-2">Xác nhận đăng ký</h3>
-          <p className="text-gray-600 mb-6">
-            Bạn sắp đăng ký khóa học "{course.title}"
+          <BookOpen className="w-16 h-16 mx-auto mb-4" style={{ color: RED_MAIN }} />
+          <h3 className="text-xl font-black text-red-900 mb-2">Xác nhận đăng ký</h3>
+          <p className="text-gray-700 mb-6">
+            Bạn sắp đăng ký khóa học <strong className="text-red-900">"{course.title}"</strong>
           </p>
           <div className="flex space-x-4 justify-center">
             <Button size="large" onClick={() => setEnrollModal(false)}>
               Hủy
             </Button>
-            <Button type="primary" size="large" onClick={handleEnroll}>
+            <Button
+              type="primary"
+              size="large"
+              onClick={handleEnroll}
+              style={{ background: RED_DARK, borderColor: RED_DARK }}
+            >
               Xác nhận đăng ký
             </Button>
           </div>

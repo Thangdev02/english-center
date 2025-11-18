@@ -60,30 +60,31 @@ const Navbar = () => {
       className="bg-white shadow-lg sticky top-0 z-50"
     >
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-around items-center h-28">
           {/* Logo */}
           <motion.div
             whileHover={{ scale: 1.05 }}
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-2  "
           >
-            <BookOpen className="h-8 w-8 text-primary-600" />
-            <Link to="/" className="text-xl font-bold text-primary-600">
-              EnglishMaster
+            <Link to="/"  style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <img src="./PanadLogo.png" alt="" className="w-24 h-24" />
+              <h2 style={{ fontSize: "20px", fontWeight: "bold", marginLeft: "10px"}} className="text-red-800">Super Panda</h2>
             </Link>
+
           </motion.div>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
             <Link
               to="/courses"
-              className="text-gray-700 hover:text-primary-600 transition-colors duration-200 font-medium"
+              className="text-red-800 hover:text-red-600 transition-colors duration-200 font-medium"
             >
               Khóa học
             </Link>
             {user?.role === 1 && (
               <Link
                 to="/exams"
-                className="text-gray-700 hover:text-primary-600 transition-colors duration-200 font-medium"
+                className="text-red-800 hover:text-red-600 transition-colors duration-200 font-medium"
               >
                 Bài thi
               </Link>
@@ -91,7 +92,7 @@ const Navbar = () => {
             {user?.role === 1 && (
               <Link
                 to="/student/classes"
-                className="text-gray-700 hover:text-primary-600 transition-colors duration-200 font-medium"
+                className="text-red-800 hover:text-red-600 transition-colors duration-200 font-medium"
               >
                 Lớp học của tôi
               </Link>
@@ -99,7 +100,7 @@ const Navbar = () => {
             {user?.role === 1 && (
               <Link
                 to="/leaderboard"
-                className="text-gray-700 hover:text-primary-600 transition-colors duration-200 font-medium"
+                className="text-red-800 hover:text-red-600 transition-colors duration-200 font-medium"
               >
                 <Trophy className="inline w-4 h-4 mr-1" />
                 Bảng xếp hạng

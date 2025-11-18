@@ -88,162 +88,125 @@ const FreeExams = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12">
-      <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-block p-3 bg-blue-100 rounded-full mb-4">
-            <BookOpen className="w-12 h-12 text-blue-600" />
-          </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Bài Thi Miễn Phí
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Thử sức với các bài thi miễn phí để đánh giá và nâng cao kiến thức
-            của bạn
-          </p>
-          <div className="mt-6 flex items-center justify-center space-x-8 text-sm">
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-              <span className="text-gray-600">Trắc nghiệm</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              <span className="text-gray-600">Tự luận</span>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-100 py-12">
+    <div className="container mx-auto px-4">
+      {/* Header */}
+      <div className="text-center mb-12">
+        <div className="inline-block p-3 bg-red-100 rounded-full mb-4">
+          <BookOpen className="w-12 h-12 text-red-600" />
         </div>
-
-        {/* Exams Grid */}
-        {loading ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Card key={i} className="h-full">
-                <Skeleton active paragraph={{ rows: 4 }} />
-              </Card>
-            ))}
+  
+        <h1 className="text-4xl font-black text-red-900 mb-4 tracking-tight">
+          Bài Thi Miễn Phí
+        </h1>
+  
+        <p className="text-lg text-gray-700 max-w-2xl mx-auto">
+          Thử sức với các bài thi miễn phí để đánh giá và nâng cao kiến thức của bạn
+        </p>
+  
+        <div className="mt-6 flex items-center justify-center space-x-8 text-sm">
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 bg-red-600 rounded-full"></div>
+            <span className="text-gray-600">Trắc nghiệm</span>
           </div>
-        ) : exams.length === 0 ? (
-          <div className="text-center py-16">
-            <Empty
-              description="Chưa có bài thi nào"
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-            />
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+            <span className="text-gray-600">Tự luận</span>
           </div>
-        ) : (
-          <>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {exams.map((exam) => (
-                <Card
-                  key={exam.id}
-                  hoverable
-                  className="h-full flex flex-col transition-all duration-300 hover:shadow-xl"
-                  cover={
-                    <div className="bg-gradient-to-br from-blue-500 to-purple-600 h-40 flex items-center justify-center">
-                      <FileText className="w-16 h-16 text-white opacity-80" />
-                    </div>
-                  }
-                >
-                  <div className="flex flex-col h-full">
-                    {/* Exam Type Badge */}
-                    <div className="mb-3">
-                      <Tag
-                        color={getExamTypeColor(exam.type)}
-                        className="text-sm"
-                      >
-                        {getExamTypeText(exam.type)}
-                      </Tag>
-                    </div>
-
-                    {/* Exam Title */}
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
-                      {exam.name}
-                    </h3>
-
-                    {/* Description */}
-                    {exam.description && (
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-grow">
-                        {exam.description}
-                      </p>
-                    )}
-
-                    {/* Exam Info */}
-                    <div className="space-y-2 mb-4">
-                      <div className="flex items-center text-sm text-gray-600">
-                        <Clock className="w-4 h-4 mr-2 text-blue-500" />
-                        <span>Thời gian: {formatDuration(exam.duration)}</span>
-                      </div>
-                      <div className="flex items-center text-sm text-gray-600">
-                        <FileText className="w-4 h-4 mr-2 text-purple-500" />
-                        <span>Số câu hỏi: {exam.quantity} câu</span>
-                      </div>
-                    </div>
-
-                    {/* Action Button */}
-                    <Button
-                      type="primary"
-                      size="large"
-                      icon={<PlayCircle className="w-4 h-4" />}
-                      onClick={() => handleTakeExam(exam.id)}
-                      className="w-full"
-                    >
-                      Làm bài thi
-                    </Button>
-                  </div>
-                </Card>
-              ))}
-            </div>
-
-            {/* Pagination */}
-            {totalExams > pageSize && (
-              <div className="flex justify-center mt-8">
-                <Pagination
-                  current={currentPage}
-                  total={totalExams}
-                  pageSize={pageSize}
-                  onChange={handlePageChange}
-                  showTotal={(total, range) =>
-                    `${range[0]}-${range[1]} của ${total} bài thi`
-                  }
-                  showSizeChanger={false}
-                />
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Info Section */}
-        <div className="mt-16 grid md:grid-cols-3 gap-6">
-          <Card className="text-center">
-            <div className="inline-block p-3 bg-blue-100 rounded-full mb-4">
-              <PlayCircle className="w-8 h-8 text-blue-600" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Làm bài dễ dàng</h3>
-            <p className="text-gray-600 text-sm">
-              Giao diện thân thiện, dễ sử dụng cho mọi đối tượng
-            </p>
-          </Card>
-          <Card className="text-center">
-            <div className="inline-block p-3 bg-green-100 rounded-full mb-4">
-              <FileText className="w-8 h-8 text-green-600" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Đa dạng bài thi</h3>
-            <p className="text-gray-600 text-sm">
-              Nhiều loại bài thi từ trắc nghiệm đến tự luận
-            </p>
-          </Card>
-          <Card className="text-center">
-            <div className="inline-block p-3 bg-purple-100 rounded-full mb-4">
-              <Clock className="w-8 h-8 text-purple-600" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Linh hoạt thời gian</h3>
-            <p className="text-gray-600 text-sm">
-              Làm bài thi bất cứ lúc nào bạn muốn
-            </p>
-          </Card>
         </div>
       </div>
+  
+      {/* Exams Grid */}
+      {!loading && exams.length > 0 && (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {exams.map((exam) => (
+            <Card
+              key={exam.id}
+              hoverable
+              className="h-full flex flex-col rounded-xl overflow-hidden border-red-100 shadow-md hover:shadow-xl transition-all"
+              cover={
+                <div className="bg-gradient-to-br from-red-500 to-red-700 h-40 flex items-center justify-center">
+                  <FileText className="w-16 h-16 text-white opacity-90" />
+                </div>
+              }
+            >
+              <div className="flex flex-col h-full">
+                {/* Badge */}
+                <Tag
+                  color={exam.type === 0 ? "red" : "orange"}
+                  className="text-sm font-bold"
+                >
+                  {exam.type === 0 ? "Trắc nghiệm" : "Tự luận"}
+                </Tag>
+  
+                {/* Title */}
+                <h3 className="text-xl font-bold text-red-900 mb-2 line-clamp-2">
+                  {exam.name}
+                </h3>
+  
+                {/* Description */}
+                {exam.description && (
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-grow">
+                    {exam.description}
+                  </p>
+                )}
+  
+                {/* Info */}
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center text-sm text-gray-600">
+                    <Clock className="w-4 h-4 mr-2 text-red-500" />
+                    <span>Thời gian: {formatDuration(exam.duration)}</span>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <FileText className="w-4 h-4 mr-2 text-red-400" />
+                    <span>Số câu hỏi: {exam.quantity} câu</span>
+                  </div>
+                </div>
+  
+                {/* Button */}
+                <Button
+                  size="large"
+                  icon={<PlayCircle className="w-4 h-4" />}
+                  onClick={() => handleTakeExam(exam.id)}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold border-none"
+                >
+                  Làm bài thi
+                </Button>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+  
+      {/* Info Section */}
+      <div className="mt-16 grid md:grid-cols-3 gap-6">
+        <Card className="text-center rounded-xl border-red-100">
+          <div className="inline-block p-3 bg-red-100 rounded-full mb-4">
+            <PlayCircle className="w-8 h-8 text-red-600" />
+          </div>
+          <h3 className="text-lg font-bold text-red-900 mb-2">Làm bài dễ dàng</h3>
+          <p className="text-gray-700 text-sm">Giao diện thân thiện dễ sử dụng</p>
+        </Card>
+  
+        <Card className="text-center rounded-xl border-red-100">
+          <div className="inline-block p-3 bg-red-200 rounded-full mb-4">
+            <FileText className="w-8 h-8 text-red-600" />
+          </div>
+          <h3 className="text-lg font-bold text-red-900 mb-2">Đa dạng bài thi</h3>
+          <p className="text-gray-700 text-sm">Từ trắc nghiệm đến tự luận</p>
+        </Card>
+  
+        <Card className="text-center rounded-xl border-red-100">
+          <div className="inline-block p-3 bg-red-100 rounded-full mb-4">
+            <Clock className="w-8 h-8 text-red-600" />
+          </div>
+          <h3 className="text-lg font-bold text-red-900 mb-2">Linh hoạt thời gian</h3>
+          <p className="text-gray-700 text-sm">Làm bài thi bất cứ lúc nào</p>
+        </Card>
+      </div>
     </div>
+  </div>
+  
   );
 };
 
