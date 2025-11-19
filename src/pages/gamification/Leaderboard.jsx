@@ -1,69 +1,23 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, Table, Tag, Avatar, Progress, Tabs, Select } from 'antd';
-import { Trophy, Star, Award, TrendingUp, Crown, BookOpen } from 'lucide-react';
+import { Trophy, Star, Award, TrendingUp, Crown, BookOpen, Flame } from 'lucide-react';
 
-const { TabPane } = Tabs;
 const { Option } = Select;
 
 const Leaderboard = () => {
   const [timeRange, setTimeRange] = useState('monthly');
 
   const leaderboardData = [
-    {
-      rank: 1,
-      name: 'Nguyễn Văn A',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
-      points: 2450,
-      level: 'Expert',
-      progress: 95,
-      streak: 15,
-      coursesCompleted: 8
-    },
-    {
-      rank: 2,
-      name: 'Trần Thị B',
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150',
-      points: 2180,
-      level: 'Advanced',
-      progress: 87,
-      streak: 12,
-      coursesCompleted: 7
-    },
-    {
-      rank: 3,
-      name: 'Lê Văn C',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
-      points: 1950,
-      level: 'Advanced',
-      progress: 78,
-      streak: 10,
-      coursesCompleted: 6
-    }
+    { rank: 1, name: 'Nguyễn Văn A', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150', points: 2450, level: 'Expert', progress: 95, streak: 15, coursesCompleted: 8 },
+    { rank: 2, name: 'Trần Thị B', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150', points: 2180, level: 'Advanced', progress: 87, streak: 12, coursesCompleted: 7 },
+    { rank: 3, name: 'Lê Văn C', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150', points: 1950, level: 'Advanced', progress: 78, streak: 10, coursesCompleted: 6 },
   ];
 
   const achievements = [
-    {
-      name: 'Học viên xuất sắc',
-      icon: '🏆',
-      description: 'Đứng top 1 bảng xếp hạng',
-      points: 500,
-      earned: true
-    },
-    {
-      name: 'Chuyên cần',
-      icon: '🔥',
-      description: 'Duy trì streak 30 ngày',
-      points: 300,
-      earned: false
-    },
-    {
-      name: 'Master Vocabulary',
-      icon: '📚',
-      description: 'Học 1000 từ vựng',
-      points: 250,
-      earned: true
-    }
+    { name: 'Học viên xuất sắc', icon: '🏆', description: 'Đứng top 1 bảng xếp hạng', points: 500, earned: true },
+    { name: 'Chuyên cần', icon: '🔥', description: 'Duy trì streak 30 ngày', points: 300, earned: false },
+    { name: 'Master Vocabulary', icon: '📚', description: 'Học 1000 từ vựng', points: 250, earned: true },
   ];
 
   const columns = [
@@ -71,88 +25,107 @@ const Leaderboard = () => {
       title: 'Hạng',
       dataIndex: 'rank',
       key: 'rank',
+      width: 80,
       render: (rank) => (
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 text-white font-bold">
+        <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold text-white shadow-lg
+          ${rank === 1 ? 'bg-gradient-to-br from-red-500 to-red-700 text-lg' : 
+            rank === 2 ? 'bg-gradient-to-br from-red-400 to-red-600' : 
+            rank === 3 ? 'bg-gradient-to-br from-red-300 to-red-500' : 
+            'bg-gray-300'}`}>
           {rank}
         </div>
-      )
+      ),
     },
     {
       title: 'Học viên',
       dataIndex: 'name',
       key: 'name',
-      render: (name, record) => (
+      render: (_, record) => (
         <div className="flex items-center space-x-3">
-          <Avatar src={record.avatar} size="large" />
+          <Avatar src={record.avatar} size={48} className="ring-4 ring-red-100" />
           <div>
-            <div className="font-semibold">{name}</div>
-            <Tag color="blue">{record.level}</Tag>
+            <div className="font-bold text-gray-800">{record.name}</div>
+            <Tag color={record.level === 'Expert' ? 'red' : 'orange'} className="mt-1">
+              {record.level}
+            </Tag>
           </div>
         </div>
-      )
+      ),
     },
     {
       title: 'Điểm số',
       dataIndex: 'points',
       key: 'points',
       render: (points) => (
-        <div className="flex items-center text-orange-500 font-semibold">
-          <Star className="w-4 h-4 mr-1 fill-current" />
-          {points}
+        <div className="flex items-center font-bold text-red-600">
+          <Star className="w-5 h-5 mr-1 fill-red-500" />
+          {points.toLocaleString()}
         </div>
-      )
+      ),
     },
     {
       title: 'Tiến độ',
       dataIndex: 'progress',
       key: 'progress',
       render: (progress) => (
-        <Progress percent={progress} size="small" />
-      )
+        <Progress 
+          percent={progress} 
+          strokeColor="#ef4444" 
+          trailColor="#fee2e2"
+          size="small"
+          className="font-medium"
+        />
+      ),
     },
     {
       title: 'Streak',
       dataIndex: 'streak',
       key: 'streak',
       render: (streak) => (
-        <div className="flex items-center text-red-500">
-          <TrendingUp className="w-4 h-4 mr-1" />
+        <div className="flex items-center font-semibold text-red-600">
+          <Flame className="w-5 h-5 mr-1 fill-current" />
           {streak} ngày
         </div>
-      )
-    }
+      ),
+    },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 py-12">
+      <div className="container mx-auto px-4 max-w-7xl">
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+          {/* Header */}
           <div className="text-center mb-12">
             <div className="flex items-center justify-center mb-4">
-              <Trophy className="w-12 h-12 text-yellow-500 mr-4" />
-              <h1 className="text-4xl font-bold text-gray-900">Bảng Xếp Hạng</h1>
+              <Trophy className="w-14 h-14 text-red-600 drop-shadow-lg" />
+              <h1 className="text-5xl font-extrabold bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
+                BẢNG XẾP HẠNG
+              </h1>
             </div>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Cùng thi đua và chinh phục những đỉnh cao mới trong học tập
+            <p className="text-lg text-gray-700 max-w-2xl mx-auto font-medium">
+              Cùng thi đua, cùng bứt phá – ai sẽ là nhà vô địch tháng này?
             </p>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
+            {/* Left Column - Leaderboard + Stats */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Top Leaderboard */}
               <Card 
+                className="shadow-xl border-0 rounded-2xl overflow-hidden"
+                bodyStyle={{ padding: 0 }}
                 title={
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center">
-                      <Crown className="w-5 h-5 text-yellow-500 mr-2" />
-                      Top Học Viên
+                  <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white">
+                    <span className="flex items-center text-lg font-bold">
+                      <Crown className="w-6 h-6 mr-3" />
+                      TOP HỌC VIÊN XUẤT SẮC
                     </span>
                     <Select 
                       value={timeRange} 
                       onChange={setTimeRange}
-                      className="w-32"
+                      style={{ width: 140 }}
+                      className="rounded-lg"
+                      dropdownStyle={{ borderRadius: 12 }}
                     >
                       <Option value="weekly">Tuần này</Option>
                       <Option value="monthly">Tháng này</Option>
@@ -167,79 +140,79 @@ const Leaderboard = () => {
                   pagination={false}
                   rowKey="rank"
                   className="leaderboard-table"
+                  rowClassName={(record) => record.rank <= 3 ? 'bg-red-50' : ''}
                 />
               </Card>
 
-              <Card className="mt-6" title="Thống kê của bạn">
+              {/* Your Stats */}
+              <Card className="shadow-lg border-0 rounded-2xl bg-gradient-to-r from-red-500 to-rose-600 text-white">
+                <h3 className="text-xl font-bold mb-6 flex items-center">
+                  <TrendingUp className="w-6 h-6 mr-2" />
+                  Thống kê của bạn
+                </h3>
                 <div className="grid grid-cols-4 gap-4 text-center">
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">15</div>
-                    <div className="text-sm text-gray-600">Hạng hiện tại</div>
+                  <div className="bg-white/20 backdrop-blur rounded-xl p-4">
+                    <div className="text-3xl font-extrabold">15</div>
+                    <div className="text-sm opacity-90">Hạng hiện tại</div>
                   </div>
-                  <div className="p-4 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">1,240</div>
-                    <div className="text-sm text-gray-600">Điểm số</div>
+                  <div className="bg-white/20 backdrop-blur rounded-xl p-4">
+                    <div className="text-3xl font-extrabold">1,240</div>
+                    <div className="text-sm opacity-90">Điểm số</div>
                   </div>
-                  <div className="p-4 bg-orange-50 rounded-lg">
-                    <div className="text-2xl font-bold text-orange-600">7</div>
-                    <div className="text-sm text-gray-600">Streak</div>
+                  <div className="bg-white/20 backdrop-blur rounded-xl p-4">
+                    <div className="text-3xl font-extrabold flex items-center justify-center">
+                      <Flame className="w-8 h-8" /> 7
+                    </div>
+                    <div className="text-sm opacity-90">Streak</div>
                   </div>
-                  <div className="p-4 bg-purple-50 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600">3</div>
-                    <div className="text-sm text-gray-600">Khóa học</div>
+                  <div className="bg-white/20 backdrop-blur rounded-xl p-4">
+                    <div className="text-3xl font-extrabold">3</div>
+                    <div className="text-sm opacity-90">Khóa học</div>
                   </div>
                 </div>
               </Card>
             </div>
 
-            <div className="lg:col-span-1">
+            {/* Right Column - Achievements */}
+            <div>
               <Card 
+                className="shadow-xl border-0 rounded-2xl overflow-hidden"
                 title={
-                  <span className="flex items-center">
-                    <Award className="w-5 h-5 text-purple-500 mr-2" />
-                    Thành Tích
-                  </span>
+                  <div className="flex items-center px-4 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white text-lg font-bold">
+                    <Award className="w-6 h-6 mr-2" />
+                    Thành tích nổi bật
+                  </div>
                 }
               >
                 <div className="space-y-4">
-                  {achievements.map((achievement, index) => (
+                  {achievements.map((a, i) => (
                     <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: 20 }}
+                      key={i}
+                      initial={{ opacity: 0, x: 30 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
+                      transition={{ delay: i * 0.15 }}
                     >
                       <Card 
                         size="small"
-                        className={`border-l-4 ${
-                          achievement.earned 
-                            ? 'border-l-green-500 bg-green-50' 
-                            : 'border-l-gray-300 bg-gray-50'
+                        className={`border-0 shadow-md rounded-xl transition-all ${
+                          a.earned 
+                            ? 'bg-gradient-to-r from-red-50 to-rose-50 border-l-4 border-l-red-600' 
+                            : 'bg-gray-50 opacity-70'
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <span className="text-2xl">{achievement.icon}</span>
+                          <div className="flex items-center space-x-4">
+                            <span className="text-3xl">{a.icon}</span>
                             <div>
-                              <div className="font-semibold">{achievement.name}</div>
-                              <div className="text-sm text-gray-600">
-                                {achievement.description}
-                              </div>
+                              <div className="font-bold text-gray-800">{a.name}</div>
+                              <div className="text-sm text-gray-600">{a.description}</div>
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="font-semibold text-orange-500">
-                              +{achievement.points}
-                            </div>
-                            {achievement.earned ? (
-                              <Tag color="green" className="text-xs">
-                                Đã đạt
-                              </Tag>
-                            ) : (
-                              <Tag color="default" className="text-xs">
-                                Chưa đạt
-                              </Tag>
-                            )}
+                            <div className="font-bold text-red-600">+{a.points}</div>
+                            <Tag color={a.earned ? 'red' : 'default'} className="mt-1">
+                              {a.earned ? 'ĐÃ ĐẠT' : 'CHƯA ĐẠT'}
+                            </Tag>
                           </div>
                         </div>
                       </Card>
@@ -247,56 +220,40 @@ const Leaderboard = () => {
                   ))}
                 </div>
 
-                <div className="mt-6 p-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg text-white">
-                  <div className="text-sm mb-2">Tiến trình đến cấp độ tiếp theo</div>
-                  <Progress 
-                    percent={65} 
-                    strokeColor="#fff"
-                    showInfo={false}
-                  />
-                  <div className="flex justify-between text-sm mt-2">
+                {/* Level Progress */}
+                <div className="mt-8 p-6 bg-gradient-to-r from-red-600 to-rose-700 rounded-2xl text-white">
+                  <div className="text-sm font-medium mb-3">Tiến trình đến cấp độ tiếp theo</div>
+                  <Progress percent={65} strokeColor="#fff" trailColor="#fecaca" showInfo={false} />
+                  <div className="flex justify-between mt-3 text-sm font-medium">
                     <span>Advanced</span>
-                    <span>Expert</span>
+                    <span className="font-bold">Expert →</span>
                   </div>
-                  <div className="text-center mt-3">
-                    <div className="text-lg font-semibold">Cần thêm 350 điểm</div>
+                  <div className="text-center mt-4 text-lg font-extrabold">
+                    Chỉ còn 350 điểm nữa!
                   </div>
                 </div>
               </Card>
             </div>
           </div>
 
-          <Card className="mt-8" title="Thử thách tuần">
+          {/* Weekly Challenges */}
+          <Card className="mt-10 shadow-xl border-0 rounded-2xl" title={<h2 className="text-2xl font-bold text-red-700 flex items-center"><Trophy className="w-7 h-7 mr-3" /> THỬ THÁCH TUẦN</h2>}>
             <div className="grid md:grid-cols-3 gap-6">
-              <div className="text-center p-6 border rounded-lg">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <BookOpen className="w-6 h-6 text-blue-600" />
+              {[
+                { title: "Hoàn thành 5 bài học", reward: "100 điểm", percent: 60, current: "3/5", icon: BookOpen, color: "red" },
+                { title: "Duy trì streak 7 ngày", reward: "150 điểm", percent: 85, current: "6/7 ngày", icon: Flame, color: "red" },
+                { title: "Đạt điểm cao bài kiểm tra", reward: "200 điểm", percent: 30, current: "Chưa hoàn thành", icon: Award, color: "rose" },
+              ].map((c, i) => (
+                <div key={i} className="text-center p-6 bg-gradient-to-br from-red-50 to-white rounded-2xl shadow-md border border-red-100">
+                  <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <c.icon className="w-9 h-9 text-white" />
+                  </div>
+                  <h3 className="font-bold text-lg text-gray-800 mb-2">{c.title}</h3>
+                  <p className="text-red-600 font-semibold mb-4">{c.reward}</p>
+                  <Progress percent={c.percent} strokeColor="#ef4444" trailColor="#fee2e2" />
+                  <div className="text-sm text-gray-600 mt-3 font-medium">{c.current}</div>
                 </div>
-                <h3 className="font-semibold mb-2">Hoàn thành 5 bài học</h3>
-                <p className="text-gray-600 text-sm mb-4">Nhận 100 điểm</p>
-                <Progress percent={60} />
-                <div className="text-sm text-gray-500 mt-2">3/5 bài học</div>
-              </div>
-
-              <div className="text-center p-6 border rounded-lg">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <TrendingUp className="w-6 h-6 text-green-600" />
-                </div>
-                <h3 className="font-semibold mb-2">Duy trì streak 7 ngày</h3>
-                <p className="text-gray-600 text-sm mb-4">Nhận 150 điểm</p>
-                <Progress percent={85} />
-                <div className="text-sm text-gray-500 mt-2">6/7 ngày</div>
-              </div>
-
-              <div className="text-center p-6 border rounded-lg">
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Award className="w-6 h-6 text-purple-600" />
-                </div>
-                <h3 className="font-semibold mb-2">Đạt điểm cao trong bài kiểm tra</h3>
-                <p className="text-gray-600 text-sm mb-4">Nhận 200 điểm</p>
-                <Progress percent={30} />
-                <div className="text-sm text-gray-500 mt-2">Chưa hoàn thành</div>
-              </div>
+              ))}
             </div>
           </Card>
         </motion.div>

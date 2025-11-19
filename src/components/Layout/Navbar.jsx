@@ -10,6 +10,7 @@ import {
   Menu,
   X,
   Shield,
+  Building2
 } from "lucide-react";
 import { Dropdown, Button } from "antd";
 import { useAuth } from "../../context/AuthContext";
@@ -121,7 +122,15 @@ const Navbar = () => {
                 Bảng xếp hạng
               </Link>
             )}
-
+            {user?.role === 1 && (
+              <Link
+                to="/about"
+                className="text-red-800 hover:text-red-600 transition-colors duration-200 font-medium"
+              >
+                <Building2 className="inline w-4 h-4 mr-1" />
+                Về Chúng Tôi
+              </Link>
+            )}
             {user ? (
               <div className="flex items-center space-x-4">
                 <Dropdown

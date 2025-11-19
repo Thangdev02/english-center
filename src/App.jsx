@@ -37,6 +37,7 @@ import StudentExam from "./pages/student/StudentExam";
 import EditCourse from "./pages/admin/EditCourse";
 import FreeExams from "./pages/FreeExams";
 import FreeExamTaking from "./pages/FreeExamTaking";
+import AboutUs from "./pages/AboutUs";
 
 function App() {
   return (
@@ -58,6 +59,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/about" element={<AboutUs />} />
                 <Route path="/courses" element={<Courses />} />
                 <Route path="/courses/:id" element={<CourseDetail />} />
                 <Route path="/student/classes" element={<StudentClasses />} />

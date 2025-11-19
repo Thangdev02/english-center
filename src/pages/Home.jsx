@@ -64,8 +64,8 @@ const Home = () => {
   const REASONS = [
     {
       icon: <GraduationCap className="w-12 h-12 text-red-600" />,
-      title: "Trung tâm tiếng Anh hàng đầu",
-      desc: "Tự hào là trung tâm đầu tiên phong trào đào tạo tiếng Anh chuẩn quốc tế. Cam kết đầu ra chất lượng hàng đầu tại Việt Nam.",
+      title: "Trung tâm tiếng Trung hàng đầu",
+      desc: "Tự hào là trung tâm đầu tiên phong trào đào tạo tiếng Trung chuẩn quốc tế. Cam kết đầu ra chất lượng hàng đầu tại Việt Nam.",
     },
     {
       icon: <Users className="w-12 h-12 text-red-600" />,
@@ -79,8 +79,8 @@ const Home = () => {
     },
     {
       icon: <Trophy className="w-12 h-12 text-red-600" />,
-      title: "Học viên đạt IELTS 7.0+",
-      desc: "Hàng trăm học viên đạt IELTS 7.0 – 8.5, du học Anh, Úc, Mỹ, Canada. SUPER PANDA là bệ phóng cho tương lai của bạn.",
+      title: "Học viên đạt trình độ Hsk3 - Hsk6",
+      desc: "Hàng trăm học viên đạt Hks3 – Hks6. SUPER PANDA là bệ phóng cho tương lai của bạn.",
     },
   ];
 
@@ -111,7 +111,7 @@ const Home = () => {
       name: "Nguyễn Minh Anh",
       level: "IELTS 8.0",
       course: "SV ĐH Bách Khoa",
-      quote: "Chỉ sau 3 tháng học tại Super Panda, em đã đạt IELTS 8.0 và nhận học bổng du học Anh!",
+      quote: "Chỉ sau 3 tháng học tại Super Panda, em đã đạt Hks4",
       img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600",
       signature: "Minh Anh",
     },
@@ -127,7 +127,7 @@ const Home = () => {
       name: "Lê Thị Ngọc",
       level: "IELTS 7.0",
       course: "Học viên",
-      quote: "Từ band 5.0 lên 7.0 chỉ trong 60 buổi. Super Panda thực sự là nơi thay đổi cuộc đời mình!",
+      quote: "Từ hsk3 lên hsk5 chỉ trong 60 buổi. Super Panda thực sự là nơi thay đổi cuộc đời mình!",
       img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600",
       signature: "Thị Ngọc",
     },
@@ -143,7 +143,7 @@ const Home = () => {
         const mapped = items.map((c) => ({
           id: c.id,
           title: c.courseName || c.name,
-          desc: c.description || "Khóa học tiếng Anh chất lượng cao",
+          desc: c.description || "Khóa học tiếng Trung chất lượng cao",
           img: c.imageUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
         }));
         setCourses(mapped);
@@ -213,13 +213,13 @@ const Home = () => {
       <section ref={reasonsRef} className="py-20 bg-gradient-to-b from-red-50 to-white">
         <div className="max-w-7xl mx-auto px-4">
           <motion.h2 initial={{ opacity: 0, y: 30 }} animate={isReasonsInView ? { opacity: 1, y: 0 } : {}} className="text-4xl md:text-5xl font-bold text-center text-red-900 mb-16">
-            LÝ DO NÊN CHỌN TIẾNG ANH SUPER PANDA
+            LÝ DO NÊN CHỌN TIẾNG TRUNG SUPER PANDA
           </motion.h2>
           <motion.div variants={container} initial="hidden" animate={isReasonsInView ? "visible" : "hidden"} className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {REASONS.map((r, i) => (
-              <motion.div key={i} variants={item} className="text-center">
+              <motion.div key={i} variants={item} className="text-cente r">
                 <div className="flex justify-center mb-4">{r.icon}</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">{r.title}</h3>
+                <h3 className="text-xl text-center font-bold text-gray-900 mb-3">{r.title}</h3>
                 <p className="text-gray-600 leading-relaxed">{r.desc}</p>
               </motion.div>
             ))}
@@ -231,7 +231,7 @@ const Home = () => {
       <section ref={bannerRef} className="py-16 bg-red-900">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={isBannerInView ? { opacity: 1, scale: 1 } : {}}>
-            <p className="text-white text-xl mb-4">MUA SÁCH GIÁO TRÌNH TIẾNG ANH CAMBRIDGE – TỰ HỌC IELTS TẠI NHÀ</p>
+            <p className="text-white text-xl mb-4">MUA SÁCH GIÁO TRÌNH TIẾNG TRUNG </p>
             <Button className="bg-white text-red-900 font-bold px-12 py-6 rounded-full text-lg">TẠI ĐÂY</Button>
           </motion.div>
         </div>
@@ -241,7 +241,7 @@ const Home = () => {
       <section ref={coursesRef} className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4">
           <motion.h2 initial={{ opacity: 0, y: 30 }} animate={isCoursesInView ? { opacity: 1, y: 0 } : {}} className="text-4xl md:text-5xl font-bold text-center text-red-900 mb-16">
-            CÁC KHÓA HỌC TIẾNG ANH TẠI SUPER PANDA
+            CÁC KHÓA HỌC TIẾNG TRUNG TẠI SUPER PANDA
           </motion.h2>
           {loading ? (
             <div className="grid md:grid-cols-3 gap-8">
@@ -282,9 +282,9 @@ const Home = () => {
                 <span className="block text-yellow-400">ĐẾN NÂNG CAO</span>
               </h2>
               <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 inline-block">
-                <p className="text-white font-bold text-xl">LỘ TRÌNH HỌC TÍCH HỢP THEO CHUẨN IELTS CAMBRIDGE</p>
+                <p className="text-white font-bold text-xl">LỘ TRÌNH HỌC TÍCH HỢP THEO CHUẨN HSK</p>
               </div>
-              <p className="text-red-100 mt-4">CHINH PHỤC IELTS – MỞ RA CÁNH CỬA TƯƠNG LAI</p>
+              <p className="text-red-100 mt-4">CHINH PHỤC HSK – MỞ RA CÁNH CỬA TƯƠNG LAI</p>
             </motion.div>
             <motion.div initial={{ opacity: 0, x: 50 }} animate={isCtaFormInView ? { opacity: 1, x: 0 } : {}}>
               <Card className="bg-white/10 backdrop-blur-md border-0 p-6">
@@ -298,11 +298,12 @@ const Home = () => {
                   <Form.Item label={<span className="text-white font-semibold">Email (bắt buộc)</span>}>
                     <Input className="h-12 rounded-lg" />
                   </Form.Item>
-                  <Form.Item label={<span className="text-white font-semibold">Mục tiêu IELTS</span>}>
+                  <Form.Item label={<span className="text-white font-semibold">Mục tiêu HSK</span>}>
                     <Select className="h-12 rounded-lg w-full">
-                      <Option value="6.5">IELTS 6.5</Option>
-                      <Option value="7.0">IELTS 7.0</Option>
-                      <Option value="7.5">IELTS 7.5+</Option>
+                      <Option value="3">Hsk3</Option>
+                      <Option value="4">Hsk4</Option>
+                      <Option value="5">Hsk5</Option>
+                      <Option value="6">Hsk6</Option>
                     </Select>
                   </Form.Item>
                   <Form.Item label={<span className="text-white font-semibold">Hình thức học</span>}>
@@ -451,10 +452,10 @@ const Home = () => {
 
       {/* === FLOATING BUTTONS === */}
       <div className="fixed bottom-6 left-6 flex flex-col gap-3 z-50">
-        <a href="https://zalo.me/0931715889" className="bg-green-500 text-white p-4 rounded-full shadow-lg flex items-center gap-2 hover:scale-110 transition-transform">
+        <a href="https://zalo.me/0369960429" className="bg-green-500 text-white p-4 rounded-full shadow-lg flex items-center gap-2 hover:scale-110 transition-transform">
           <MessageCircle className="w-5 h-5" /> Chat Zalo
         </a>
-        <a href="https://m.me/superpanda.english" className="bg-blue-600 text-white p-4 rounded-full shadow-lg flex items-center gap-2 hover:scale-110 transition-transform">
+        <a href="https://www.facebook.com/profile.php?id=61551807950988&locale=vi_VN" className="bg-blue-600 text-white p-4 rounded-full shadow-lg flex items-center gap-2 hover:scale-110 transition-transform">
           <Facebook className="w-5 h-5" /> Chat Facebook
         </a>
         <a href="tel:0931715889" className="bg-red-600 text-white p-4 rounded-full shadow-lg flex items-center gap-2 hover:scale-110 transition-transform">
