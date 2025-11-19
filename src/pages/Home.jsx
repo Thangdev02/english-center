@@ -64,8 +64,8 @@ const Home = () => {
   const REASONS = [
     {
       icon: <GraduationCap className="w-12 h-12 text-red-600" />,
-      title: "Trung tâm tiếng Anh hàng đầu",
-      desc: "Tự hào là trung tâm đầu tiên phong trào đào tạo tiếng Anh chuẩn quốc tế. Cam kết đầu ra chất lượng hàng đầu tại Việt Nam.",
+      title: "Trung tâm tiếng Trung hàng đầu",
+      desc: "Tự hào là trung tâm đầu tiên phong trào đào tạo tiếng Trung chuẩn quốc tế. Cam kết đầu ra chất lượng hàng đầu tại Việt Nam.",
     },
     {
       icon: <Users className="w-12 h-12 text-red-600" />,
