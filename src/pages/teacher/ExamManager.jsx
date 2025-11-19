@@ -10,12 +10,14 @@ import {
   Space,
   Tabs,
   Tag,
+  Upload,
 } from "antd";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
   Clock,
   Edit,
+  Music,
   Plus,
   Search,
   Send,
@@ -53,6 +55,8 @@ const ExamManager = () => {
     { content: "", isCorrect: false },
     { content: "", isCorrect: false },
   ]);
+  const [mp3File, setMp3File] = useState(null);
+  const [mp3Url, setMp3Url] = useState(null);
   const [assignForm] = Form.useForm();
   const [questionForm] = Form.useForm();
 
@@ -178,19 +182,35 @@ const ExamManager = () => {
         }
       }
 
-      const questionData = {
-        content: values.content,
-        ...(values.type === 0 && { answers: answers }),
-      };
+      // Create FormData
+      const formData = new FormData();
+      formData.append("content", values.content);
+
+      // Add type only for create (not edit)
+      if (!isEditMode) {
+        formData.append("type", values.type);
+      }
+
+      // Add MP3 file if provided
+      if (mp3File) {
+        formData.append("mp3", mp3File);
+      }
+
+      // Add answers for MultipleChoice
+      if (values.type === 0 || (isEditMode && questionType === 0)) {
+        answers.map((ans, index) => {
+          formData.append(`answers[${index}].content`, ans.content);
+          formData.append(`answers[${index}].isCorrect`, ans.isCorrect);
+        });
+      }
 
       if (isEditMode && selectedQuestion) {
         // Update existing question
-        await examApi.updateQuestion(selectedQuestion.id, questionData);
+        await examApi.updateQuestion(selectedQuestion.id, formData);
         message.success("Cập nhật câu hỏi thành công!");
       } else {
         // Create new question
-        questionData.type = values.type;
-        await examApi.createQuestion(questionData);
+        await examApi.createQuestion(formData);
         message.success("Tạo câu hỏi thành công!");
       }
 
@@ -199,6 +219,8 @@ const ExamManager = () => {
       setQuestionType(null);
       setIsEditMode(false);
       setSelectedQuestion(null);
+      setMp3File(null);
+      setMp3Url(null);
       setAnswers([
         { content: "", isCorrect: false },
         { content: "", isCorrect: false },
@@ -246,6 +268,8 @@ const ExamManager = () => {
       setSelectedQuestion(questionData);
       setIsEditMode(true);
       setQuestionType(questionData.type);
+      setMp3Url(questionData.mp3 || null);
+      setMp3File(null);
 
       // Prefill form with question data
       questionForm.setFieldsValue({
@@ -714,6 +738,8 @@ const ExamManager = () => {
           setQuestionType(null);
           setIsEditMode(false);
           setSelectedQuestion(null);
+          setMp3File(null);
+          setMp3Url(null);
           setAnswers([
             { content: "", isCorrect: false },
             { content: "", isCorrect: false },
@@ -751,6 +777,48 @@ const ExamManager = () => {
             ]}
           >
             <Input.TextArea rows={4} placeholder="Nhập nội dung câu hỏi..." />
+          </Form.Item>
+
+          {/* MP3 Upload */}
+          <Form.Item label="File MP3 (tùy chọn)">
+            <Upload
+              accept=".mp3,audio/mpeg"
+              maxCount={1}
+              beforeUpload={(file) => {
+                const isMp3 =
+                  file.type === "audio/mpeg" || file.name.endsWith(".mp3");
+                if (!isMp3) {
+                  message.error("Chỉ chấp nhận file MP3!");
+                  return Upload.LIST_IGNORE;
+                }
+                const isLt50M = file.size / 1024 / 1024 < 50;
+                if (!isLt50M) {
+                  message.error("File MP3 phải nhỏ hơn 50MB!");
+                  return Upload.LIST_IGNORE;
+                }
+                setMp3File(file);
+                setMp3Url(null);
+                return false;
+              }}
+              onRemove={() => {
+                setMp3File(null);
+              }}
+              fileList={
+                mp3File
+                  ? [{ uid: "-1", name: mp3File.name, status: "done" }]
+                  : []
+              }
+            >
+              <Button icon={<Music size={16} />}>Chọn file MP3</Button>
+            </Upload>
+            {mp3Url && !mp3File && (
+              <div className="mt-2">
+                <audio controls className="w-full">
+                  <source src={mp3Url} type="audio/mpeg" />
+                  Trình duyệt không hỗ trợ phát audio.
+                </audio>
+              </div>
+            )}
           </Form.Item>
 
           {/* Answers section for MultipleChoice */}

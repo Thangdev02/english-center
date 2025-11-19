@@ -11,6 +11,7 @@ import {
 import {
   CheckCircle,
   Clock,
+  Download,
   FileText,
   MessageCircle,
   PlayCircle,
@@ -348,14 +349,74 @@ const Learning = () => {
                           <span className="flex items-center">
                             <FileText className="w-4 h-4 mr-2" />
                             Tài liệu
+                            {currentLessonData.lessonDocuments?.length > 0 && (
+                              <span className="ml-2 px-2 py-0.5 bg-blue-500 text-white text-xs rounded-full">
+                                {currentLessonData.lessonDocuments.length}
+                              </span>
+                            )}
                           </span>
                         }
                         key="materials"
                       >
-                        <div className="text-center py-12 text-gray-500">
-                          <FileText className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                          <p>Tài liệu bài học sẽ được cập nhật</p>
-                        </div>
+                        {currentLessonData.lessonDocuments?.length > 0 ? (
+                          <div className="space-y-3">
+                            <h3 className="text-lg font-semibold mb-4">
+                              Tài liệu bài học
+                            </h3>
+                            <List
+                              dataSource={currentLessonData.lessonDocuments}
+                              renderItem={(doc) => (
+                                <List.Item
+                                  className="hover:bg-gray-50 p-4 rounded-lg transition-colors"
+                                  actions={[
+                                    <Button
+                                      type="primary"
+                                      icon={<Download className="w-4 h-4" />}
+                                      href={doc.documentUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      Tải xuống
+                                    </Button>,
+                                  ]}
+                                >
+                                  <List.Item.Meta
+                                    avatar={
+                                      <FileText className="w-8 h-8 text-blue-500" />
+                                    }
+                                    title={
+                                      <a
+                                        href={doc.documentUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 hover:text-blue-800 font-medium"
+                                      >
+                                        {doc.name}
+                                      </a>
+                                    }
+                                    description={
+                                      <div className="text-sm text-gray-500">
+                                        {doc.createdDate && (
+                                          <span>
+                                            Ngày tạo:{" "}
+                                            {new Date(
+                                              doc.createdDate
+                                            ).toLocaleDateString("vi-VN")}
+                                          </span>
+                                        )}
+                                      </div>
+                                    }
+                                  />
+                                </List.Item>
+                              )}
+                            />
+                          </div>
+                        ) : (
+                          <div className="text-center py-12 text-gray-500">
+                            <FileText className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                            <p>Chưa có tài liệu cho bài học này</p>
+                          </div>
+                        )}
                       </Tabs.TabPane>
 
                       <Tabs.TabPane

@@ -535,6 +535,16 @@ const StudentExam = () => {
                     </Paragraph>
                   </div>
 
+                  {/* MP3 Audio Player */}
+                  {question.questionMp3 && (
+                    <div className="mb-4">
+                      <audio controls className="w-full">
+                        <source src={question.questionMp3} type="audio/mpeg" />
+                        Trình duyệt không hỗ trợ phát audio.
+                      </audio>
+                    </div>
+                  )}
+
                   {question.questionType === 0 ? (
                     // Multiple choice
                     <Radio.Group
