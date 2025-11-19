@@ -137,10 +137,10 @@ const Courses = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold text-red-900 mb-4 tracking-tight">
-            KHÓA HỌC TIẾNG ANH SUPER PANDA
+            KHÓA HỌC TIẾNG TRUNG SUPER PANDA
           </h1>
           <p className="text-xl text-red-700 max-w-3xl mx-auto font-medium">
-            Hơn 50+ khóa học IELTS từ 4.0 → 8.5+ – Cam kết đầu ra bằng văn bản
+            Hơn 50+ khóa học Hsk từ 3 → 6 – Cam kết đầu ra
           </p>
         </div>
 
