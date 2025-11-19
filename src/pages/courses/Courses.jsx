@@ -149,7 +149,7 @@ const Courses = () => {
           <div className="flex flex-col lg:flex-row gap-4 items-center">
             <div className="flex-1 w-full">
               <AntSearch
-                placeholder="Tìm khóa học: IELTS Writing, Speaking, 7.0+..."
+                placeholder="Tìm khóa học: ..."
                 prefix={<Search className="text-red-600" />}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
