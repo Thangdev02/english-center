@@ -16,9 +16,26 @@ export const examApi = {
   getAllQuestions: (params) => api.get(`/questions`, { params }),
   getQuestion: (id) => api.get(`/questions/${id}`),
   getExamQuestions: (examId) => api.get(`/examQuestions?examId=${examId}`),
-  createQuestion: (questionData) => api.post(`/questions`, questionData),
-  updateQuestion: (id, questionData) =>
-    api.patch(`/questions/${id}`, questionData),
+  createQuestion: (questionData) => {
+    if (questionData instanceof FormData) {
+      return api.post(`/questions`, questionData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    }
+    return api.post(`/questions`, questionData);
+  },
+  updateQuestion: (id, questionData) => {
+    if (questionData instanceof FormData) {
+      return api.patch(`/questions/${id}`, questionData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    }
+    return api.patch(`/questions/${id}`, questionData);
+  },
   deleteQuestion: (id) => api.delete(`/questions/${id}`),
 
   // Class exams

@@ -354,6 +354,8 @@ const EditCourse = () => {
           content: data.content,
           duration: data.duration,
         });
+        // Reset new documents state when viewing lesson
+        setLessonDocuments([]);
         setLessonDetailModalVisible(true);
       }
     } catch (error) {
@@ -374,7 +376,7 @@ const EditCourse = () => {
         formData.append("video", lessonVideoFile);
       }
 
-      // Add document files if exists
+      // Add document files if exists (for both create and update)
       if (lessonDocuments && lessonDocuments.length > 0) {
         lessonDocuments.forEach((doc, index) => {
           formData.append(`document[${index}].document`, doc.file);
@@ -385,6 +387,17 @@ const EditCourse = () => {
       if (isEditLesson && selectedLesson) {
         await courseApi.updateLesson(selectedLesson.id, formData);
         message.success("Cập nhật bài học thành công!");
+
+        // Add new documents separately if editing
+        if (lessonDocuments && lessonDocuments.length > 0) {
+          for (const doc of lessonDocuments) {
+            const docFormData = new FormData();
+            docFormData.append("name", doc.name);
+            docFormData.append("document", doc.file);
+            await courseApi.addLessonDocument(selectedLesson.id, docFormData);
+          }
+        }
+
         setLessonDetailModalVisible(false);
       } else {
         await courseApi.addMoreLesson(selectedChapterForLessons.id, formData);
@@ -442,9 +455,37 @@ const EditCourse = () => {
     return false;
   };
 
-  // Remove document
+  // Remove document (for new documents being uploaded)
   const handleRemoveDocument = (uid) => {
     setLessonDocuments((prev) => prev.filter((doc) => doc.uid !== uid));
+  };
+
+  // Delete existing lesson document
+  const handleDeleteLessonDocument = (doc) => {
+    Modal.confirm({
+      title: "Xác nhận xóa tài liệu",
+      content: `Bạn có chắc chắn muốn xóa tài liệu "${doc.name}"?`,
+      okText: "Xóa",
+      okType: "danger",
+      cancelText: "Hủy",
+      onOk: async () => {
+        try {
+          await courseApi.deleteLessonDocument(doc.id);
+          message.success("Xóa tài liệu thành công!");
+          // Reload lesson details to refresh document list
+          if (selectedLesson) {
+            const response = await courseApi.getLesson(selectedLesson.id);
+            const data = response?.data?.data;
+            if (data) {
+              setSelectedLesson(data);
+            }
+          }
+        } catch (error) {
+          console.error("Error deleting document:", error);
+          message.error("Xóa tài liệu thất bại!");
+        }
+      },
+    });
   };
 
   const handleDeleteLesson = (lesson) => {
@@ -1099,6 +1140,39 @@ const EditCourse = () => {
               </a>
             </div>
           )}
+
+          {selectedLesson?.lessonDocuments &&
+            selectedLesson.lessonDocuments.length > 0 && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tài liệu hiện tại
+                </label>
+                <div className="space-y-2">
+                  {selectedLesson.lessonDocuments.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                    >
+                      <a
+                        href={doc.documentUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline flex-1 truncate"
+                      >
+                        {doc.name}
+                      </a>
+                      <Button
+                        type="text"
+                        size="small"
+                        danger
+                        icon={<Trash2 size={14} />}
+                        onClick={() => handleDeleteLessonDocument(doc)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
           <Form.Item label="Cập nhật video">
             <Upload
