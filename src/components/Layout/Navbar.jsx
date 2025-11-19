@@ -67,11 +67,26 @@ const Navbar = () => {
             whileHover={{ scale: 1.05 }}
             className="flex items-center space-x-2  "
           >
-            <Link to="/" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <img src="./PanadLogo.png" alt="" className="w-24 h-24" />
-              <h2 style={{ fontSize: "20px", fontWeight: "bold", marginLeft: "10px" }} className="text-red-800">Super Panda</h2>
+            <Link
+              to="/"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <img src="/PanadLogo.png" alt="" className="w-24 h-24" />
+              <h2
+                style={{
+                  fontSize: "20px",
+                  fontWeight: "bold",
+                  marginLeft: "10px",
+                }}
+                className="text-red-800"
+              >
+                Super Panda
+              </h2>
             </Link>
-
           </motion.div>
 
           {/* Desktop Menu */}

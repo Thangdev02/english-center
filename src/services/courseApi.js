@@ -70,20 +70,20 @@ export const courseApi = {
     return api.patch(`/lessons/${id}`, lessonData);
   },
   deleteLesson: (id) => api.delete(`/lessons/${id}`),
+  deleteLessonDocument: (id) => api.delete(`/lesson-documents/${id}`),
+  addLessonDocument: (lessonId, documentData) => {
+    if (documentData instanceof FormData) {
+      return api.post(`/lessons/${lessonId}/lesson-documents`, documentData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    }
+    return api.post(`/lessons/${lessonId}/lesson-documents`, documentData);
+  },
 
   //  join khoa
-  enrollCourse: (courseId, userId) => {
-    const enrollmentData = {
-      userId: userId,
-      courseId: courseId,
-      progress: 0,
-      completedLessons: [],
-      enrolledAt: new Date().toISOString(),
-      status: "active",
-    };
-    console.log("🔄 Creating enrollment:", enrollmentData);
-    return api.post("/enrollments", enrollmentData);
-  },
+  enrollCourse: (courseId) => api.post(`/courses/${courseId}/student-courses`),
 
   //xem cai khoa cua minh
   getMyEnrollments: (userId) => {
