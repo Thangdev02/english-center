@@ -35,8 +35,8 @@ const AboutUs = () => {
               Super Panda – Chúng Tôi Là Ai?
             </h1>
             <p className="text-xl md:text-2xl text-gray-700 max-w-5xl mx-auto leading-relaxed font-medium">
-              Hệ thống học tiếng Anh trực tuyến & trung tâm hàng đầu Việt Nam<br />
-              <span className="text-red-600 font-bold">Nơi gấu trúc đỏ giúp bạn nói tiếng Anh như người bản xứ!</span>
+              Hệ thống học tiếng Trung trực tuyến & trung tâm hàng đầu Việt Nam<br />
+              <span className="text-red-600 font-bold">Nơi gấu trúc đỏ giúp bạn nói tiếng Trung như người bản xứ!</span>
             </p>
           </motion.div>
 
@@ -49,9 +49,8 @@ const AboutUs = () => {
           >
             {[
               { icon: UsersRound, number: "68,000+", label: "Panda Learners" },
-              { icon: Trophy, number: "Top 3", label: "App Tiếng Anh VN 2025" },
+              { icon: Trophy, number: "Top 3", label: "App Tiếng Trung VN 2025" },
               { icon: Flame, number: "42 ngày", label: "Streak kỷ lục" },
-              { icon: Star, number: "4.95", label: "Đánh giá App Store" },
             ].map((stat, i) => (
               <motion.div
                 key={i}
@@ -122,7 +121,7 @@ const AboutUs = () => {
                 <Target className="w-20 h-20 mb-8" />
                 <h2 className="text-5xl font-extrabold mb-8">Sứ Mệnh</h2>
                 <p className="text-xl leading-relaxed opacity-95">
-                  Giúp <strong>1 triệu người Việt</strong> nói tiếng Anh tự tin như người bản xứ trước 2030 — 
+                  Giúp <strong>1 triệu người Việt</strong> nói tiếng Trung tự tin như người bản xứ trước 2030 — 
                   bằng phương pháp học vui như chơi, nhớ lâu như khắc vào não!
                 </p>
               </div>
@@ -160,8 +159,8 @@ const AboutUs = () => {
           <div className="grid md:grid-cols-3 gap-12">
             {[
               { icon: Heart, title: "Yêu thương như gia đình", desc: "Mỗi học viên là một người thân — chúng tôi không bỏ rơi ai." },
-              { icon: BookOpen, title: "Học vui – Nhớ lâu", desc: "Dùng trò chơi, âm nhạc, phim ảnh — biến tiếng Anh thành niềm vui." },
-              { icon: Award, title: "Kết quả thực sự", desc: "Hàng nghìn học viên đạt IELTS 7.5+, nói tiếng Anh trôi chảy sau 6 tháng." },
+              { icon: BookOpen, title: "Học vui – Nhớ lâu", desc: "Dùng trò chơi, âm nhạc, phim ảnh — biến tiếng Trung thành niềm vui." },
+              { icon: Award, title: "Kết quả thực sự", desc: "Hàng nghìn học viên đạt IELTS 7.5+, nói tiếng Trung trôi chảy sau 6 tháng." },
             ].map((v, i) => (
               <motion.div
                 key={i}
@@ -191,7 +190,7 @@ const AboutUs = () => {
             Bạn Đã Sẵn Sàng Trở Thành <span className="text-red-600">Super Panda</span> Chưa?
           </h2>
           <p className="text-2xl text-gray-700 mb-12">
-            Hành trình chinh phục tiếng Anh bắt đầu ngay hôm nay — cùng gấu trúc đỏ!
+            Hành trình chinh phục tiếng Trung bắt đầu ngay hôm nay — cùng gấu trúc đỏ!
           </p>
 
           <div className="flex flex-col sm:flex-row gap-8 justify-center">

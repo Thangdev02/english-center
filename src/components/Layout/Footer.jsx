@@ -14,7 +14,7 @@ const Footer = () => {
               </Link>
             </div>
             <p className="text-gray-400">
-              Nền tảng học tiếng Anh trực tuyến hàng đầu Việt Nam với phương pháp giảng dạy hiện đại và hiệu quả.
+              Nền tảng học tiếng Trung trực tuyến hàng đầu Việt Nam với phương pháp giảng dạy hiện đại và hiệu quả.
             </p>
           
           </div>
