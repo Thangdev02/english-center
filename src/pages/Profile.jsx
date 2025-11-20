@@ -10,6 +10,7 @@ import {
   Upload,
   Empty,
   message,
+  Modal,
 } from "antd";
 import { motion } from "framer-motion";
 import {
@@ -26,6 +27,7 @@ import { useAuth } from "../context/AuthContext";
 import { examApi } from "../services/examApi";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
+import { userApi } from "../services/userApi";
 
 const { TabPane } = Tabs;
 
@@ -34,6 +36,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [form] = Form.useForm();
+  const [passwordForm] = Form.useForm();
   const [freeExams, setFreeExams] = useState([]);
   const [loadingExams, setLoadingExams] = useState(false);
   const [examsPagination, setExamsPagination] = useState({
@@ -41,10 +44,33 @@ const Profile = () => {
     pageSize: 10,
     total: 0,
   });
+  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
 
   const onFinish = (values) => {
     updateProfile(values);
     setEditing(false);
+  };
+
+  const handleChangePassword = async (values) => {
+    try {
+      setChangingPassword(true);
+      await userApi.changePassword({
+        oldPassword: values.oldPassword,
+        newPassword: values.newPassword,
+      });
+      message.success("Đổi mật khẩu thành công!");
+      setPasswordModalVisible(false);
+      passwordForm.resetFields();
+    } catch (error) {
+      console.error("Error changing password:", error);
+      message.error(
+        error.response?.data?.message ||
+          "Không thể đổi mật khẩu. Vui lòng thử lại!"
+      );
+    } finally {
+      setChangingPassword(false);
+    }
   };
 
   const isStudent = user?.role === 1;
@@ -349,12 +375,19 @@ const Profile = () => {
                             </Button>
                           </>
                         ) : (
-                          <Button
-                            type="primary"
-                            onClick={() => setEditing(true)}
-                          >
-                            Chỉnh sửa hồ sơ
-                          </Button>
+                          <>
+                            <Button
+                              type="primary"
+                              onClick={() => setEditing(true)}
+                            >
+                              Chỉnh sửa hồ sơ
+                            </Button>
+                            <Button
+                              onClick={() => setPasswordModalVisible(true)}
+                            >
+                              Đổi mật khẩu
+                            </Button>
+                          </>
                         )}
                       </div>
                     </Form>
@@ -482,6 +515,85 @@ const Profile = () => {
             </div>
           </div>
         </motion.div>
+
+        {/* Change Password Modal */}
+        <Modal
+          title="Đổi mật khẩu"
+          open={passwordModalVisible}
+          onCancel={() => {
+            setPasswordModalVisible(false);
+            passwordForm.resetFields();
+          }}
+          footer={null}
+        >
+          <Form
+            form={passwordForm}
+            layout="vertical"
+            onFinish={handleChangePassword}
+          >
+            <Form.Item
+              name="oldPassword"
+              label="Mật khẩu cũ"
+              rules={[
+                { required: true, message: "Vui lòng nhập mật khẩu cũ!" },
+              ]}
+            >
+              <Input.Password placeholder="Nhập mật khẩu cũ" />
+            </Form.Item>
+
+            <Form.Item
+              name="newPassword"
+              label="Mật khẩu mới"
+              rules={[
+                { required: true, message: "Vui lòng nhập mật khẩu mới!" },
+                { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" },
+              ]}
+            >
+              <Input.Password placeholder="Nhập mật khẩu mới" />
+            </Form.Item>
+
+            <Form.Item
+              name="confirmPassword"
+              label="Xác nhận mật khẩu mới"
+              dependencies={["newPassword"]}
+              rules={[
+                { required: true, message: "Vui lòng xác nhận mật khẩu mới!" },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue("newPassword") === value) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(
+                      new Error("Mật khẩu xác nhận không khớp!")
+                    );
+                  },
+                }),
+              ]}
+            >
+              <Input.Password placeholder="Nhập lại mật khẩu mới" />
+            </Form.Item>
+
+            <Form.Item className="mb-0">
+              <div className="flex justify-end space-x-2">
+                <Button
+                  onClick={() => {
+                    setPasswordModalVisible(false);
+                    passwordForm.resetFields();
+                  }}
+                >
+                  Hủy
+                </Button>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={changingPassword}
+                >
+                  Đổi mật khẩu
+                </Button>
+              </div>
+            </Form.Item>
+          </Form>
+        </Modal>
       </div>
     </div>
   );

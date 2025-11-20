@@ -14,12 +14,12 @@ export const userApi = {
   // Authentication
   login: (credentials) => api.post("/login", credentials),
   register: (userData) => api.post("/register", userData),
+  changePassword: (passwordData) =>
+    api.patch("/auth/change-password", passwordData),
 
   // User management
   getProfile: () => api.get("/users/me"),
   updateProfile: (userData) => api.patch("/users/me", userData),
-  changePassword: (passwordData) =>
-    api.patch("/users/me/password", passwordData),
 
   // Teacher functions
   getStudents: () => api.get("/users?role=student"),
