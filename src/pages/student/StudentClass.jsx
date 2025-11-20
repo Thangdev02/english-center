@@ -33,8 +33,15 @@ const StudentClasses = () => {
   const [myClasses, setMyClasses] = useState([]);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [coursesLoading, setCoursesLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("classes");
   const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 9,
+    total: 0,
+    totalPages: 0,
+  });
+  const [coursesPagination, setCoursesPagination] = useState({
     current: 1,
     pageSize: 9,
     total: 0,
@@ -44,7 +51,10 @@ const StudentClasses = () => {
   useEffect(() => {
     if (user?.id) {
       fetchMyClasses(pagination.current, pagination.pageSize);
-      fetchEnrolledCourses();
+      fetchEnrolledCourses(
+        coursesPagination.current,
+        coursesPagination.pageSize
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
@@ -76,34 +86,31 @@ const StudentClasses = () => {
     fetchMyClasses(page, pageSize);
   };
 
-  const fetchEnrolledCourses = async () => {
+  const fetchEnrolledCourses = async (page = 1, size = 9) => {
     try {
-      // Lấy các khóa học đã đăng ký
-      const enrollmentsResponse = await courseApi.getMyEnrollments();
-      const coursesWithProgress = await Promise.all(
-        enrollmentsResponse.data.map(async (enrollment) => {
-          const courseResponse = await courseApi.getCourse(enrollment.courseId);
-          return {
-            ...courseResponse.data,
-            progress: enrollment.progress,
-            enrolledAt: enrollment.enrolledAt,
-            enrollmentId: enrollment.id,
-          };
-        })
-      );
-      setEnrolledCourses(coursesWithProgress);
+      setCoursesLoading(true);
+      const response = await courseApi.getMyCourse({ page, size });
+      const data = response?.data?.data;
+
+      if (data) {
+        setEnrolledCourses(data.items || []);
+        setCoursesPagination({
+          current: data.page || page,
+          pageSize: data.size || size,
+          total: data.total || 0,
+          totalPages: data.totalPages || 0,
+        });
+      }
     } catch (error) {
       console.error("Error fetching enrolled courses:", error);
+      message.error("Không thể tải danh sách khóa học");
+    } finally {
+      setCoursesLoading(false);
     }
   };
 
-  const getLevelColor = (level) => {
-    const colors = {
-      beginner: "green",
-      intermediate: "blue",
-      advanced: "red",
-    };
-    return colors[level] || "default";
+  const handleCoursesPageChange = (page, pageSize) => {
+    fetchEnrolledCourses(page, pageSize);
   };
 
   const formatDate = (dateString) => {
@@ -326,110 +333,142 @@ const StudentClasses = () => {
                       <BookOpen className="w-4 h-4 mr-2" />
                       Khóa học của tôi
                       <Badge
-                        count={enrolledCourses.length}
+                        count={coursesPagination.total}
                         style={{ backgroundColor: "#52c41a", marginLeft: 8 }}
                       />
                     </span>
                   ),
-                  children:
-                    enrolledCourses.length > 0 ? (
-                      <List
-                        dataSource={enrolledCourses}
-                        renderItem={(course, index) => (
+                  children: coursesLoading ? (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {[1, 2, 3].map((n) => (
+                        <Card key={n} loading={true} />
+                      ))}
+                    </div>
+                  ) : enrolledCourses.length > 0 ? (
+                    <>
+                      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                        {enrolledCourses.map((item, index) => (
                           <motion.div
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
+                            key={item.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.1 }}
                           >
-                            <List.Item
-                              className="bg-white rounded-lg mb-4 shadow-sm hover:shadow-md transition-shadow"
+                            <Card
+                              className="h-full hover:shadow-lg transition-shadow duration-300"
+                              cover={
+                                item.course.imageUrl && (
+                                  <img
+                                    alt={item.course.name}
+                                    src={item.course.imageUrl}
+                                    className="h-48 object-cover"
+                                  />
+                                )
+                              }
                               actions={[
-                                course.progress === 100 ? (
-                                  <Tag color="success">Đã hoàn thành</Tag>
-                                ) : (
-                                  <Link to={`/learning/${course.enrollmentId}`}>
-                                    <Button type="primary">
-                                      {course.progress > 0
-                                        ? "Tiếp tục học"
-                                        : "Bắt đầu học"}
-                                    </Button>
-                                  </Link>
-                                ),
+                                <Link
+                                  to={`/learning/${item.course.id}`}
+                                  key="learn"
+                                >
+                                  <Button
+                                    type="primary"
+                                    icon={<ArrowRight className="w-4 h-4" />}
+                                  >
+                                    Bắt đầu học
+                                  </Button>
+                                </Link>,
                               ]}
                             >
-                              <List.Item.Meta
-                                avatar={
-                                  <img
-                                    src={course.image}
-                                    alt={course.title}
-                                    className="w-20 h-16 object-cover rounded-lg"
-                                  />
-                                }
-                                title={
-                                  <div className="flex items-center space-x-3">
-                                    <span className="font-semibold">
-                                      {course.title}
+                              <div className="space-y-3">
+                                <div>
+                                  <h3 className="font-bold text-lg text-gray-900 mb-2">
+                                    {item.course.name}
+                                  </h3>
+                                  <p className="text-gray-600 text-sm line-clamp-2">
+                                    {item.course.description || "Chưa có mô tả"}
+                                  </p>
+                                </div>
+
+                                <div className="space-y-2">
+                                  <div className="flex items-center text-sm text-gray-600">
+                                    <Clock className="w-4 h-4 mr-2" />
+                                    <span>{item.course.duration}</span>
+                                  </div>
+
+                                  <div className="flex items-center text-sm text-gray-600">
+                                    <Calendar className="w-4 h-4 mr-2" />
+                                    <span>
+                                      Đăng ký: {formatDate(item.createdDate)}
                                     </span>
-                                    <Tag
-                                      color={getLevelColor(course.level)}
-                                      className="capitalize"
-                                    >
-                                      {course.level}
-                                    </Tag>
                                   </div>
-                                }
-                                description={
-                                  <div className="space-y-2">
-                                    <p className="text-gray-600">
-                                      {course.description}
-                                    </p>
-                                    <div className="flex items-center space-x-4 text-sm text-gray-500">
-                                      <div className="flex items-center">
-                                        <UserCheck className="w-4 h-4 mr-1" />
-                                        <span>Tiến độ: {course.progress}%</span>
-                                      </div>
-                                      <div className="flex items-center">
-                                        <Calendar className="w-4 h-4 mr-1" />
-                                        <span>
-                                          Đăng ký:{" "}
-                                          {formatDate(course.enrolledAt)}
-                                        </span>
-                                      </div>
-                                    </div>
-                                    {course.progress > 0 && (
-                                      <Progress
-                                        percent={course.progress}
-                                        size="small"
-                                        className="mt-2"
-                                      />
-                                    )}
-                                  </div>
-                                }
-                              />
-                            </List.Item>
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                  <Tag
+                                    color={
+                                      item.course.level === 0
+                                        ? "green"
+                                        : item.course.level === 1
+                                        ? "blue"
+                                        : "red"
+                                    }
+                                  >
+                                    {item.course.level === 0
+                                      ? "Beginner"
+                                      : item.course.level === 1
+                                      ? "Intermediate"
+                                      : "Advanced"}
+                                  </Tag>
+                                  <Tag
+                                    color={
+                                      item.course.isActive
+                                        ? "success"
+                                        : "default"
+                                    }
+                                  >
+                                    {item.course.isActive
+                                      ? "Đang hoạt động"
+                                      : "Ngừng hoạt động"}
+                                  </Tag>
+                                </div>
+                              </div>
+                            </Card>
                           </motion.div>
-                        )}
-                      />
-                    ) : (
-                      <Empty
-                        image={Empty.PRESENTED_IMAGE_SIMPLE}
-                        description={
-                          <div>
-                            <p className="text-lg mb-2">
-                              Bạn chưa đăng ký khóa học nào
-                            </p>
-                            <Link to="/courses">
-                              <Button
-                                type="primary"
-                                icon={<ArrowRight className="w-4 h-4" />}
-                              >
-                                Khám phá khóa học
-                              </Button>
-                            </Link>
-                          </div>
-                        }
-                      />
-                    ),
+                        ))}
+                      </div>
+
+                      <div className="flex justify-center mt-6">
+                        <Pagination
+                          current={coursesPagination.current}
+                          pageSize={coursesPagination.pageSize}
+                          total={coursesPagination.total}
+                          onChange={handleCoursesPageChange}
+                          showSizeChanger
+                          showTotal={(total) => `Tổng ${total} khóa học`}
+                          pageSizeOptions={["6", "9", "12", "18"]}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <Empty
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      description={
+                        <div>
+                          <p className="text-lg mb-2">
+                            Bạn chưa đăng ký khóa học nào
+                          </p>
+                          <Link to="/courses">
+                            <Button
+                              type="primary"
+                              icon={<ArrowRight className="w-4 h-4" />}
+                            >
+                              Khám phá khóa học
+                            </Button>
+                          </Link>
+                        </div>
+                      }
+                    />
+                  ),
                 },
               ]}
             />
