@@ -48,6 +48,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginWithGoogle = async (idToken) => {
+    {
+      // if (!apiConnected) {
+      //   throw new Error(
+      //     "Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng."
+      //   );
+      // }
+
+      const { user: userData } = await authApi.loginWithGoogle(idToken);
+      setUser(userData);
+      console.log("🏠 Login successful, should navigate to home");
+      return userData;
+    }
+  };
+
   const register = async (userData) => {
     const { user: newUser } = await authApi.register(userData);
     setUser(newUser);
@@ -67,6 +82,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     login,
+    loginWithGoogle,
     register,
     logout,
     updateProfile,
