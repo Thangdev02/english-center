@@ -39,6 +39,7 @@ const FreeExamTaking = () => {
   const autoSaveIntervalRef = useRef(null);
   const countdownIntervalRef = useRef(null);
   const lastSavedAnswersRef = useRef({});
+  const pendingAnswersRef = useRef({});
   const timeRemainingRef = useRef(0);
 
   const QUESTIONS_PER_PAGE = 10;
@@ -125,7 +126,9 @@ const FreeExamTaking = () => {
       if (examData.examType === 1) {
         const essayQuestion = examData.questionHistories?.[0];
         if (essayQuestion) {
-          const currentAnswer = answers[essayQuestion.id];
+          const currentAnswer =
+            pendingAnswersRef.current[essayQuestion.id] ??
+            answers[essayQuestion.id];
           const lastSavedAnswer = lastSavedAnswersRef.current[essayQuestion.id];
 
           if (
@@ -135,16 +138,14 @@ const FreeExamTaking = () => {
             console.log(`Saving essay answer for question ${essayQuestion.id}`);
             await examApi.updateFreeExamDoing(id, {
               questionHistoryId: essayQuestion.id,
-              yourAnswer: currentAnswer || "",
+              yourAnswer: currentAnswer,
               duration: formatTime(currentTime),
               status: 0,
             });
             lastSavedAnswersRef.current[essayQuestion.id] = currentAnswer;
           } else {
-            // Update duration only
+            // Update duration only (avoid sending yourAnswer which may overwrite with empty)
             await examApi.updateFreeExamDoing(id, {
-              questionHistoryId: essayQuestion.id,
-              yourAnswer: currentAnswer || "",
               duration: formatTime(currentTime),
               status: 0,
             });
@@ -157,10 +158,14 @@ const FreeExamTaking = () => {
           [];
 
         for (const qh of essayQuestions) {
-          const currentAnswer = answers[qh.id];
+          const currentAnswer =
+            pendingAnswersRef.current[qh.id] ?? answers[qh.id];
           const lastSavedAnswer = lastSavedAnswersRef.current[qh.id];
 
-          if (currentAnswer && currentAnswer !== lastSavedAnswer) {
+          if (
+            currentAnswer !== undefined &&
+            currentAnswer !== lastSavedAnswer
+          ) {
             console.log(`Saving essay answer for question ${qh.id}`);
             await examApi.updateFreeExamDoing(id, {
               questionHistoryId: qh.id,
@@ -199,9 +204,14 @@ const FreeExamTaking = () => {
       if (examData.examType === 1) {
         const essayQuestion = examData.questionHistories?.[0];
         if (essayQuestion) {
+          const answerToSubmit =
+            pendingAnswersRef.current[essayQuestion.id] ??
+            answers[essayQuestion.id] ??
+            "";
+
           await examApi.updateFreeExamDoing(id, {
             questionHistoryId: essayQuestion.id,
-            yourAnswer: answers[essayQuestion.id] || "",
+            yourAnswer: answerToSubmit,
             duration: formatTime(currentTime),
             status: 1, // Đã nộp
           });
@@ -213,10 +223,12 @@ const FreeExamTaking = () => {
         );
 
         for (const qh of essayQuestions) {
-          if (answers[qh.id]) {
+          const answerToSave =
+            pendingAnswersRef.current[qh.id] ?? answers[qh.id];
+          if (answerToSave !== undefined && answerToSave !== "") {
             await examApi.updateFreeExamDoing(id, {
               questionHistoryId: qh.id,
-              yourAnswer: answers[qh.id],
+              yourAnswer: answerToSave,
               duration: formatTime(currentTime),
               status: 0,
             });
@@ -341,6 +353,12 @@ const FreeExamTaking = () => {
     answerContent,
     questionType
   ) => {
+    // Keep pending ref in sync (store the content for saving)
+    pendingAnswersRef.current = {
+      ...pendingAnswersRef.current,
+      [questionHistoryId]: answerContent,
+    };
+
     setAnswers((prev) => ({
       ...prev,
       [questionHistoryId]: answerId,
@@ -363,6 +381,11 @@ const FreeExamTaking = () => {
 
   // Handle essay answer change
   const handleEssayChange = (questionHistoryId, value) => {
+    // Keep a synchronous ref of the latest typed value to avoid races
+    pendingAnswersRef.current = {
+      ...pendingAnswersRef.current,
+      [questionHistoryId]: value,
+    };
     setAnswers((prev) => ({
       ...prev,
       [questionHistoryId]: value,
@@ -735,6 +758,45 @@ const FreeExamTaking = () => {
                   {formatTime(timeRemaining)}
                 </div>
               </div>
+            </div>
+          </Card>
+        )}
+
+        {/* Teacher feedback for essay exams (Tự luận) */}
+        {examData.status === 1 && examData.examType === 1 && (
+          <Card
+            className="shadow-md border border-gray-200 mt-6"
+            title="Phản hồi từ giáo viên"
+          >
+            <div className="prose max-w-none text-gray-700">
+              {examData.feedback ? (
+                typeof examData.feedback === "string" ? (
+                  <p>{examData.feedback}</p>
+                ) : Array.isArray(examData.feedback) ? (
+                  examData.feedback.map((fb, idx) => (
+                    <div key={idx} className="mb-4">
+                      {fb.title && (
+                        <h4 className="font-semibold">{fb.title}</h4>
+                      )}
+                      <p>{fb.content ?? fb}</p>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    {examData.feedback.title && (
+                      <h4 className="font-semibold">
+                        {examData.feedback.title}
+                      </h4>
+                    )}
+                    <p>
+                      {examData.feedback.content ??
+                        JSON.stringify(examData.feedback)}
+                    </p>
+                  </>
+                )
+              ) : (
+                <p className="text-gray-500">Chưa có phản hồi.</p>
+              )}
             </div>
           </Card>
         )}
