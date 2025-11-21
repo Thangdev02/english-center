@@ -735,6 +735,42 @@ const StudentExam = () => {
             </div>
           </Card>
         )}
+
+        {/* Teacher feedback for essay exams (Tự luận) */}
+        {examData.status === 1 && examData.examType === 1 && (
+          <Card className="shadow-lg mt-6" title="Phản hồi từ giáo viên">
+            <div className="prose max-w-none text-gray-700">
+              {examData.feedback ? (
+                typeof examData.feedback === "string" ? (
+                  <p>{examData.feedback}</p>
+                ) : Array.isArray(examData.feedback) ? (
+                  examData.feedback.map((fb, idx) => (
+                    <div key={idx} className="mb-4">
+                      {fb.title && (
+                        <h4 className="font-semibold">{fb.title}</h4>
+                      )}
+                      <p>{fb.content ?? fb}</p>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    {examData.feedback.title && (
+                      <h4 className="font-semibold">
+                        {examData.feedback.title}
+                      </h4>
+                    )}
+                    <p>
+                      {examData.feedback.content ??
+                        JSON.stringify(examData.feedback)}
+                    </p>
+                  </>
+                )
+              ) : (
+                <p className="text-gray-500">Chưa có phản hồi.</p>
+              )}
+            </div>
+          </Card>
+        )}
       </div>
     </div>
   );

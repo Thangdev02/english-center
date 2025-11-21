@@ -7,6 +7,7 @@ import {
   message,
   Select,
   Tag,
+  Tooltip,
   TimePicker,
   Transfer,
 } from "antd";
@@ -91,6 +92,7 @@ const ExamCreator = () => {
         description: values.description || null,
         quantity: values.quantity,
         type: values.type,
+        level: values.level || null,
         questionsIds: selectedQuestionIds,
       };
 
@@ -164,6 +166,24 @@ const ExamCreator = () => {
                     <Select placeholder="Chọn loại" onChange={handleTypeChange}>
                       <Option value={0}>Trắc nghiệm</Option>
                       <Option value={1}>Tự luận</Option>
+                    </Select>
+                  </Form.Item>
+
+                  <Form.Item
+                    name="level"
+                    label="Level"
+                    rules={[
+                      { required: true, message: "Vui lòng chọn cấp độ!" },
+                    ]}
+                  >
+                    <Select placeholder="Chọn level">
+                      <Option value={1}>HSK1</Option>
+                      <Option value={2}>HSK2</Option>
+                      <Option value={3}>HSK3</Option>
+                      <Option value={4}>HSK4</Option>
+                      <Option value={5}>HSK5</Option>
+                      <Option value={6}>HSK6</Option>
+                      <Option value={7}>HSK7-9</Option>
                     </Select>
                   </Form.Item>
 
@@ -247,6 +267,7 @@ const ExamCreator = () => {
 
             <div className="lg:col-span-2">
               <Card title="Chọn câu hỏi">
+                <style>{`.exam-transfer .ant-transfer-list{width:100% !important} @media (min-width:1024px){.exam-transfer .ant-transfer-list{width:48% !important}} .exam-transfer .ant-transfer-list-item .ant-transfer-list-item-content{word-break:break-word;white-space:normal}`}</style>
                 {examType === null ? (
                   <div className="text-center py-12 text-gray-500">
                     <div className="text-6xl mb-4">📝</div>
@@ -254,44 +275,52 @@ const ExamCreator = () => {
                     <p>Chọn loại bài thi ở bên trái để bắt đầu chọn câu hỏi</p>
                   </div>
                 ) : (
-                  <Transfer
-                    dataSource={getFilteredQuestions().map((q) => ({
-                      key: q.id,
-                      title: q.content,
-                      description: q.type === 0 ? "Trắc nghiệm" : "Tự luận",
-                    }))}
-                    titles={["Câu hỏi có sẵn", "Câu hỏi đã chọn"]}
-                    targetKeys={selectedQuestionIds}
-                    onChange={handleQuestionSelectionChange}
-                    render={(item) => (
-                      <div className="py-2">
-                        <div className="font-medium text-sm mb-1">
-                          {item.title}
+                  <div className="exam-transfer">
+                    <Transfer
+                      dataSource={getFilteredQuestions().map((q) => ({
+                        key: q.id,
+                        title: q.content,
+                        description: q.type === 0 ? "Trắc nghiệm" : "Tự luận",
+                      }))}
+                      titles={["Câu hỏi có sẵn", "Câu hỏi đã chọn"]}
+                      targetKeys={selectedQuestionIds}
+                      onChange={handleQuestionSelectionChange}
+                      render={(item) => (
+                        <div className="py-2 break-words">
+                          <Tooltip
+                            placement="topLeft"
+                            title={item.title}
+                            mouseEnterDelay={0.25}
+                          >
+                            <div className="font-medium text-sm mb-1 break-words">
+                              {item.title}
+                            </div>
+                          </Tooltip>
+                          <Tag
+                            color={examType === 0 ? "blue" : "green"}
+                            size="small"
+                          >
+                            {item.description}
+                          </Tag>
                         </div>
-                        <Tag
-                          color={examType === 0 ? "blue" : "green"}
-                          size="small"
-                        >
-                          {item.description}
-                        </Tag>
-                      </div>
-                    )}
-                    listStyle={{
-                      width: "100%",
-                      height: 500,
-                    }}
-                    showSearch
-                    filterOption={(input, item) =>
-                      item.title.toLowerCase().includes(input.toLowerCase())
-                    }
-                    locale={{
-                      itemUnit: "câu hỏi",
-                      itemsUnit: "câu hỏi",
-                      searchPlaceholder: "Tìm kiếm câu hỏi...",
-                      notFoundContent: "Không tìm thấy",
-                    }}
-                    loading={loadingQuestions}
-                  />
+                      )}
+                      listStyle={{
+                        width: "100%",
+                        height: 500,
+                      }}
+                      showSearch
+                      filterOption={(input, item) =>
+                        item.title.toLowerCase().includes(input.toLowerCase())
+                      }
+                      locale={{
+                        itemUnit: "câu hỏi",
+                        itemsUnit: "câu hỏi",
+                        searchPlaceholder: "Tìm kiếm câu hỏi...",
+                        notFoundContent: "Không tìm thấy",
+                      }}
+                      loading={loadingQuestions}
+                    />
+                  </div>
                 )}
               </Card>
             </div>

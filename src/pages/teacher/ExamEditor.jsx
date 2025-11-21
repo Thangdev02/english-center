@@ -6,6 +6,7 @@ import {
   InputNumber,
   message,
   Popconfirm,
+  Tooltip,
   Spin,
   Tag,
   TimePicker,
@@ -371,46 +372,55 @@ const ExamEditor = () => {
                   </Button>
                 }
               >
-                <Transfer
-                  dataSource={availableQuestions
-                    .filter((q) => !getExamQuestionIds().includes(q.id))
-                    .map((q) => ({
-                      key: q.id,
-                      title: q.content,
-                      description: q.type === 0 ? "Trắc nghiệm" : "Tự luận",
-                    }))}
-                  titles={["Câu hỏi có sẵn", "Sẽ thêm vào bài thi"]}
-                  targetKeys={selectedQuestionIds}
-                  onChange={setSelectedQuestionIds}
-                  render={(item) => (
-                    <div className="py-2">
-                      <div className="font-medium text-sm mb-1">
-                        {item.title}
+                <style>{`.exam-transfer .ant-transfer-list{width:100% !important} @media (min-width:1024px){.exam-transfer .ant-transfer-list{width:48% !important}} .exam-transfer .ant-transfer-list-item .ant-transfer-list-item-content{word-break:break-word;white-space:normal}`}</style>
+                <div className="exam-transfer">
+                  <Transfer
+                    dataSource={availableQuestions
+                      .filter((q) => !getExamQuestionIds().includes(q.id))
+                      .map((q) => ({
+                        key: q.id,
+                        title: q.content,
+                        description: q.type === 0 ? "Trắc nghiệm" : "Tự luận",
+                      }))}
+                    titles={["Câu hỏi có sẵn", "Sẽ thêm vào bài thi"]}
+                    targetKeys={selectedQuestionIds}
+                    onChange={setSelectedQuestionIds}
+                    render={(item) => (
+                      <div className="py-2 break-words">
+                        <Tooltip
+                          placement="topLeft"
+                          title={item.title}
+                          mouseEnterDelay={0.25}
+                        >
+                          <div className="font-medium text-sm mb-1 break-words">
+                            {item.title}
+                          </div>
+                        </Tooltip>
+                        <Tag
+                          color={exam?.type === 0 ? "blue" : "green"}
+                          size="small"
+                        >
+                          {item.description}
+                        </Tag>
                       </div>
-                      <Tag
-                        color={exam?.type === 0 ? "blue" : "green"}
-                        size="small"
-                      >
-                        {item.description}
-                      </Tag>
-                    </div>
-                  )}
-                  listStyle={{
-                    width: "100%",
-                    height: 400,
-                  }}
-                  showSearch
-                  filterOption={(input, item) =>
-                    item.title.toLowerCase().includes(input.toLowerCase())
-                  }
-                  locale={{
-                    itemUnit: "câu hỏi",
-                    itemsUnit: "câu hỏi",
-                    searchPlaceholder: "Tìm kiếm câu hỏi...",
-                    notFoundContent: "Không tìm thấy",
-                  }}
-                  loading={loadingQuestions}
-                />
+                    )}
+                    listStyle={{
+                      width: "100%",
+                      height: 400,
+                    }}
+                    showSearch
+                    filterOption={(input, item) =>
+                      item.title.toLowerCase().includes(input.toLowerCase())
+                    }
+                    locale={{
+                      itemUnit: "câu hỏi",
+                      itemsUnit: "câu hỏi",
+                      searchPlaceholder: "Tìm kiếm câu hỏi...",
+                      notFoundContent: "Không tìm thấy",
+                    }}
+                    loading={loadingQuestions}
+                  />
+                </div>
               </Card>
             </div>
           </div>
