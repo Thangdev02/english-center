@@ -15,7 +15,7 @@ import {
   Target,
   Trophy,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { courseApi } from "../services/courseApi";
 
 const { Option } = Select;
@@ -42,7 +42,7 @@ const Home = () => {
   const isCtaFormInView = useInView(ctaFormRef, { once: true });
   const isTeachersInView = useInView(teachersRef, { once: true });
   const isTestimonialsInView = useInView(testimonialsRef, { once: true });
-
+const navigate = useNavigate();
   // === HERO SLIDER IMAGES ===
   const HERO_IMAGES = [
     "./realBanner.jpg",
@@ -109,7 +109,7 @@ const Home = () => {
   const TESTIMONIALS = [
     {
       name: "Nguyễn Minh Anh",
-      level: "IELTS 8.0",
+      level: "HSK4",
       course: "SV ĐH Bách Khoa",
       quote: "Chỉ sau 3 tháng học tại Super Panda, em đã đạt Hks4",
       img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600",
@@ -117,7 +117,7 @@ const Home = () => {
     },
     {
       name: "Trần Đức Huy",
-      level: "IELTS 7.5",
+      level: "HSK3",
       course: "Học viên",
       quote: "Lớp học online nhưng chất lượng như offline. Thầy cô tận tâm, bài giảng dễ hiểu.",
       img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600",
@@ -125,7 +125,7 @@ const Home = () => {
     },
     {
       name: "Lê Thị Ngọc",
-      level: "IELTS 7.0",
+      level: "HSK 5",
       course: "Học viên",
       quote: "Từ hsk3 lên hsk5 chỉ trong 60 buổi. Super Panda thực sự là nơi thay đổi cuộc đời mình!",
       img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600",
@@ -312,7 +312,7 @@ const Home = () => {
                       <Option value="offline">Offline</Option>
                     </Select>
                   </Form.Item>
-                  <Button className="w-full bg-yellow-400 text-red-900 h-14 text-lg font-bold rounded-lg hover:bg-yellow-300">
+                  <Button onClick={() => navigate("/register")} className="w-full bg-yellow-400 text-red-900 h-14 text-lg font-bold rounded-lg hover:bg-yellow-300">
                     ĐĂNG KÝ TƯ VẤN MIỄN PHÍ
                   </Button>
                 </Form>

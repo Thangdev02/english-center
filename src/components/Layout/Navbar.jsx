@@ -145,11 +145,25 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="flex items-center space-x-4">
+              <Link
+                to="/leaderboard"
+                className="text-red-800 hover:text-red-600 transition-colors duration-200 font-medium"
+              >
+                <Trophy className="inline w-4 h-4 mr-1" />
+                Bảng xếp hạng
+              </Link>
+              <Link
+                to="/about"
+                className="text-red-800 hover:text-red-600 transition-colors duration-200 font-medium"
+              >
+                <Building2 className="inline w-4 h-4 mr-1" />
+                Về Chúng Tôi
+              </Link>
                 <Link to="/login">
                   <Button type="text">Đăng nhập</Button>
                 </Link>
                 <Link to="/register">
-                  <Button type="primary">Đăng ký</Button>
+                  <Button  className="bg-red-600 border-none hover:bg-red-700" type="primary">Đăng ký</Button>
                 </Link>
               </div>
             )}
