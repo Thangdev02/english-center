@@ -1,6 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Card, Button, Tabs, Tag, Skeleton, message, Modal } from "antd";
+import {
+  Card,
+  Button,
+  Tabs,
+  Tag,
+  Skeleton,
+  message,
+  Modal,
+  Rate,
+  List,
+  Pagination,
+  Input,
+} from "antd";
 import {
   PlayCircle,
   Users,
@@ -32,6 +44,44 @@ const CourseDetail = () => {
   const [enrollModal, setEnrollModal] = useState(false);
   const [relatedCourses, setRelatedCourses] = useState([]);
   const [enrolling, setEnrolling] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsPagination, setReviewsPagination] = useState({
+    current: 1,
+    pageSize: 5,
+    total: 0,
+  });
+  const [userRating, setUserRating] = useState(0);
+  const [userReviewContent, setUserReviewContent] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+
+  const fetchReviews = useCallback(
+    async (page = 1, size = 5) => {
+      try {
+        setReviewsLoading(true);
+        const response = await courseApi.getCourseReviews({
+          page,
+          size,
+          courseId: id,
+        });
+        const data = response?.data?.data;
+
+        if (data) {
+          setReviews(data.items || []);
+          setReviewsPagination({
+            current: data.page || page,
+            pageSize: data.size || size,
+            total: data.total || 0,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+      } finally {
+        setReviewsLoading(false);
+      }
+    },
+    [id]
+  );
 
   useEffect(() => {
     const fetchCourseData = async () => {
@@ -120,8 +170,45 @@ const CourseDetail = () => {
       }
     };
 
-    if (id) fetchCourseData();
-  }, [id]);
+    if (id) {
+      fetchCourseData();
+      fetchReviews(1, 5);
+    }
+  }, [id, fetchReviews]);
+
+  const handleReviewsPageChange = (page, pageSize) => {
+    fetchReviews(page, pageSize);
+  };
+
+  const handleSubmitReview = async () => {
+    if (!user) {
+      message.warning("Vui lòng đăng nhập để đánh giá!");
+      return;
+    }
+
+    if (userRating === 0) {
+      message.warning("Vui lòng chọn số sao đánh giá!");
+      return;
+    }
+
+    try {
+      setSubmittingReview(true);
+      await courseApi.reviewCourse(id, {
+        rating: userRating,
+        content: userReviewContent.trim() || null,
+      });
+      message.success("Đánh giá thành công!");
+      setUserRating(0);
+      setUserReviewContent("");
+      // Refresh reviews
+      fetchReviews(1, reviewsPagination.pageSize);
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      message.error("Không thể gửi đánh giá. Vui lòng thử lại!");
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   const handleStartLearning = async () => {
     // Check if user is authenticated
@@ -417,6 +504,121 @@ const CourseDetail = () => {
                         <p>Chưa có nội dung khóa học</p>
                       </div>
                     )}
+                  </div>
+                </TabPane>
+
+                <TabPane
+                  tab={<span className="font-bold text-red-900">Đánh giá</span>}
+                  key="reviews"
+                >
+                  <div className="space-y-6">
+                    {/* Review Submission Form */}
+                    <Card className="border-2 border-red-100">
+                      <h3 className="text-xl font-black text-red-900 mb-4">
+                        Đánh giá khóa học
+                      </h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-gray-700 font-medium mb-2">
+                            Số sao đánh giá{" "}
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <Rate
+                            value={userRating}
+                            onChange={setUserRating}
+                            style={{ fontSize: 32, color: RED_MAIN }}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-gray-700 font-medium mb-2">
+                            Nội dung đánh giá (không bắt buộc)
+                          </label>
+                          <Input.TextArea
+                            value={userReviewContent}
+                            onChange={(e) =>
+                              setUserReviewContent(e.target.value)
+                            }
+                            rows={4}
+                            placeholder="Chia sẻ trải nghiệm của bạn về khóa học..."
+                            maxLength={500}
+                            showCount
+                          />
+                        </div>
+                        <Button
+                          type="primary"
+                          size="large"
+                          onClick={handleSubmitReview}
+                          loading={submittingReview}
+                          style={{
+                            background: RED_DARK,
+                            borderColor: RED_DARK,
+                          }}
+                        >
+                          Gửi đánh giá
+                        </Button>
+                      </div>
+                    </Card>
+
+                    {/* Reviews List */}
+                    <Card className="border-2 border-red-100">
+                      <h3 className="text-xl font-black text-red-900 mb-4">
+                        Đánh giá từ học viên ({reviewsPagination.total})
+                      </h3>
+                      <List
+                        loading={reviewsLoading}
+                        dataSource={reviews}
+                        locale={{ emptyText: "Chưa có đánh giá nào" }}
+                        renderItem={(review) => (
+                          <List.Item className="border-b border-gray-100 py-4">
+                            <List.Item.Meta
+                              avatar={
+                                <div
+                                  className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
+                                  style={{ background: RED_MAIN }}
+                                >
+                                  {review.student?.firstName?.charAt(0) || ""}
+                                  {review.student?.lastName?.charAt(0) || ""}
+                                </div>
+                              }
+                              title={
+                                <div className="flex items-center gap-3">
+                                  <span className="font-bold text-gray-900">
+                                    {review.student?.firstName}{" "}
+                                    {review.student?.lastName}
+                                  </span>
+                                  <Rate
+                                    disabled
+                                    value={review.rating}
+                                    style={{ fontSize: 16, color: RED_MAIN }}
+                                  />
+                                </div>
+                              }
+                              description={
+                                <div className="mt-2">
+                                  {review.content && (
+                                    <p className="text-gray-700 leading-relaxed">
+                                      {review.content}
+                                    </p>
+                                  )}
+                                </div>
+                              }
+                            />
+                          </List.Item>
+                        )}
+                      />
+                      {reviewsPagination.total > 0 && (
+                        <div className="mt-6 flex justify-center">
+                          <Pagination
+                            current={reviewsPagination.current}
+                            pageSize={reviewsPagination.pageSize}
+                            total={reviewsPagination.total}
+                            onChange={handleReviewsPageChange}
+                            showSizeChanger
+                            showTotal={(total) => `Tổng ${total} đánh giá`}
+                          />
+                        </div>
+                      )}
+                    </Card>
                   </div>
                 </TabPane>
               </Tabs>

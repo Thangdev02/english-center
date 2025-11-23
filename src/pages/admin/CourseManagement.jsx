@@ -210,14 +210,11 @@ const CourseManagement = () => {
       title: "Trạng thái",
       dataIndex: "isActive",
       key: "isActive",
-      width: 100,
-      render: (isActive, record) => (
-        <Switch
-          checked={isActive}
-          onChange={(checked) => handleToggleActive(record, checked)}
-          checkedChildren="Hiện"
-          unCheckedChildren="Ẩn"
-        />
+      width: 120,
+      render: (isActive) => (
+        <Tag color={isActive ? "green" : "red"}>
+          {isActive ? "Hiện" : "Ẩn"}
+        </Tag>
       ),
     },
     {
@@ -246,12 +243,6 @@ const CourseManagement = () => {
             icon={<Edit size={16} />}
             onClick={() => handleEdit(record)}
             className="text-yellow-600 hover:text-yellow-700"
-          />
-          <Button
-            type="text"
-            danger
-            icon={<Trash2 size={16} />}
-            onClick={() => handleDelete(record)}
           />
         </Space>
       ),

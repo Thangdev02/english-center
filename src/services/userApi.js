@@ -14,12 +14,12 @@ export const userApi = {
   // Authentication
   login: (credentials) => api.post("/login", credentials),
   register: (userData) => api.post("/register", userData),
+  changePassword: (passwordData) =>
+    api.patch("/auth/change-password", passwordData),
 
   // User management
   getProfile: () => api.get("/users/me"),
   updateProfile: (userData) => api.patch("/users/me", userData),
-  changePassword: (passwordData) =>
-    api.patch("/users/me/password", passwordData),
 
   // Teacher functions
   getStudents: () => api.get("/users?role=student"),
@@ -48,6 +48,33 @@ export const authApi = {
       const response = await api.post("/auth/login", {
         usernameOrEmail: credentials.email,
         password: credentials.password,
+      });
+
+      console.log("📡 API Response:", response.data);
+
+      // if (response.data.length === 0) {
+      //   throw new Error("Email hoặc mật khẩu không đúng!");
+      // }
+
+      const user = response.data.data;
+      const token = user.accessToken;
+      // const token = createSimpleToken(user);
+
+      localStorage.setItem("token", user.accessToken);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      console.log("✅ Login successful:", user.name);
+      return { user, token };
+    } catch (error) {
+      console.error("❌ Login error:", error);
+      throw error;
+    }
+  },
+
+  loginWithGoogle: async (idToken) => {
+    try {
+      const response = await api.post("/auth/google", {
+        idToken: idToken,
       });
 
       console.log("📡 API Response:", response.data);

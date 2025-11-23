@@ -38,6 +38,11 @@ import EditCourse from "./pages/admin/EditCourse";
 import FreeExams from "./pages/FreeExams";
 import FreeExamTaking from "./pages/FreeExamTaking";
 import AboutUs from "./pages/AboutUs";
+import GuestGuard from "./guards/GuestGuard";
+import AdminGuard from "./guards/AdminGuard";
+import TeacherGuard from "./guards/TeacherGuard";
+import StudentGuard from "./guards/StudentGuard";
+import UserGuard from "./guards/UserGuard";
 
 function App() {
   return (
@@ -56,56 +61,115 @@ function App() {
               <ScrollToTop />
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/profile" element={<Profile />} />
+                <Route
+                  path="/login"
+                  element={<GuestGuard children={<Login />} />}
+                />
+                <Route
+                  path="/register"
+                  element={<GuestGuard children={<Register />} />}
+                />
+                <Route
+                  path="/profile"
+                  element={<UserGuard children={<Profile />} />}
+                />
                 <Route path="/about" element={<AboutUs />} />
                 <Route path="/courses" element={<Courses />} />
-                <Route path="/courses/:id" element={<CourseDetail />} />
-                <Route path="/student/classes" element={<StudentClasses />} />
+                <Route
+                  path="/courses/:id"
+                  element={<StudentGuard children={<CourseDetail />} />}
+                />
+                <Route
+                  path="/student/classes"
+                  element={<StudentGuard children={<StudentClasses />} />}
+                />
                 <Route
                   path="/student/classes/:id"
-                  element={<StudentClassDetail />}
+                  element={<StudentGuard children={<StudentClassDetail />} />}
                 />
-                <Route path="/student/exams/:id" element={<StudentExam />} />
-                <Route path="/learning/:courseId" element={<Learning />} />
-                <Route path="/forum/:courseId" element={<Forum />} />
-                <Route path="/free-exams" element={<FreeExams />} />
+                <Route
+                  path="/student/exams/:id"
+                  element={<StudentGuard children={<StudentExam />} />}
+                />
+                <Route
+                  path="/learning/:courseId"
+                  element={<StudentGuard children={<Learning />} />}
+                />
+                <Route
+                  path="/forum/:courseId"
+                  element={<StudentGuard children={<Forum />} />}
+                />
                 {/* <Route path="/exam/:courseId" element={<Exam />} /> */}
                 <Route path="/leaderboard" element={<Leaderboard />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/admin/courses/add" element={<AddCourse />} />
-                <Route path="/admin/courses/:id" element={<EditCourse />} />
-                <Route path="/admin/users" element={<UserManagement />} />
-                <Route path="/admin/courses" element={<CourseManagement />} />
-                <Route path="/admin/exams" element={<AdminExamManager />} />
+                <Route
+                  path="/admin"
+                  element={<AdminGuard children={<AdminDashboard />} />}
+                />
+                <Route
+                  path="/admin/courses/add"
+                  element={<AdminGuard children={<AddCourse />} />}
+                />
+                <Route
+                  path="/admin/courses/:id"
+                  element={<AdminGuard children={<EditCourse />} />}
+                />
+                <Route
+                  path="/admin/users"
+                  element={<AdminGuard children={<UserManagement />} />}
+                />
+                <Route
+                  path="/admin/courses"
+                  element={<AdminGuard children={<CourseManagement />} />}
+                />
+                <Route
+                  path="/admin/exams"
+                  element={<AdminGuard children={<AdminExamManager />} />}
+                />
                 <Route
                   path="/admin/exams/:id/edit"
-                  element={<AdminExamEditor />}
+                  element={<AdminGuard children={<AdminExamEditor />} />}
                 />
                 <Route
                   path="/admin/exams/create"
-                  element={<AdminExamCreator />}
+                  element={<AdminGuard children={<AdminExamCreator />} />}
                 />
-                <Route path="/teacher" element={<TeacherDashboard />} />
-                <Route path="/teacher/schedule" element={<TeacherSchedule />} />
-                <Route path="/teacher/forum" element={<ForumManager />} />
+                <Route
+                  path="/teacher"
+                  element={<TeacherGuard children={<TeacherDashboard />} />}
+                />
+                <Route
+                  path="/teacher/schedule"
+                  element={<TeacherGuard children={<TeacherSchedule />} />}
+                />
+                <Route
+                  path="/teacher/forum"
+                  element={<TeacherGuard children={<ForumManager />} />}
+                />
                 <Route
                   path="/teacher/students"
-                  element={<StudentManagement />}
+                  element={<TeacherGuard children={<StudentManagement />} />}
                 />
-                <Route path="/teacher/exams" element={<TeacherExamManager />} />
+                <Route
+                  path="/teacher/exams"
+                  element={<TeacherGuard children={<TeacherExamManager />} />}
+                />
                 <Route
                   path="/teacher/exams/create"
-                  element={<TeacherExamCreator />}
+                  element={<TeacherGuard children={<TeacherExamCreator />} />}
                 />
                 <Route
                   path="/teacher/exams/:id/edit"
-                  element={<TeacherExamEditor />}
+                  element={<TeacherGuard children={<TeacherExamEditor />} />}
                 />
-                <Route path="/exam/:id" element={<ExamTaking />} />
-                <Route path="/exams" element={<FreeExams />} />
-                <Route path="/exams/:id" element={<FreeExamTaking />} />
+                {/* <Route path="/exam/:id" element={<ExamTaking />} /> */}
+                <Route
+                  path="/exams"
+                  element={<StudentGuard children={<FreeExams />} />}
+                />
+                <Route
+                  path="/exams/:id"
+                  element={<StudentGuard children={<FreeExamTaking />} />}
+                />
                 <Route path="/test-tailwind" element={<TestTailwind />} />
               </Routes>
             </main>

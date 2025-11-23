@@ -146,6 +146,7 @@ const ForumManager = () => {
         dayOfWeeks: values.dayOfWeeks || [],
         classMeetUrl: values.classMeetUrl?.trim() || null,
         subClassMeetUrl: values.subClassMeetUrl?.trim() || null,
+        isActive: values.isActive ?? true,
       };
 
       await forumApi.createClass(classData);
@@ -219,10 +220,6 @@ const ForumManager = () => {
         setSelectedClass({
           ...classDetails,
           members: classDetails.assignedStudents || [],
-          isActive: isActiveByDate(
-            classDetails.startDate,
-            classDetails.endDate
-          ),
           createdAt: classDetails.createdDate,
         });
         console.log(" Class details:", classDetails);
@@ -267,6 +264,7 @@ const ForumManager = () => {
       dayOfWeeks: selectedClass.dayOfWeeks || [],
       classMeetUrl: selectedClass.classMeetUrl || null,
       subClassMeetUrl: selectedClass.subClassMeetUrl || null,
+      isActive: selectedClass.isActive ?? true,
     });
     setEditModalVisible(true);
   };
@@ -289,6 +287,7 @@ const ForumManager = () => {
         dayOfWeeks: values.dayOfWeeks || [],
         classMeetUrl: values.classMeetUrl?.trim() || null,
         subClassMeetUrl: values.subClassMeetUrl?.trim() || null,
+        isActive: values.isActive ?? true,
       };
 
       await forumApi.updateClass(selectedClass.id, payload);
@@ -336,17 +335,6 @@ const ForumManager = () => {
     4: "T5",
     5: "T6",
     6: "T7",
-  };
-
-  const isActiveByDate = (start, end) => {
-    try {
-      const now = new Date();
-      const s = new Date(start);
-      const e = new Date(end);
-      return s <= now && now <= e;
-    } catch {
-      return false;
-    }
   };
 
   const columns = [
@@ -407,10 +395,8 @@ const ForumManager = () => {
       title: "Trạng thái",
       key: "status",
       render: (_, r) => (
-        <Tag color={isActiveByDate(r.startDate, r.endDate) ? "green" : "red"}>
-          {isActiveByDate(r.startDate, r.endDate)
-            ? "Đang hoạt động"
-            : "Ngừng hoạt động"}
+        <Tag color={r.isActive ? "green" : "red"}>
+          {r.isActive ? "Đang hoạt động" : "Ngừng hoạt động"}
         </Tag>
       ),
     },
@@ -1004,6 +990,18 @@ const ForumManager = () => {
             <Input placeholder="https://meet.google.com/..." />
           </Form.Item>
 
+          <Form.Item
+            name="isActive"
+            label="Trạng thái"
+            valuePropName="checked"
+            initialValue={true}
+          >
+            <Select defaultValue={true}>
+              <Select.Option value={true}>Đang hoạt động</Select.Option>
+              <Select.Option value={false}>Ngừng hoạt động</Select.Option>
+            </Select>
+          </Form.Item>
+
           <Form.Item className="mb-0">
             <div className="flex justify-end space-x-4">
               <Button
@@ -1077,6 +1075,13 @@ const ForumManager = () => {
 
           <Form.Item name="subClassMeetUrl" label="Link phòng học phụ">
             <Input placeholder="https://meet.google.com/..." />
+          </Form.Item>
+
+          <Form.Item name="isActive" label="Trạng thái">
+            <Select>
+              <Select.Option value={true}>Đang hoạt động</Select.Option>
+              <Select.Option value={false}>Ngừng hoạt động</Select.Option>
+            </Select>
           </Form.Item>
 
           <Form.Item className="mb-0">

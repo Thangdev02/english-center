@@ -86,10 +86,7 @@ export const courseApi = {
   enrollCourse: (courseId) => api.post(`/courses/${courseId}/student-courses`),
 
   //xem cai khoa cua minh
-  getMyEnrollments: (userId) => {
-    console.log("🔄 Getting enrollments for user:", userId);
-    return api.get(`/enrollments?userId=${userId}`);
-  },
+  getMyCourse: (params) => api.get(`/student-courses`, { params }),
 
   getEnrollmentByCourse: (userId, courseId) => {
     return api.get(`/enrollments?userId=${userId}&courseId=${courseId}`);
@@ -101,6 +98,10 @@ export const courseApi = {
     api.patch(`/enrollments/${enrollmentId}`, progress),
 
   getTeacherCourses: () => api.get(`/courses`),
+
+  reviewCourse: (courseId, reviewData) =>
+    api.post(`/courses/${courseId}/reviews`, reviewData),
+  getCourseReviews: (params) => api.get(`/reviews`, { params }),
 };
 
 export const courseService = {

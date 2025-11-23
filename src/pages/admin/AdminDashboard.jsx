@@ -9,48 +9,66 @@ import {
   Eye,
   Edit,
   Delete,
+  GraduationCap,
+  School,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { courseApi } from "../../services/courseApi";
+import { dashboardApi } from "../../services/dashboard.api";
 
 const AdminDashboard = () => {
   const [recentCourses, setRecentCourses] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [dashboardStats, setDashboardStats] = useState({
+    totalStudents: 0,
+    totalCourses: 0,
+    totalClasses: 0,
+    totalTeachers: 0,
+  });
+
+  useEffect(() => {
+    fetchDashboardData();
+    fetchRecentCourses();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await dashboardApi.getAdminDashboard();
+      const data = response?.data?.data;
+      if (data) {
+        setDashboardStats(data);
+      }
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    }
+  };
 
   const stats = [
     {
       title: "Tổng học viên",
-      value: 1250,
+      value: dashboardStats.totalStudents,
       icon: <Users className="w-8 h-8 text-blue-500" />,
-      change: "+12%",
       color: "blue",
     },
     {
-      title: "Tổng khóa học",
-      value: 45,
-      icon: <BookOpen className="w-8 h-8 text-green-500" />,
-      change: "+5%",
+      title: "Tổng giáo viên",
+      value: dashboardStats.totalTeachers,
+      icon: <GraduationCap className="w-8 h-8 text-green-500" />,
       color: "green",
     },
     {
-      title: "Doanh thu",
-      value: "125M",
-      icon: <DollarSign className="w-8 h-8 text-purple-500" />,
-      change: "+23%",
+      title: "Tổng khóa học",
+      value: dashboardStats.totalCourses,
+      icon: <BookOpen className="w-8 h-8 text-purple-500" />,
       color: "purple",
     },
     {
-      title: "Tỷ lệ hoàn thành",
-      value: "78%",
-      icon: <TrendingUp className="w-8 h-8 text-orange-500" />,
-      change: "+8%",
+      title: "Tổng lớp học",
+      value: dashboardStats.totalClasses,
+      icon: <School className="w-8 h-8 text-orange-500" />,
       color: "orange",
     },
   ];
-
-  useEffect(() => {
-    fetchRecentCourses();
-  }, []);
 
   const fetchRecentCourses = async () => {
     try {
@@ -145,15 +163,6 @@ const AdminDashboard = () => {
                           {stat.value}
                         </div>
                         <div className="text-gray-600">{stat.title}</div>
-                        <div
-                          className={`text-sm ${
-                            stat.change.startsWith("+")
-                              ? "text-green-500"
-                              : "text-red-500"
-                          }`}
-                        >
-                          {stat.change} so với tháng trước
-                        </div>
                       </div>
                       {stat.icon}
                     </div>

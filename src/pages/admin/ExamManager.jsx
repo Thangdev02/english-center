@@ -438,18 +438,6 @@ const ExamManager = () => {
           <Button
             type="text"
             size="small"
-            icon={<Send size={14} />}
-            onClick={() => {
-              setSelectedExam(record);
-              setAssignModalVisible(true);
-            }}
-            className="text-blue-600"
-          >
-            Giao bài
-          </Button>
-          <Button
-            type="text"
-            size="small"
             danger
             icon={<Trash2 size={14} />}
             onClick={() => handleDelete(record)}
