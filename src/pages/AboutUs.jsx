@@ -160,7 +160,7 @@ const AboutUs = () => {
             {[
               { icon: Heart, title: "Yêu thương như gia đình", desc: "Mỗi học viên là một người thân — chúng tôi không bỏ rơi ai." },
               { icon: BookOpen, title: "Học vui – Nhớ lâu", desc: "Dùng trò chơi, âm nhạc, phim ảnh — biến tiếng Trung thành niềm vui." },
-              { icon: Award, title: "Kết quả thực sự", desc: "Hàng nghìn học viên đạt IELTS 7.5+, nói tiếng Trung trôi chảy sau 6 tháng." },
+              { icon: Award, title: "Kết quả thực sự", desc: "Hàng nghìn học viên đạt HSK 5+, nói tiếng Trung trôi chảy sau 6 tháng." },
             ].map((v, i) => (
               <motion.div
                 key={i}

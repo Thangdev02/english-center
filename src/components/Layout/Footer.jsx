@@ -24,7 +24,7 @@ const Footer = () => {
             <ul className="space-y-2 text-gray-400">
               <li><Link to="/courses" className="hover:text-white transition-colors">Khóa học</Link></li>
               <li><Link to="/leaderboard" className="hover:text-white transition-colors">Bảng xếp hạng</Link></li>
-              <li><Link to="/forum" className="hover:text-white transition-colors">Diễn đàn</Link></li>
+              <li><Link to="https://www.facebook.com/profile.php?id=61551807950988&locale=vi_VN" className="hover:text-white transition-colors">Diễn đàn</Link></li>
               <li><Link to="/about" className="hover:text-white transition-colors">Về chúng tôi</Link></li>
             </ul>
           </div>

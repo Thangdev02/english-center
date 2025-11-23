@@ -43,6 +43,7 @@ import AdminGuard from "./guards/AdminGuard";
 import TeacherGuard from "./guards/TeacherGuard";
 import StudentGuard from "./guards/StudentGuard";
 import UserGuard from "./guards/UserGuard";
+import ContactPage from "./pages/ContactPage";
 
 function App() {
   return (
@@ -74,6 +75,7 @@ function App() {
                   element={<UserGuard children={<Profile />} />}
                 />
                 <Route path="/about" element={<AboutUs />} />
+                <Route path="/contact" element={<ContactPage />} />
                 <Route path="/courses" element={<Courses />} />
                 <Route
                   path="/courses/:id"

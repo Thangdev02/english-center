@@ -10,7 +10,8 @@ import {
   Menu,
   X,
   Shield,
-  Building2
+  Building2,
+  PhoneCall
 } from "lucide-react";
 import { Dropdown, Button } from "antd";
 import { useAuth } from "../../context/AuthContext";
@@ -123,6 +124,16 @@ const Navbar = () => {
               </Link>
             )}
             {user?.role === 1 && (
+             <Link
+                to="/contact"
+                className="text-red-800 hover:text-red-600 transition-colors duration-200 font-medium"
+              >
+                <PhoneCall className="inline w-4 h-4 mr-1" />
+                Liên Hệ
+              </Link>
+            )}
+
+            {user?.role === 1 && (
               <Link
                 to="/about"
                 className="text-red-800 hover:text-red-600 transition-colors duration-200 font-medium"
@@ -158,6 +169,13 @@ const Navbar = () => {
               >
                 <Building2 className="inline w-4 h-4 mr-1" />
                 Về Chúng Tôi
+              </Link>
+              <Link
+                to="/contact"
+                className="text-red-800 hover:text-red-600 transition-colors duration-200 font-medium"
+              >
+                <PhoneCall className="inline w-4 h-4 mr-1" />
+                Liên Hệ
               </Link>
                 <Link to="/login">
                   <Button type="text">Đăng nhập</Button>
@@ -198,6 +216,13 @@ const Navbar = () => {
                 className="text-gray-700 hover:text-primary-600 transition-colors duration-200 font-medium"
               >
                 Lớp học của tôi
+              </Link>
+              <Link
+                to="/contact"
+                className="text-red-800 hover:text-red-600 transition-colors duration-200 font-medium"
+              >
+                <PhoneCall className="inline w-4 h-4 mr-1" />
+                Liên Hệ
               </Link>
               <Link
                 to="/leaderboard"
