@@ -65,6 +65,7 @@ const EditCourse = () => {
   const [lessonsTableKey, setLessonsTableKey] = useState(0);
   const [lessonVideoFile, setLessonVideoFile] = useState(null);
   const [lessonDocuments, setLessonDocuments] = useState([]);
+  const [lessonLoading, setLessonLoading] = useState(false);
 
   // Forms
   const [overviewForm] = Form.useForm();
@@ -131,7 +132,7 @@ const EditCourse = () => {
     try {
       const response = await courseApi.getChapters({
         page: 1,
-        size: 10,
+        size: 10000,
         courseId: id,
         sortBy: "number",
         isAsc: true,
@@ -366,6 +367,7 @@ const EditCourse = () => {
 
   const handleSaveLesson = async (values) => {
     try {
+      setLessonLoading(true);
       const formData = new FormData();
       formData.append("name", values.name);
       formData.append("content", values.content || "");
@@ -414,6 +416,8 @@ const EditCourse = () => {
       message.error(
         isEditLesson ? "Cập nhật bài học thất bại!" : "Thêm bài học thất bại!"
       );
+    } finally {
+      setLessonLoading(false);
     }
   };
 
@@ -1079,7 +1083,7 @@ const EditCourse = () => {
             >
               Hủy
             </Button>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" htmlType="submit" loading={lessonLoading}>
               Thêm bài học
             </Button>
           </div>
@@ -1231,7 +1235,7 @@ const EditCourse = () => {
             >
               Hủy
             </Button>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" htmlType="submit" loading={lessonLoading}>
               Cập nhật
             </Button>
           </div>
