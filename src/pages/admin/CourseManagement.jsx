@@ -115,11 +115,11 @@ const CourseManagement = () => {
 
   const getLevelColor = (level) => {
     switch (level) {
-      case 1:
+      case 0:
         return "green";
-      case 2:
+      case 1:
         return "blue";
-      case 3:
+      case 2:
         return "red";
       default:
         return "default";
@@ -128,11 +128,11 @@ const CourseManagement = () => {
 
   const getLevelText = (level) => {
     switch (level) {
-      case 1:
+      case 0:
         return "Beginner";
-      case 2:
+      case 1:
         return "Intermediate";
-      case 3:
+      case 2:
         return "Advanced";
       default:
         return "Unknown";
