@@ -108,28 +108,28 @@ const navigate = useNavigate();
 
   const TESTIMONIALS = [
     {
-      name: "Nguyễn Minh Anh",
+      name: "Nguyễn Minh Đức",
       level: "HSK4",
       course: "SV ĐH Bách Khoa",
       quote: "Chỉ sau 3 tháng học tại Super Panda, em đã đạt Hks4",
-      img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600",
-      signature: "Minh Anh",
+      img: "/hs1.jpeg",
+      signature: "Minh Đức",
     },
     {
-      name: "Trần Đức Huy",
+      name: "Đỗ Thị Hà Quyên",
       level: "HSK3",
       course: "Học viên",
       quote: "Lớp học online nhưng chất lượng như offline. Thầy cô tận tâm, bài giảng dễ hiểu.",
-      img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600",
-      signature: "Đức Huy",
+      img: "/hs2.jpeg",
+      signature: "Hà Quyên",
     },
     {
-      name: "Lê Thị Ngọc",
+      name: "Đỗ Minh Hiếu",
       level: "HSK 5",
       course: "Học viên",
       quote: "Từ hsk3 lên hsk5 chỉ trong 60 buổi. Super Panda thực sự là nơi thay đổi cuộc đời mình!",
-      img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600",
-      signature: "Thị Ngọc",
+      img: "/hs3.jpeg",
+      signature: "Minh Hiếu",
     },
   ];
 
