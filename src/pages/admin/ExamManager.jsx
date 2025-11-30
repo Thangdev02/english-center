@@ -49,6 +49,7 @@ const ExamManager = () => {
   const [tableKey, setTableKey] = useState(0);
   const [questionTableKey, setQuestionTableKey] = useState(0);
   const [questionType, setQuestionType] = useState(null);
+  const [questionLoading, setQuestionLoading] = useState(false);
   const [answers, setAnswers] = useState([
     { content: "", isCorrect: false },
     { content: "", isCorrect: false },
@@ -151,6 +152,7 @@ const ExamManager = () => {
 
   const handleCreateQuestion = async (values) => {
     try {
+      setQuestionLoading(true);
       // Validate for MultipleChoice type
       if (values.type === 0) {
         // Check if at least 2 answers
@@ -178,19 +180,28 @@ const ExamManager = () => {
         }
       }
 
-      const questionData = {
-        content: values.content,
-        ...(values.type === 0 && { answers: answers }),
-      };
+      // Create FormData for both create and update
+      const formData = new FormData();
+      formData.append("content", values.content);
+
+      if (!isEditMode) {
+        formData.append("type", values.type);
+      }
+
+      if (values.type === 0) {
+        answers.forEach((answer, index) => {
+          formData.append(`answers[${index}].content`, answer.content);
+          formData.append(`answers[${index}].isCorrect`, answer.isCorrect);
+        });
+      }
 
       if (isEditMode && selectedQuestion) {
         // Update existing question
-        await examApi.updateQuestion(selectedQuestion.id, questionData);
+        await examApi.updateQuestion(selectedQuestion.id, formData);
         message.success("Cập nhật câu hỏi thành công!");
       } else {
         // Create new question
-        questionData.type = values.type;
-        await examApi.createQuestion(questionData);
+        await examApi.createQuestion(formData);
         message.success("Tạo câu hỏi thành công!");
       }
 
@@ -209,6 +220,8 @@ const ExamManager = () => {
       message.error(
         isEditMode ? "Cập nhật câu hỏi thất bại!" : "Tạo câu hỏi thất bại!"
       );
+    } finally {
+      setQuestionLoading(false);
     }
   };
 
@@ -825,7 +838,11 @@ const ExamManager = () => {
               >
                 Hủy
               </Button>
-              <Button type="primary" htmlType="submit">
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={questionLoading}
+              >
                 {isEditMode ? "Cập Nhật" : "Tạo Câu Hỏi"}
               </Button>
             </div>
